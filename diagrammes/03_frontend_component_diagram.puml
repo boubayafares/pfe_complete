@@ -1,0 +1,155 @@
+@startuml
+!pragma layout smetana
+title FootTech - Diagramme de Composants (Frontend Flutter)
+caption Application mobile Flutter : features metier et couche core (Riverpod, go_router, Dio, Socket.io, SQLite)
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+' ============================================================================
+' STEREOTYPES / COULEURS (VERT = frontend)
+' ============================================================================
+skinparam component {
+    BackgroundColor #2E8B57
+    BorderColor #1F5C3D
+    FontColor #FFFFFF
+    StereotypeFontColor #FFFFFF
+}
+
+skinparam component <<Core>> {
+    BackgroundColor #00695C
+    BorderColor #004D40
+    FontColor #FFFFFF
+}
+
+skinparam component <<Feature>> {
+    BackgroundColor #43A047
+    BorderColor #2E7D32
+    FontColor #FFFFFF
+}
+
+skinparam component <<DB>> {
+    BackgroundColor #607D8B
+    BorderColor #37474F
+    FontColor #FFFFFF
+}
+
+skinparam package {
+    BackgroundColor #E8F5E9
+    BorderColor #66BB6A
+    FontColor #1B5E20
+}
+
+' ============================================================================
+' COUCHE CORE (transversale)
+' ============================================================================
+package "Core (couche transversale)" {
+    component "network/api_client.dart\n(Dio HTTP + interceptors JWT)" as API_CLIENT <<Core>>
+    component "network/socket_service.dart\n(Socket.io client)" as SOCKET <<Core>>
+    component "routing/app_router.dart\n(go_router)" as ROUTER <<Core>>
+    component "database/app_database.dart\n(SQLite local / drift)" as DB <<DB>>
+    component "storage/token_storage.dart\n(flutter_secure_storage JWT)" as TOKEN <<Core>>
+    component "services/local_auth_service.dart\n(empreinte / FaceID)" as BIOMETRIC <<Core>>
+
+    ' State management global (Riverpod)
+    component "Providers\n(Riverpod)" as PROVIDERS <<Core>>
+    component "Generic Repository\n(network/generic_repository.dart)" as REPO <<Core>>
+}
+
+' ============================================================================
+' FEATURES METIER
+' ============================================================================
+package "Features (modules metier)" {
+    component "auth\n(login / OTP / biometric)" as F_AUTH <<Feature>>
+    component "dashboard\n(statistiques)" as F_DASH <<Feature>>
+    component "teams\n(equipes)" as F_TEAMS <<Feature>>
+    component "players\n(joueurs)" as F_PLAYERS <<Feature>>
+    component "trainings\n(entrainements)" as F_TRAIN <<Feature>>
+    component "matches\n(matchs / live)" as F_MATCH <<Feature>>
+    component "calendar\n(calendrier partage)" as F_CAL <<Feature>>
+    component "notifications\n(push / in-app)" as F_NOTIF <<Feature>>
+    component "attendance\n(presence)" as F_ATTEND <<Feature>>
+    component "exercise-proposals\n(propositions d'exercices)" as F_EXERCISE <<Feature>>
+    component "seasons\n(saisons)" as F_SEASONS <<Feature>>
+    component "profile\n(profil)" as F_PROFILE <<Feature>>
+    component "weekly-plannings\n(planification hebdo)" as F_PLAN <<Feature>>
+}
+
+' ============================================================================
+' RELATIONS
+' ============================================================================
+
+' Toutes les features dependent du Router (navigation) et des Providers state
+F_AUTH ..> ROUTER : "navigate"
+F_DASH ..> ROUTER
+F_TEAMS ..> ROUTER
+F_PLAYERS ..> ROUTER
+F_TRAIN ..> ROUTER
+F_MATCH ..> ROUTER
+F_CAL ..> ROUTER
+F_NOTIF ..> ROUTER
+F_ATTEND ..> ROUTER
+F_EXERCISE ..> ROUTER
+F_SEASONS ..> ROUTER
+F_PROFILE ..> ROUTER
+F_PLAN ..> ROUTER
+
+F_AUTH ..> PROVIDERS : "state"
+F_DASH ..> PROVIDERS
+F_TEAMS ..> PROVIDERS
+F_PLAYERS ..> PROVIDERS
+F_TRAIN ..> PROVIDERS
+F_MATCH ..> PROVIDERS
+F_CAL ..> PROVIDERS
+F_NOTIF ..> PROVIDERS
+F_ATTEND ..> PROVIDERS
+F_EXERCISE ..> PROVIDERS
+F_SEASONS ..> PROVIDERS
+F_PROFILE ..> PROVIDERS
+F_PLAN ..> PROVIDERS
+
+' Features -> Repository -> API client (acces reseau via son propre repository)
+F_DASH ..> REPO : "use"
+F_TEAMS ..> REPO
+F_PLAYERS ..> REPO
+F_TRAIN ..> REPO
+F_MATCH ..> REPO
+F_CAL ..> REPO
+F_NOTIF ..> REPO
+F_ATTEND ..> REPO
+F_EXERCISE ..> REPO
+F_SEASONS ..> REPO
+F_PLAN ..> REPO
+
+' Features temps reel (matches, notifications)
+F_MATCH ..> SOCKET : "channel live"
+F_NOTIF ..> SOCKET : "receive push realtime"
+
+' Synchronisation / stockage local
+F_PLAYERS ..> DB : "cache local"
+F_TRAIN ..> DB
+F_MATCH ..> DB
+F_CAL ..> DB
+
+' Acces securise JWT + biometrie
+API_CLIENT ..> TOKEN : "injecte Bearer JWT"
+F_AUTH ..> TOKEN : "stocke / lit tokens"
+F_AUTH ..> BIOMETRIC : "empreinte / FaceID"
+API_CLIENT ..> BIOMETRIC : "re-auth si besoin"
+
+' RELATIONS INTERNES DU CORE
+PROVIDERS ..> REPO
+REPO ..> API_CLIENT
+REPO ..> DB
+ROUTER ..> F_AUTH : "route guards auth"
+ROUTER ..> PROVIDERS
+
+' Composant racine
+component "main.dart\n(initialisation app)" as MAIN <<Core>>
+MAIN ..> PROVIDERS : "ProviderScope"
+MAIN ..> ROUTER : "instancie router"
+MAIN ..> DB : "init SQLite"
+
+@enduml

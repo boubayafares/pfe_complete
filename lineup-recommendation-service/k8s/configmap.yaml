@@ -1,0 +1,19 @@
+# Généré/mis à jour via:
+#   kubectl create configmap lineup-weights-config \
+#     --from-file=weights.json=app/infrastructure/persistence/weights.json \
+#     --dry-run=client -o yaml | kubectl apply -f -
+#
+# Ce fichier statique sert de valeur par défaut versionnée dans Git tant
+# qu'aucune calibration n'a encore été exécutée en local.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lineup-weights-config
+data:
+  weights.json: |
+    {
+      "presence": 0.333,
+      "performance": 0.333,
+      "fatigue": 0.334,
+      "version": "equal-default"
+    }

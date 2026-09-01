@@ -1,0 +1,346 @@
+@startuml
+!pragma layout smetana
+title FootTech - Diagramme de Classes / Modules (Backend Express)
+caption Structure moduleaire du backend Express 5 : modules, routes, controleurs, services, repositories
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+' ============================================================================
+' STEREOTYPES ET COULEURS
+' ============================================================================
+skinparam class {
+    BackgroundColor #E3F2FD
+    BorderColor #1565C0
+    FontColor #0D3C61
+}
+
+skinparam classHeaderBackgroundColor #1E88E5
+skinparam classHeaderFontColor #FFFFFF
+
+skinparam package {
+    BackgroundColor #F5FAFF
+    BorderColor #90CAF9
+    FontColor #0D47A1
+}
+
+skinparam node {
+    BackgroundColor #FFF3E0
+    BorderColor #E65100
+}
+
+' ============================================================================
+' MODULE PRINCIPAL / APPLICATION
+' ============================================================================
+package "app.ts / main.ts" {
+    class "Application\n(bootstrap)" as APP {
+        + mountRoutes()
+        + setupSwagger()
+        + initSocket()
+    }
+    class "Swagger Docs\n(/api-docs)" as SWAGGER
+}
+
+' ============================================================================
+' COUCHE TRANSVERSALE
+' ============================================================================
+package "shared / middleware / config / socket" {
+    class "Auth Guard\n(JWT)" as MID_AUTH {
+        + verifyToken()
+        + requireRole(role)
+    }
+    class "Validation" as MID_VALID {
+        + validateBody()
+        + validateParams()
+    }
+    class "Error Handler" as MID_ERR {
+        + handle()
+    }
+    class "Socket Server\n(Socket.io)" as SOCKET {
+        + emitLiveMatch()
+        + emitNotification()
+    }
+    class "Config\n(env)" as CFG {
+        + PORT = 4000
+        + DATABASE_URL
+        + JWT_SECRET
+    }
+}
+
+' ============================================================================
+' PATRON REPOSITORY
+' ============================================================================
+package "Patron Repository / Service" {
+    class "Base Repository" <<interface>> {
+        + findById(id)
+        + findAll(filter)
+        + create(data)
+        + update(id, data)
+        + delete(id)
+    }
+    class "Base Service" <<interface>> {
+        + execute business logic
+    }
+}
+
+' ============================================================================
+' MODULES METIER
+' ============================================================================
+
+package "Module Auth" {
+    class "AuthRoutes" {
+        /auth/register
+        /auth/login
+        /auth/refresh
+        /auth/otp/verify
+        /auth/biometric
+    }
+    class "AuthController" {
+        + register()
+        + login()
+        + refresh()
+        + verifyOtp()
+    }
+    class "AuthService" {
+        + hashPassword()
+        + signTokens()
+    }
+    class "AuthRepository" {
+        + findByEmail()
+        + findByPhone()
+        + saveRefreshToken()
+    }
+    AuthRoutes --> AuthController
+    AuthController --> AuthService
+    AuthService --> AuthRepository
+}
+
+package "Module Users" {
+    class "UsersRoutes" {
+        /users
+        /users/:id
+    }
+    class "UsersController"
+    class "UsersService"
+    class "UsersRepository"
+    UsersRoutes --> UsersController
+    UsersController --> UsersService
+    UsersService --> UsersRepository
+}
+
+package "Module Teams" {
+    class "TeamsRoutes" {
+        /teams
+        /teams/:id/staff
+        /teams/:id/players
+    }
+    class "TeamsController"
+    class "TeamsService"
+    class "TeamsRepository"
+    TeamsRoutes --> TeamsController
+    TeamsController --> TeamsService
+    TeamsService --> TeamsRepository
+}
+
+package "Module Players" {
+    class "PlayersRoutes" {
+        /players
+        /players/:id/guardians
+        /players/:id/school
+        /players/:id/injuries
+    }
+    class "PlayersController"
+    class "PlayersService"
+    class "PlayersRepository"
+    PlayersRoutes --> PlayersController
+    PlayersController --> PlayersService
+    PlayersService --> PlayersRepository
+}
+
+package "Module Seasons" {
+    class "SeasonsRoutes" {
+        /seasons
+        /seasons/:id/player-profiles
+    }
+    class "SeasonsController"
+    class "SeasonsService"
+    class "SeasonsRepository"
+    SeasonsRoutes --> SeasonsController
+    SeasonsController --> SeasonsService
+    SeasonsService --> SeasonsRepository
+}
+
+package "Module Trainings" {
+    class "TrainingsRoutes" {
+        /trainings
+        /trainings/:id/sheet
+        /trainings/:id/attendance
+    }
+    class "TrainingsController"
+    class "TrainingsService"
+    class "TrainingsRepository"
+    TrainingsRoutes --> TrainingsController
+    TrainingsController --> TrainingsService
+    TrainingsService --> TrainingsRepository
+}
+
+package "Module Matches" {
+    class "MatchesRoutes" {
+        /matches
+        /matches/:id/lineups
+        /matches/:id/events
+        /matches/:id/stats
+        /matches/:id/evaluations
+        /matches/:id/report
+        /matches/:id/ai-recommendation
+    }
+    class "MatchesController"
+    class "MatchesService"
+    class "MatchesRepository"
+    MatchesRoutes --> MatchesController
+    MatchesController --> MatchesService
+    MatchesService --> MatchesRepository
+}
+
+package "Module Notifications" {
+    class "NotificationsRoutes" {
+        /notifications
+        /notifications/broadcast
+        /notifications/read
+    }
+    class "NotificationsController"
+    class "NotificationsService" {
+        + sendPush(fcm)
+        + sendSms(twilio)
+        + broadcastToTeam()
+    }
+    class "NotificationsRepository"
+    NotificationsRoutes --> NotificationsController
+    NotificationsController --> NotificationsService
+    NotificationsService --> NotificationsRepository
+}
+
+package "Module Dashboard" {
+    class "DashboardRoutes" {
+        /dashboard/stats
+        /dashboard/trends
+    }
+    class "DashboardController"
+    class "DashboardService"
+    class "DashboardRepository"
+    DashboardRoutes --> DashboardController
+    DashboardController --> DashboardService
+    DashboardService --> DashboardRepository
+}
+
+package "Module Calendar Events" {
+    class "CalendarRoutes" {
+        /calendar-events
+    }
+    class "CalendarController"
+    class "CalendarService"
+    class "CalendarRepository"
+    CalendarRoutes --> CalendarController
+    CalendarController --> CalendarService
+    CalendarService --> CalendarRepository
+}
+
+package "Module Attendance" {
+    class "AttendanceRoutes" {
+        /attendance
+        /attendance/training/:id
+    }
+    class "AttendanceController"
+    class "AttendanceService"
+    class "AttendanceRepository"
+    AttendanceRoutes --> AttendanceController
+    AttendanceController --> AttendanceService
+    AttendanceService --> AttendanceRepository
+}
+
+package "Module Exercise Proposals" {
+    class "ExerciseRoutes" {
+        /exercise-proposals
+        /exercise-proposals/:id/review
+    }
+    class "ExerciseController"
+    class "ExerciseService"
+    class "ExerciseRepository"
+    ExerciseRoutes --> ExerciseController
+    ExerciseController --> ExerciseService
+    ExerciseService --> ExerciseRepository
+}
+
+package "Module Weekly Plannings" {
+    class "PlanningRoutes" {
+        /weekly-plannings
+        /weekly-plannings/:id/slots
+    }
+    class "PlanningController"
+    class "PlanningService"
+    class "PlanningRepository"
+    PlanningRoutes --> PlanningController
+    PlanningController --> PlanningService
+    PlanningService --> PlanningRepository
+}
+
+package "Module Intelligence Artificielle" {
+    class "AIModule" {
+        /ai/trends
+        /ai/clustering
+        /ai/tone
+        /ai/transcription
+        /ai/ocr
+    }
+}
+
+' ============================================================================
+' RELATIONS TRANSVERSALES
+' ============================================================================
+APP --> "14 modules metier"
+APP --> SWAGGER
+APP --> SOCKET
+
+MID_AUTH ..> CFG
+MID_VAL ..> CFG
+MID_ERR ..> CFG
+
+' Chaque controller utilise les middlewares transversaux
+AuthController ..> MID_AUTH : "guard"
+MatchesController ..> SOCKET : "emit live updates"
+DashboardController ..> SOCKET
+NotificationsService ..> SOCKET
+
+' Les repositories heritent du Base Repository
+AuthRepository ..|> "Base Repository"
+UsersRepository ..|> "Base Repository"
+TeamsRepository ..|> "Base Repository"
+PlayersRepository ..|> "Base Repository"
+SeasonsRepository ..|> "Base Repository"
+TrainingsRepository ..|> "Base Repository"
+MatchesRepository ..|> "Base Repository"
+NotificationsRepository ..|> "Base Repository"
+DashboardRepository ..|> "Base Repository"
+CalendarRepository ..|> "Base Repository"
+AttendanceRepository ..|> "Base Repository"
+ExerciseRepository ..|> "Base Repository"
+PlanningRepository ..|> "Base Repository"
+
+' Les services heritent du Base Service
+AuthService ..|> "Base Service"
+UsersService ..|> "Base Service"
+TeamsService ..|> "Base Service"
+PlayersService ..|> "Base Service"
+SeasonsService ..|> "Base Service"
+TrainingsService ..|> "Base Service"
+MatchesService ..|> "Base Service"
+NotificationsService ..|> "Base Service"
+DashboardService ..|> "Base Service"
+CalendarService ..|> "Base Service"
+AttendanceService ..|> "Base Service"
+ExerciseService ..|> "Base Service"
+PlanningService ..|> "Base Service"
+
+@enduml

@@ -1,0 +1,143 @@
+@startuml
+!pragma layout smetana
+title FootTech - Architecture Système Globale (High-level System Architecture)
+caption Vue d'ensemble des composants du système et de leurs connexions
+
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+' ============================================================================
+' COULEURS PAR DOMAINE
+'   BLEU = Backend (Express / Django admin / services)
+'   VERT = Frontend (Flutter mobile)
+'   ORANGE = Services IA (FastAPI)
+'   ROUGE = Services externes (Firebase, Twilio, Redis)
+' ============================================================================
+
+' --- FRONTEND (VERT) --------------------------------------------------------
+skinparam component {
+    BackgroundColor #2E8B57
+    BorderColor #1F5C3D
+    FontColor #FFFFFF
+    StereotypeFontColor #1F5C3D
+}
+
+' --- BACKEND EXPRESS (BLEU) -------------------------------------------------
+skinparam component <<Express>> {
+    BackgroundColor #1E88E5
+    BorderColor #0D47A1
+    FontColor #FFFFFF
+}
+
+' --- BACKEND DJANGO (BLEU CLAIR) --------------------------------------------
+skinparam component <<Django>> {
+    BackgroundColor #42A5F5
+    BorderColor #1565C0
+    FontColor #FFFFFF
+}
+
+' --- SERVICES IA (ORANGE) ----------------------------------------------------
+skinparam component <<AI>> {
+    BackgroundColor #F57C00
+    BorderColor #E65100
+    FontColor #FFFFFF
+}
+
+' --- SERVICES EXTERNES (ROUGE) ----------------------------------------------
+skinparam component <<External>> {
+    BackgroundColor #E53935
+    BorderColor #B71C1C
+    FontColor #FFFFFF
+}
+
+' --- DATABASE (GRIS / ARDOISE) ----------------------------------------------
+skinparam component <<DB>> {
+    BackgroundColor #607D8B
+    BorderColor #37474F
+    FontColor #FFFFFF
+}
+
+' ============================================================================
+' COMPOSANTS
+' ============================================================================
+
+' --- FRONTEND ---
+package "Frontend Mobile" #E8F5E9 {
+    component "Flutter App\n(Dart / Riverpod)" as FLUTTER <<frontend>>
+}
+
+' --- BACKEND EXPRESS ---
+package "Backend API (Node.js / Express 5)" #E3F2FD {
+    component "Express REST API\n(port 4000)\nTypeScript" as EXPRESS <<Express>>
+    component "WebSocket Serveur\n(Socket.io)" as SOCKET <<Express>>
+    component "Authentification JWT\n(email/password + OTP)" as AUTH <<Express>>
+}
+
+' --- ADMIN DJANGO ---
+package "Backend Admin (Django + DRF)" #E1F5FE {
+    component "Django REST API\n(port 8000)\nJWT Auth" as DJANGO <<Django>>
+}
+
+' --- ADMIN DESKTOP ---
+package "Desktop Admin" #E8F5E9 {
+    component "JavaFX Desktop App\n(Admin)" as JAVAFX <<frontend>>
+}
+
+' --- SERVICES IA (ORANGE) ---
+package "Services IA (FastAPI)" #FFF3E0 {
+    component "AI Insights Service\n(port 8300)\ntrend / clustering / tone /\ntranscription / OCR" as AI_INSIGHTS <<AI>>
+    component "Lineup Recommendation\nService (port 8100)\nplayer scoring" as AI_LINEUP <<AI>>
+}
+
+' --- STOCKAGE / CACHE ---
+package "Données & Infra" #ECEFF1 {
+    database "PostgreSQL\n(platform schema)" as PG <<DB>>
+    database "Redis\n(Cache)" as REDIS <<External>>
+}
+
+' --- SERVICES EXTERNES (ROUGE) ---
+package "Services Externes" #FFEBEE {
+    component "Firebase Cloud Messaging\n(Push notifications)" as FIREBASE <<External>>
+    component "Twilio\n(SMS / OTP)" as TWILIO <<External>>
+}
+
+' ============================================================================
+' CONNEXIONS
+' ============================================================================
+
+' Flutter <-> Express (REST + Socket)
+FLUTTER ..> EXPRESS : "REST (Dio)\nJWT Bearer"
+FLUTTER ..> SOCKET : "Socket.io\n(matches live, notifications)"
+
+' Express <-> PostgreSQL
+EXPRESS ..> PG : "TypeORM / pg\n(requêtes SQL)"
+DJANGO ..> PG : "Django ORM\n(plateforme administrée)"
+
+' Express <-> Redis
+EXPRESS ..> REDIS : "cache (sessions, scores,\ndonnées fréquentes)"
+
+' Express <-> Firebase push
+EXPRESS ..> FIREBASE : "push notifications\n(tokens FCM)"
+
+' Express <-> Twilio OTP/SMS
+EXPRESS ..> TWILIO : "SMS + OTP\n(codes d'activation)"
+
+' Express <-> Services IA
+EXPRESS ..> AI_INSIGHTS : "HTTP (FastAPI)\ntendances, clustering, analyses"
+EXPRESS ..> AI_LINEUP : "HTTP (FastAPI)\ncalcul alignement IA"
+
+' Services IA <-> Redis (cache)
+AI_INSIGHTS ..> REDIS : "cache résultats IA"
+AI_LINEUP ..> REDIS : "cache scores / lecture"
+
+' Express <-> Socket pour notifications
+SOCKET ..> FIREBASE : "relay push"
+
+' Admin
+JAVAFX ..> DJANGO : "REST (JWT)\nport 8000"
+DJANGO ..> PG : "lecture/écriture"
+
+@enduml

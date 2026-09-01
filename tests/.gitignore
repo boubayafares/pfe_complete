@@ -1,0 +1,40 @@
+# ==============================
+# tests/ - E2E, charge, specs (Playwright, Cypress, Selenium, Newman)
+# ==============================
+
+# ---- Node deps ----
+node_modules/
+
+# ---- Playwright ----
+test-results/
+playwright-report/
+playwright/.cache/
+
+# ---- Cypress ----
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
+cypress/fixtures/*.tmp
+
+# ---- Python/Selenium ----
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# ---- Newman / Postman ----
+*.newman/
+newman/
+.history/
+
+# ---- Reports generes ----
+reports/
+*.html
+*.xml
+lcov.info
+
+# ---- Secrets ----
+.env
+.env.*
+!.env.example

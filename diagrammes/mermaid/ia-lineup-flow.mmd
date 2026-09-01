@@ -1,0 +1,29 @@
+sequenceDiagram
+    autonumber
+    participant App as Flutter (Coach/Adjoint)
+    participant API as API Express :4000
+    participant DB as PostgreSQL
+    participant LINEUP as Lineup Service :8100
+
+    App->>API: POST /api/v1/matches/:id/ai-recommendations
+    API->>API: authMiddleware (JWT, role COACH/ADJOINT)
+    API->>DB: match + appartenance equipe verifies
+    alt match introuvable ou acces refuse
+        API-->>App: 404 / 403 ApiError
+    else match valide
+        API->>DB: getLineUpFeatures (presence 10 seances, perf 5 matchs, cwr proxy 7j/28j, daysSinceLastMatch)
+        API->>LINEUP: POST /api/v1/lineup/recommendations {matchId, players}
+        alt lineup injoignable (AbortController 5s)
+            LINEUP-->>API: timeout / connexion refusee
+            API-->>App: 503 ServiceUnavailable
+        else lineup repond
+            LINEUP-->>API: 200 {weightsVersion, recommendations[finalScore 0-100]}
+            Note over API: zod valide la reponse
+            alt reponse invalide
+                API-->>App: 502 BadGateway
+            else reponse valide
+                API->>DB: storeLineUpRecommendations (scores /100 normalises 0-1)
+                API-->>App: 200 {normalizedScores, weightsVersion, status}
+            end
+        end
+    end

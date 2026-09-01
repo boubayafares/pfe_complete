@@ -1,0 +1,177 @@
+stages:
+  - build
+  - test
+  - docker
+  - deploy
+
+variables:
+  POSTGRES_DB: foottech_test
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+
+# ─── Express Backend ────────────────────────────────────────
+backend:build:
+  stage: build
+  image: node:22-alpine
+  script:
+    - cd back/FoottechBackend-main
+    - npm ci
+    - npm run build
+  cache:
+    key: backend-${CI_COMMIT_REF_SLUG}
+    paths:
+      - back/FoottechBackend-main/node_modules/
+  artifacts:
+    paths:
+      - back/FoottechBackend-main/dist/
+    expire_in: 1 hour
+
+backend:test:
+  stage: test
+  image: node:22-alpine
+  services:
+    - postgres:16-alpine
+    - redis:7-alpine
+  variables:
+    POSTGRES_DB: foottech_test
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    DB_HOST: postgres
+    DB_NAME: foottech_test
+    REDIS_URL: redis://redis:6379
+    JWT_ACCESS_SECRET: gitlab-ci-test-secret-minimum-32-chars
+    JWT_REFRESH_SECRET: gitlab-ci-test-refresh-secret-minimum-32-chars
+  script:
+    - cd back/FoottechBackend-main
+    - npm ci
+    - npm test
+  cache:
+    key: backend-${CI_COMMIT_REF_SLUG}
+    paths:
+      - back/FoottechBackend-main/node_modules/
+
+# ─── Django Admin Backend ───────────────────────────────────
+admin:build:
+  stage: build
+  image: python:3.12-slim
+  script:
+    - cd foottech_admin_backend/foottech_admin_backend
+    - pip install -r requirements.txt
+    - python manage.py check --deploy
+  cache:
+    key: admin-${CI_COMMIT_REF_SLUG}
+    paths:
+      - foottech_admin_backend/foottech_admin_backend/.venv/
+
+# ─── Flutter App ────────────────────────────────────────────
+flutter:build:
+  stage: build
+  image: ghcr.io/cirruslabs/flutter:stable
+  script:
+    - cd front/foottechproject
+    - flutter pub get
+    - flutter analyze
+    - flutter test
+    - flutter build apk --debug
+  cache:
+    key: flutter-${CI_COMMIT_REF_SLUG}
+    paths:
+      - front/foottechproject/.dart_tool/
+      - front/foottechproject/build/
+
+# ─── AI Services ────────────────────────────────────────────
+ai-insights:test:
+  stage: test
+  image: python:3.12-slim
+  script:
+    - cd ai-insights-service
+    - pip install -r requirements.txt
+    - pytest -v
+  cache:
+    key: ai-insights-${CI_COMMIT_REF_SLUG}
+    paths:
+      - ai-insights-service/.venv/
+
+lineup-service:test:
+  stage: test
+  image: python:3.12-slim
+  script:
+    - cd lineup-recommendation-service
+    - pip install -r requirements-runtime.txt
+    - pytest -v
+  cache:
+    key: lineup-${CI_COMMIT_REF_SLUG}
+    paths:
+      - lineup-recommendation-service/.venv/
+
+# ─── Docker Builds ──────────────────────────────────────────
+docker:api:
+  stage: docker
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE/api:$CI_COMMIT_SHA back/FoottechBackend-main
+    - docker push $CI_REGISTRY_IMAGE/api:$CI_COMMIT_SHA
+  only:
+    - main
+    - develop
+
+docker:admin:
+  stage: docker
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE/admin-api:$CI_COMMIT_SHA foottech_admin_backend/foottech_admin_backend
+    - docker push $CI_REGISTRY_IMAGE/admin-api:$CI_COMMIT_SHA
+  only:
+    - main
+    - develop
+
+docker:ai-insights:
+  stage: docker
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE/ai-insights:$CI_COMMIT_SHA ai-insights-service
+    - docker push $CI_REGISTRY_IMAGE/ai-insights:$CI_COMMIT_SHA
+  only:
+    - main
+
+docker:lineup:
+  stage: docker
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE/lineup-service:$CI_COMMIT_SHA lineup-recommendation-service
+    - docker push $CI_REGISTRY_IMAGE/lineup-service:$CI_COMMIT_SHA
+  only:
+    - main
+
+# ─── Deploy ─────────────────────────────────────────────────
+deploy:production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | ssh-add -
+  script:
+    - ssh $DEPLOY_USER@$DEPLOY_HOST "cd /opt/foottech && docker compose pull && docker compose up -d --remove-orphans"
+  only:
+    - main
+  when: manual
+  environment:
+    name: production
+    url: https://foottech.example.com

@@ -1,0 +1,31 @@
+flowchart LR
+    subgraph Source["Sources (PostgreSQL)"]
+        T10[(10 dernieres seances\npresenceRate)]
+        M5[(5 derniers matchs\nrecentPerformanceRating)]
+        ACWR[(charge 7j / 28j\nacuteChronicWorkloadRatio)]
+        LM[(date dernier match\ndaysSinceLastMatch)]
+    end
+
+    subgraph Express["API Express (repository)"]
+        F[getLineUpFeatures\npayload snake/camel]
+    end
+
+    subgraph Lineup["Lineup Service FastAPI"]
+        P[POST /recommendations]
+        W[ScoreWeights\nequal-defaults si absent]
+        C[calcul score 0-100\npresence 40% / perf 30% / fatigue 30%]
+    end
+
+    subgraph Store["Persistance"]
+        N[Normalise /100\nclamp 0-1, round 3]
+        NB[(ai_lineup_recommendations\nNUMERIC(4,3) CHECK 0-1)]
+    end
+
+    T10 --> F
+    M5 --> F
+    ACWR --> F
+    LM --> F
+    F -->|payload camelCase\nmatchId + players[]| P
+    P --> W --> C
+    C -->|recommendations +\nweightsVersion| N
+    N --> NB

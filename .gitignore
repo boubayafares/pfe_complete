@@ -1,0 +1,64 @@
+# ==============================
+# FootTech - root .gitignore
+# ==============================
+
+# ---- Environments (secrets) ----
+.env
+.env.*
+!.env.example
+
+# ---- Logs ----
+logs/
+*.log
+*.log.*
+server.log
+server.err.log
+
+# ---- Databases ----
+*.db
+*.sqlite3
+test.db
+
+# ---- OS / Editor ----
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+*.swp
+*.swo
+.vscode/
+
+# ---- Node / JS (nested) ----
+node_modules/
+dist/
+src/uploads/*
+!src/uploads/.gitkeep
+
+# ---- Python ----
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# ---- Java / Maven ----
+target/
+*.class
+
+# ---- Flutter / Dart ----
+.dart_tool/
+.pub-cache/
+.build/
+build/
+.flutter-plugins-dependencies
+
+# ---- Docker ----
+*.pid
+coverage/
+htmlcov/
+
+# ---- Reports / generated docs ----
+# (garder les .md et .pdf livrables versionnes)
+*.toc
+*.aux

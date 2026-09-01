@@ -1,0 +1,134 @@
+"""
+FootTech Admin Backend - Django settings.
+
+This service is the platform-level administration backend: it authenticates
+Administrateurs (its own, dedicated user model - fully separate from the
+Coach/Adjoint/Joueur JWT auth handled by the Express API) and connects to the
+SAME PostgreSQL database as the Express backend to oversee teams, users and
+platform-wide activity.
+"""
+import os
+from datetime import timedelta
+from pathlib import Path
+
+import dj_database_url
+from dotenv import load_dotenv
+
+load_dotenv()
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "insecure-dev-key-change-me")
+DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",")
+
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    "django_filters",
+    "corsheaders",
+    "administrateurs",
+    "core",
+    "moderation",
+]
+
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+ROOT_URLCONF = "foottech_admin.urls"
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = "foottech_admin.wsgi.application"
+ASGI_APPLICATION = "foottech_admin.asgi.application"
+
+# --- Database ---------------------------------------------------------------
+# Same PostgreSQL instance/database as the Express backend (sql/schema.sql).
+# The Express schema lives under the `platform` schema (search_path=platform);
+# Django's own tables (administrateurs, moderation, sessions, ...) live under
+# `public`. To let the `core` models (managed=False) read the Express tables
+# via their plain names (`users`, `teams`, ...), the connection resolves
+# `search_path=public, platform`: Django-owned unqualified names hit `public`,
+# Express-owned names fall through to `platform`.
+_DATABASE = dj_database_url.config(
+    env="DATABASE_URL",
+    default="postgres://foottech:foottech@localhost:5432/foottech",
+    conn_max_age=600,
+)
+if "postgres" in _DATABASE["ENGINE"]:
+    _DATABASE["OPTIONS"] = {"options": "-c search_path=public,platform"}
+DATABASES = {"default": _DATABASE}
+
+# --- Auth ---------------------------------------------------------------
+AUTH_USER_MODEL = "administrateurs.Administrateur"
+
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 8}},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+# --- DRF / JWT ---------------------------------------------------------------
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "sub",
+}
+
+# --- CORS ---------------------------------------------------------------
+CORS_ALLOWED_ORIGINS = [o for o in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",") if o]
+CORS_ALLOW_ALL_ORIGINS = DEBUG and not CORS_ALLOWED_ORIGINS
+
+LANGUAGE_CODE = "fr-fr"
+TIME_ZONE = "UTC"
+USE_I18N = True
+USE_TZ = True
+
+STATIC_URL = "static/"
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

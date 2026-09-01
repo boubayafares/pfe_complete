@@ -1,0 +1,28 @@
+services:
+  ai-insights-service:
+    build:
+      context: .
+    ports:
+      - "8300:8300"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8300/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+    # Modules transcription/documents: montent des fichiers volumineux
+    # (modèles Whisper/PaddleOCR téléchargés au premier usage) — prévoir un
+    # volume dédié si ces modules sont activés, pour ne pas re-télécharger
+    # à chaque rebuild d'image:
+    # volumes:
+    #   - whisper-models:/root/.cache/huggingface
+    #   - paddleocr-models:/root/.paddleocr
+
+# volumes:
+#   whisper-models:
+#   paddleocr-models:
+
+# Extrait à fusionner dans le docker-compose.yml principal du monorepo
+# FootTech. Côté backend Express, ajouter dans le service `api`:
+#   environment:
+#     AI_INSIGHTS_SERVICE_URL: http://ai-insights-service:8300

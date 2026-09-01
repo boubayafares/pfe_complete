@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: lineup-recommendation-service
+spec:
+  selector:
+    app: lineup-recommendation-service
+  ports:
+    - port: 8100
+      targetPort: 8100
+  type: ClusterIP # interne au cluster uniquement — jamais exposé directement, seul le backend Express l'appelle

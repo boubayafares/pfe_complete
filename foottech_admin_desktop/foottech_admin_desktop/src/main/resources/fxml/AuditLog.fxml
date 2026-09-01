@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="16" styleClass="view-root" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.foottech.admin.controller.AuditLogController">
+    <padding><Insets top="28" right="32" bottom="28" left="32" /></padding>
+
+    <Label text="Journal d'audit" styleClass="view-title" />
+    <Label text="Historique de toutes les actions de modération" styleClass="view-subtitle" />
+
+    <TableView fx:id="logsTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colDate" text="Date" prefWidth="160" />
+            <TableColumn fx:id="colAdmin" text="Administrateur" prefWidth="160" />
+            <TableColumn fx:id="colAction" text="Action" prefWidth="200" />
+            <TableColumn fx:id="colCible" text="Cible" prefWidth="140" />
+            <TableColumn fx:id="colDetails" text="Détails" prefWidth="260" />
+        </columns>
+    </TableView>
+</VBox>

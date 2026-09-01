@@ -1,0 +1,17 @@
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+pydantic==2.9.2
+pydantic-settings==2.6.1
+
+# Calibration offline uniquement (scripts/calibrate_from_statsbomb.py) —
+# pas requis au runtime de l'API, mais gardé dans le même requirements.txt
+# pour simplifier l'installation locale. Retirer de l'image Docker de
+# production si la taille de l'image devient un problème (voir Dockerfile,
+# stage "runtime" séparé du stage "calibration").
+statsbombpy==1.15.0
+socceraction==1.5.1
+scikit-learn==1.5.2
+pandas==2.2.3
+
+pytest==8.3.3
+httpx==0.27.2

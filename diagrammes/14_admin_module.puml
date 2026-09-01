@@ -1,0 +1,216 @@
+@startuml
+!pragma layout smetana
+title FootTech - Backend Admin (Django + DRF) : Modules
+caption Application Django du back-office de la plateforme : administrateurs, core, moderation
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+' ============================================================================
+' STEREOTYPES / COULEURS (BLEU clair = Django)
+' ============================================================================
+skinparam package {
+    BackgroundColor #E1F5FE
+    BorderColor #0288D1
+    FontColor #01579B
+}
+
+skinparam package<<Admin>> {
+    BackgroundColor #E8EAF6
+    BorderColor #3949AB
+    FontColor #1A237E
+}
+
+skinparam class {
+    BackgroundColor #F5F8FF
+    BorderColor #0288D1
+    FontColor #014
+}
+skinparam classHeaderBackgroundColor #42A5F5
+skinparam classHeaderFontColor #FFFFFF
+
+skinparam database {
+    BackgroundColor #ECEFF1
+    BorderColor #37474F
+    FontColor #263238
+}
+
+' ============================================================================
+' PROJET DJANGO (racine)
+' ============================================================================
+package "foottech_admin (setting/settings.py)" {
+    class "settings.py" {
+        + INSTALLED_APPS = [administrateurs, core, moderation]
+        + AUTH_USER_MODEL = administrateurs.Administrateur
+        + DATABASES = postgres (même que Express)
+        + REST_FRAMEWORK (JWT + pagination)
+        + SIMPLE_JWT (access 30min / refresh 7j)
+    }
+    class "urls.py" {
+        /admin-site/
+        /api/admin/auth/
+        /api/admin/
+    }
+    class "manage.py"
+}
+
+' ============================================================================
+' APP : administrateurs (auth & gestion des admins)
+' ============================================================================
+package "administrateurs (comptes et authentification)" as APP_ADMIN <<Admin>> {
+    class "Administrateur\n(AbstractBaseUser)" {
+        nom / prenom
+        email (unique)
+        role : SUPER_ADMIN | MODERATEUR | SUPPORT
+        is_staff / is_active
+        has_full_access()
+    }
+    class "AdministrateurManager" {
+        create_user()
+        create_superuser()
+    }
+    class "permissions.py" {
+        IsSuperAdmin
+    }
+    class "serializers.py" {
+        AdminTokenObtainPairSerializer
+        AdministrateurSerializer
+        CreateAdministrateurSerializer
+    }
+
+    class "views.py (DRF)" {
+        AdminLoginView  (POST /auth/login)
+        MeView          (GET/PATCH /auth/me)
+        ChangePasswordView
+        AdministrateurListCreateView
+        UserStatisticsView
+        PlatformOverviewView
+    }
+
+    class "urls.py" {
+        /api/admin/auth/*
+    }
+
+    class "admin.py\n(interface Django admin)" {
+        enregistrement du modèle
+    }
+
+    AdministrateurManager ..> Administrateur : "crée des instances"
+    views.py <.. serializers.py : "utilise"
+    views.py <.. permissions.py : "contrôle d'accès"
+    urls.py --> views.py : "route"
+    admin.py --> Administrateur : "inscrit"
+}
+
+' ============================================================================
+' APP : core (miroir en lecture des tables Express)
+' ============================================================================
+package "core (miroir lecture des tables Express)" {
+    class "Utilisateur (managed=False)" {
+        + id_utilisateur
+        + nom / prenom / email / telephone
+        + role : COACH | ADJOINT | JOUEUR
+        + actif  (ajouté par migration 0002)
+        - db_table = utilisateur
+    }
+    class "Equipe (managed=False)" {
+        + id_equipe / nom_equipe / categorie / saison
+        + id_coach (FK Utilisateur)
+        + actif
+        - db_table = equipe
+    }
+    class "Joueur (managed=False)" {
+        + id_joueur
+        + id_utilisateur (1-1) / id_equipe
+        + poste / statut_activation
+        - db_table = joueur
+    }
+    class "Adjoint (managed=False)" {
+        + id_adjoint
+        + id_utilisateur (1-1) / id_equipe
+        - db_table = adjoint
+    }
+    class "Entrainement (managed=False)" {
+        + id_entrainement / id_equipe / date_seance / statut
+    }
+    class "Match (managed=False)" {
+        + id_match / id_equipe / adversaire / score / statut
+    }
+    class "Notification (managed=False)" {
+        + id_notification / id_utilisateur / message / lu
+    }
+    class "migrations/0002 (SQL additif)" {
+        ALTER TABLE ... ADD COLUMN IF NOT EXISTS actif
+    }
+
+    Utilisateur "1" ..> "0..*" Equipe : "coache"
+    Equipe "1" ..> "0..*" Joueur
+    Equipe "1" ..> "0..*" Adjoint
+    Utilisateur "1" ..> "0..*" Entrainement
+    Utilisateur "1" ..> "0..*" Notification
+}
+
+' ============================================================================
+' APP : moderation (journal d'audit + diffusion)
+' ============================================================================
+package "moderation (audit & diffusion)" {
+    class "AuditLog" {
+        + action : SUSPEND_TEAM | ACTIVATE_TEAM | SUSPEND_USER | ACTIVATE_USER | BROADCAST_NOTIFICATION
+        + administrateur (FK)
+        + cible_type / cible_id
+        + details (JSON)
+        + date_action
+        - db_table = admin_audit_log
+    }
+    class "views.py (DRF)" {
+        BroadcastNotificationView
+        AuditLogListView
+        SuspendTeamView / ActivateTeamView
+        SuspendUserView / ActivateUserView
+    }
+    class "serializers.py" {
+        BroadcastSerializer
+        AuditLogSerializer
+    }
+    class "urls.py" {
+        /api/admin/notifications/broadcast/
+        /api/admin/audit-log/
+        /api/admin/teams/::id/suspend/
+        /api/admin/users/::id/suspend/
+    }
+    class "admin.py"
+
+    views.py <.. serializers.py : "utilise"
+    urls.py --> views.py : "route"
+    views.py ..> AuditLog : "enregistre chaque action"
+    admin.py --> AuditLog : "inscrit"
+
+    AuditLog ..> Administrateur : "auteur de l'action (FK settings.AUTH_USER_MODEL)"
+}
+
+' ============================================================================
+' BASE DE DONNÉES
+' ============================================================================
+database "PostgreSQL (foottech)" as PG {
+    rectangle "tables Express (utilisateur, equipe,\njoueur, adjoint, entrainement,\nmatch, notification)"
+    rectangle "tables admin (administrateur,\nadmin_audit_log)"
+}
+
+settings.py ..> PG : "joue le rôle de connexion (même base)"
+core --> PG : "lecture seule (managed=False, miroir)"
+moderation --> PG : "écrit journal + diffuse"
+administrateurs --> PG : "AUTH_USER_MODEL + login"
+
+' ============================================================================
+' NOTE
+' ============================================================================
+note bottom
+  Les modèles de l'app core sont en mode non géré (managed=False) :
+  ils reflètent les tables déjà créées par le backend Express et servent
+  uniquement à la lecture / à la supervision. Seules les tables admin
+  (administrateur, admin_audit_log) sont gérées par Django.
+end note
+
+@enduml

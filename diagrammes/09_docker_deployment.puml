@@ -1,0 +1,139 @@
+@startuml
+!pragma layout smetana
+title FootTech - Déploiement Docker (Conteneurs & Réseau)
+caption Infrastructure de conteneurisation : services, ports, volumes et dépendances (inspiré de docker-compose.yml)
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+
+' ============================================================================
+' COULEURS (fond conteneur)
+' ============================================================================
+skinparam node {
+    BackgroundColor #E3F2FD
+    BorderColor #1565C0
+    FontColor #0D47A1
+    StereotypeFontColor #0D47A1
+}
+
+skinparam database {
+    BackgroundColor #ECEFF1
+    BorderColor #37474F
+    FontColor #263238
+}
+
+skinparam folder {
+    BackgroundColor #FFF8E1
+    BorderColor #F57F17
+    FontColor #E65100
+}
+
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #999999
+    FontColor #333333
+}
+
+' ============================================================================
+' HÔTE DOCKER
+' ============================================================================
+package "Hôte Docker" {
+    rectangle "docker-compose.yml\n(réseau bridge foottech)" as NET
+    folder "Volumes\n(named volumes)" as VOL {
+        database "pgdata" as VOL_PG
+        database "redisdata" as VOL_REDIS
+    }
+}
+
+' ============================================================================
+' CONTENEURS
+' ============================================================================
+
+package "Données" #ECEFF1 {
+    node "Conteneur : postgres\npostgres:16-alpine" as PG {
+        rectangle "PostgreSQL 16\nDB: foottech\nschema: platform" as PG_SRV
+    }
+    node "Conteneur : redis\nredis:7-alpine" as RD {
+        rectangle "Redis Server 7\nmaxmemory 256mb (LRU)\naof appendonly" as RD_SRV
+    }
+}
+
+package "Backend API" #E3F2FD {
+    node "Conteneur : api\n(Dockerfile backend)" as API {
+        rectangle "Express 5 (TypeScript)\nREST API" as API_SRV
+        rectangle "Socket.io" as API_SOCK
+        rectangle "Swagger /api-docs" as API_SWAG
+    }
+}
+
+package "Admin Backend" #E1F5FE {
+    node "Conteneur : admin-api\n(Dockerfile Django)" as DJ {
+        rectangle "Django + DRF\nREST API" as DJ_SRV
+    }
+}
+
+package "Services IA" #FFF3E0 {
+    node "Conteneur :\nai-insights-service" as AI {
+        rectangle "FastAPI :8300\ntrend / clustering / tone /\ntranscription / OCR" as AI_SRV
+    }
+    node "Conteneur :\nlineup-recommendation-service" as RECO {
+        rectangle "FastAPI :8100\nplayer scoring" as RECO_SRV
+    }
+}
+
+' ============================================================================
+' PORTS PUBLICS
+' ============================================================================
+rectangle "Port 5432\nHOST:5432 -> postgres" as P_PG
+rectangle "Port 6379\nHOST:6379 -> redis" as P_RD
+rectangle "Port 4000\nHOST:4000 -> api" as P_API
+rectangle "Port 8000\nHOST:8000 -> admin-api" as P_DJ
+rectangle "Port 8300\nHOST:8300 -> ai-insights" as P_AI
+rectangle "Port 8100\nHOST:8100 -> lineup" as P_RECO
+
+' ============================================================================
+' VOLUMES
+' ============================================================================
+PG --- VOL_PG : "mount :/var/lib/postgresql/data"
+RD --- VOL_REDIS : "mount :/data"
+
+' ============================================================================
+' RÉSEAU INTERNE (service-to-service)
+' ============================================================================
+' API -> données
+API --> PG : "5432 postgres://postgres@postgres:5432/foottech"
+API --> RD : "redis://redis:6379"
+
+' API -> services IA
+API --> AI : "http://ai-insights-service:8300"
+API --> RECO : "http://lineup-recommendation-service:8100"
+
+' Admin Django -> données
+DJ --> PG : "postgres://...@postgres:5432/foottech"
+
+' ============================================================================
+' PORTS PUBLICS / HÔTE
+' ============================================================================
+P_PG --> PG : "5432:5432"
+P_RD --> RD : "6379:6379"
+P_API --> API : "4000:4000"
+P_DJ --> DJ : "8000:8000"
+P_AI --> AI : "8300:8300"
+P_RECO --> RECO : "8100:8100"
+
+' dépendances (healthcheck)
+API ..> PG : "depends_on (healthy)"
+API ..> RD : "depends_on (healthy)"
+DJ ..> PG : "depends_on (healthy)"
+
+' ============================================================================
+' NOTES
+' ============================================================================
+note bottom of NET
+  Schema SQL (foottech_v2_schema.sql) est monté dans
+  /docker-entrypoint-initdb.d/01-schema.sql de postgres pour
+  init automatique de la base au premier démarrage.
+end note
+
+@enduml

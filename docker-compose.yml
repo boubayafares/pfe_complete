@@ -1,0 +1,121 @@
+version: "3.9"
+
+services:
+  # ─── PostgreSQL ──────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: foottech
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./foottech_v2_schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Redis ──────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  # ─── Express Backend ────────────────────────────────────────
+  api:
+    build:
+      context: ./back/FoottechBackend-main
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: foottech
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_SCHEMA: platform
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      CORS_ORIGIN: "*"
+      REDIS_URL: redis://redis:6379
+      AI_INSIGHTS_SERVICE_URL: http://ai-insights-service:8300
+      LINEUP_SERVICE_URL: http://lineup-recommendation-service:8100
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─── Django Admin Backend ───────────────────────────────────
+  admin-api:
+    build:
+      context: ./foottech_admin_backend/foottech_admin_backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DEBUG: "false"
+      DATABASE_URL: postgres://postgres:${DB_PASSWORD:-postgres}@postgres:5432/foottech
+      SECRET_KEY: ${DJANGO_SECRET_KEY:-change-me-in-production}
+      ALLOWED_HOSTS: "*"
+    command: >
+      sh -c "python manage.py migrate &&
+             gunicorn foottech_admin.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─── AI Insights Service ────────────────────────────────────
+  ai-insights-service:
+    build:
+      context: ./ai-insights-service
+      dockerfile: Dockerfile
+    ports:
+      - "8300:8300"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8300/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+  # ─── Lineup Recommendation Service ──────────────────────────
+  lineup-recommendation-service:
+    build:
+      context: ./lineup-recommendation-service
+      dockerfile: Dockerfile
+    ports:
+      - "8100:8100"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8100/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:

@@ -1,0 +1,157 @@
+@startuml
+!pragma layout smetana
+title FootTech - Diagramme de Cas d'Utilisation (3 rôles)
+caption Fonctionnalités par rôle : Coach, Adjoint et Joueur
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+' ============================================================================
+' ACTEURS ET COULEURS
+' ============================================================================
+actor "Coach" as COACH #1E88E5
+actor "Adjoint" as ADJOINT #43A047
+actor "Joueur" as JOUEUR #F57C00
+
+skinparam usecase {
+    BackgroundColor #F5F5F5
+    BorderColor #616161
+    FontColor #212121
+}
+
+skinparam usecase<<Auth>> {
+    BackgroundColor #FFEBEE
+    BorderColor #B71C1C
+}
+skinparam usecase<<Team>> {
+    BackgroundColor #E8F5FF
+    BorderColor #0D47A1
+}
+skinparam usecase<<Training>> {
+    BackgroundColor #F3E5F5
+    BorderColor #4A148C
+}
+skinparam usecase<<Match>> {
+    BackgroundColor #E1F5FE
+    BorderColor #01579B
+}
+skinparam usecase<<Player>> {
+    BackgroundColor #E8F5E9
+    BorderColor #1B5E20
+}
+skinparam usecase<<Notification>> {
+    BackgroundColor #FFF3E0
+    BorderColor #BF360C
+}
+skinparam usecase<<Calendar>> {
+    BackgroundColor #E0F7FA
+    BorderColor #006064
+}
+
+' ============================================================================
+' BORDS DES CAS D'USAGE PAR GROUPE
+' ============================================================================
+rectangle "Gestion de l'équipe et des joueurs" as GRP_TEAM {
+    usecase "Créer / gérer les équipes" as UC1 <<Team>>
+    usecase "Gérer les joueurs (fiches complètes)" as UC2 <<Player>>
+    usecase "Gérer les blessures" as UC3 <<Player>>
+}
+
+rectangle "Planification & entraînements" as GRP_TRAIN {
+    usecase "Créer les saisons" as UC4 <<Team>>
+    usecase "Créer des entraînements" as UC5 <<Training>>
+    usecase "Marquer les présences" as UC6 <<Training>>
+    usecase "Ajouter les situations (fiche)" as UC7 <<Training>>
+    usecase "Dessiner les schémas tactiques" as UC8 <<Training>>
+    usecase "Proposer des exercices" as UC9 <<Training>>
+    usecase "Valider les propositions" as UC10 <<Training>>
+    usecase "Gérer le planning hebdomadaire" as UC11 <<Calendar>>
+    usecase "Consulter le planning" as UC12 <<Calendar>>
+}
+
+rectangle "Gestion des matchs" as GRP_MATCH {
+    usecase "Créer un match" as UC13 <<Match>>
+    usecase "Calculer l'alignement IA" as UC14 <<Match>>
+    usecase "Valider la composition" as UC15 <<Match>>
+    usecase "Suivre le match en direct" as UC16 <<Match>>
+    usecase "Saisir les événements (buts/cartons)" as UC17 <<Match>>
+    usecase "Évaluer les joueurs (post-match)" as UC18 <<Match>>
+    usecase "Consulter le rapport de match" as UC19 <<Match>>
+}
+
+rectangle "Comptes & notifications" as GRP_AUTH {
+    usecase "S'authentifier (login)" as UC20 <<Auth>>
+    usecase "Activer son compte par OTP" as UC21 <<Auth>>
+    usecase "S'authentifier par biométrie" as UC22 <<Auth>>
+    usecase "Recevoir les notifications" as UC23 <<Notification>>
+    usecase "Diffuser un message (broadcast)" as UC24 <<Notification>>
+}
+
+rectangle "Tableau de bord & suivi" as GRP_DASH {
+    usecase "Consulter le tableau de bord" as UC25 <<Team>>
+    usecase "Consulter les tendances IA" as UC26 <<Match>>
+    usecase "Accéder au profil" as UC27 <<Player>>
+}
+
+' ============================================================================
+' ASSOCIATIONS ACTEURS
+' ============================================================================
+COACH --> UC1
+COACH --> UC2
+COACH --> UC3
+COACH --> UC4
+COACH --> UC5
+COACH --> UC6
+COACH --> UC7
+COACH --> UC8
+COACH --> UC10
+COACH --> UC11
+COACH --> UC13
+COACH --> UC14
+COACH --> UC15
+COACH --> UC18
+COACH --> UC20
+COACH --> UC22
+COACH --> UC24
+COACH --> UC25
+COACH --> UC26
+
+ADJOINT --> UC1
+ADJOINT --> UC5
+ADJOINT --> UC6
+ADJOINT --> UC7
+ADJOINT --> UC8
+ADJOINT --> UC9
+ADJOINT --> UC11
+ADJOINT --> UC13
+ADJOINT --> UC16
+ADJOINT --> UC17
+ADJOINT --> UC18
+ADJOINT --> UC20
+ADJOINT --> UC23
+
+JOUEUR --> UC12
+JOUEUR --> UC14
+JOUEUR --> UC15
+JOUEUR --> UC16
+JOUEUR --> UC19
+JOUEUR --> UC21
+JOUEUR --> UC22
+JOUEUR --> UC23
+JOUEUR --> UC27
+
+' ============================================================================
+' EXTENDS / INCLUDES
+' ============================================================================
+UC13 ..> UC14 : <<include>> (alignement IA à la création)
+UC17 ..> UC16 : <<extend>> (événements pendant suivi live)
+UC9 ..> UC10 : <<extend>> (validation par le coach)
+UC2 ..> UC3 : <<extend>> (gestion des blessures d'un joueur)
+
+note bottom of COACH : Rôle COACH : contrôle total de l'équipe,\nvalidation des propositions et évaluations.
+note bottom of ADJOINT : Rôle ADJOINT : aide à la planification,\nprésence et saisie live des matchs.
+note bottom of JOUEUR : Rôle JOUEUR : accès en consultation\n(planning, composition, rapports, notifications).
+
+@enduml

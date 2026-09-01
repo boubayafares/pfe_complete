@@ -1,0 +1,1833 @@
+{
+  "info": {
+    "name": "FootTech API",
+    "description": "FootTech backend API collection covering all endpoints across auth, teams, players, seasons, trainings, matches, notifications, attendance, dashboard, calendar events, exercise proposals, weekly plannings, and AI services.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000" },
+    { "key": "adminUrl", "value": "http://localhost:8000" },
+    { "key": "aiUrl", "value": "http://localhost:8300" },
+    { "key": "lineupUrl", "value": "http://localhost:8100" }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) pm.environment.set('token', res.accessToken);",
+                  "if (res.refreshToken) pm.environment.set('refreshToken', res.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{coachEmail}}\",\n  \"password\": \"{{coachPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Register Coach",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"{{coachEmail}}\",\n  \"password\": \"{{coachPassword}}\",\n  \"phone\": \"+33612345678\",\n  \"clubName\": \"FootTech FC\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register-coach",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "register-coach"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "refresh"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "logout"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "me"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Teams",
+      "item": [
+        {
+          "name": "GET List Teams",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/teams",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "teams"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Team by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/teams/{{teamId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "teams", "{{teamId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Team",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"U15 A\",\n  \"category\": \"U15\",\n  \"logoUrl\": \"\",\n  \"coachId\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/teams",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "teams"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Update Team",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"U15 A Updated\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/teams/{{teamId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "teams", "{{teamId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Team",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/teams/{{teamId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "teams", "{{teamId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Team Staff",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/teams/{{teamId}}/staff",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "teams", "{{teamId}}", "staff"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Add Staff",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"email\": \"adjoint@test.com\",\n  \"phone\": \"+33698765432\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/teams/{{teamId}}/staff",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "teams", "{{teamId}}", "staff"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Remove Staff",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/teams/{{teamId}}/staff/{{adjointId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "teams", "{{teamId}}", "staff", "{{adjointId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Players",
+      "item": [
+        {
+          "name": "GET List Players",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Player by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players/{{playerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players", "{{playerId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Player",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Lucas\",\n  \"lastName\": \"Martin\",\n  \"dateOfBirth\": \"2012-05-14\",\n  \"position\": \"Attaquant\",\n  \"teamId\": \"{{teamId}}\",\n  \"jerseyNumber\": 9,\n  \"phone\": \"+33611112222\",\n  \"emergencyContact\": \"+33633334444\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Update Player",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jerseyNumber\": 10,\n  \"position\": \"Milieu\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players/{{playerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players", "{{playerId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Guardians",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players/{{playerId}}/guardians",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players", "{{playerId}}", "guardians"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Upsert Guardian",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Pierre\",\n  \"lastName\": \"Martin\",\n  \"relation\": \"Père\",\n  \"phone\": \"+33644445555\",\n  \"email\": \"pierre.martin@test.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players/{{playerId}}/guardians",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players", "{{playerId}}", "guardians"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Address",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players/{{playerId}}/address",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players", "{{playerId}}", "address"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Upsert Address",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"street\": \"12 Rue des Lilas\",\n  \"city\": \"Lyon\",\n  \"postalCode\": \"69003\",\n  \"country\": \"France\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players/{{playerId}}/address",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players", "{{playerId}}", "address"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET School Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players/{{playerId}}/school-info",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players", "{{playerId}}", "school-info"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Upsert School Info",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"schoolName\": \"Collège Jean Moulin\",\n  \"grade\": \"5ème\",\n  \"notes\": \"Bon élève\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players/{{playerId}}/school-info",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players", "{{playerId}}", "school-info"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Season Profiles",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players/{{playerId}}/season-profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players", "{{playerId}}", "season-profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Upsert Season Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"seasonId\": \"{{seasonId}}\",\n  \"medicalCertificate\": true,\n  \"insuranceNumber\": \"INS-123456\",\n  \"skillLevel\": \"Avancé\",\n  \"footedness\": \"RIGHT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players/{{playerId}}/season-profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players", "{{playerId}}", "season-profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Injuries",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players/{{playerId}}/injuries",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players", "{{playerId}}", "injuries"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Injury",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"injuryType\": \"Entorse cheville\",\n  \"date\": \"2024-03-10\",\n  \"severity\": \"MODERATE\",\n  \"notes\": \"Arrêt 3 semaines\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players/{{playerId}}/injuries",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players", "{{playerId}}", "injuries"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Update Injury",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"RECOVERED\",\n  \"recoveryDate\": \"2024-04-01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players/{{playerId}}/injuries/{{injuryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players", "{{playerId}}", "injuries", "{{injuryId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Injury",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/players/{{playerId}}/injuries/{{injuryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "players", "{{playerId}}", "injuries", "{{injuryId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Seasons",
+      "item": [
+        {
+          "name": "GET List Seasons",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/seasons",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "seasons"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Season by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/seasons/{{seasonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "seasons", "{{seasonId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Season",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Saison 2024-2025\",\n  \"startDate\": \"2024-09-01\",\n  \"endDate\": \"2025-06-30\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/seasons",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "seasons"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Update Season",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Saison 2024-2025 v2\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/seasons/{{seasonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "seasons", "{{seasonId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Season",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/seasons/{{seasonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "seasons", "{{seasonId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Trainings",
+      "item": [
+        {
+          "name": "GET List Trainings",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/trainings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "trainings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Training by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/trainings/{{trainingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "trainings", "{{trainingId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Training",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Séance vitesse\",\n  \"date\": \"2024-11-05\",\n  \"startTime\": \"18:00\",\n  \"endTime\": \"19:30\",\n  \"location\": \"Stade Municipal\",\n  \"teamId\": \"{{teamId}}\",\n  \"seasonId\": \"{{seasonId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/trainings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "trainings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Update Training",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Séance vitesse avancée\",\n  \"startTime\": \"18:30\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/trainings/{{trainingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "trainings", "{{trainingId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Training",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/trainings/{{trainingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "trainings", "{{trainingId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Training Sheet",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/trainings/{{trainingId}}/sheet",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "trainings", "{{trainingId}}", "sheet"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Upsert Training Sheet",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"objectives\": [\"Améliorer la vitesse\", \"Travail technique\"],\n  \"expectedAttendance\": 18,\n  \"equipment\": [\"Cônes\", \"Ballons\", \"Portes\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/trainings/{{trainingId}}/sheet",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "trainings", "{{trainingId}}", "sheet"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Situations",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/trainings/{{trainingId}}/situations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "trainings", "{{trainingId}}", "situations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Situation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Exercice 1 - Conduite de balle\",\n  \"description\": \"Slalom avec ballon\",\n  \"duration\": 15,\n  \"objective\": \"Technique\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/trainings/{{trainingId}}/situations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "trainings", "{{trainingId}}", "situations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Update Situation",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Exercice 1 modifié\",\n  \"duration\": 20\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/trainings/{{trainingId}}/situations/{{situationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "trainings", "{{trainingId}}", "situations", "{{situationId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Situation",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/trainings/{{trainingId}}/situations/{{situationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "trainings", "{{trainingId}}", "situations", "{{situationId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Tactical Drawing",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/trainings/{{trainingId}}/situations/{{situationId}}/drawing",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "trainings", "{{trainingId}}", "situations", "{{situationId}}", "drawing"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Save Tactical Drawing",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"elements\": [\n    {\n      \"type\": \"player\",\n      \"x\": 100,\n      \"y\": 150,\n      \"team\": \"A\"\n    }\n  ],\n  \"width\": 800,\n  \"height\": 500\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/trainings/{{trainingId}}/situations/{{situationId}}/drawing",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "trainings", "{{trainingId}}", "situations", "{{situationId}}", "drawing"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Matches",
+      "item": [
+        {
+          "name": "GET List Matches",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Match by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Match",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2024-11-10\",\n  \"opponent\": \"AS Romains\",\n  \"location\": \"Stade de Genève\",\n  \"homeAway\": \"HOME\",\n  \"teamId\": \"{{teamId}}\",\n  \"seasonId\": \"{{seasonId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Update Match Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"FINISHED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Match",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Match Lineup",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/lineup",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}", "lineup"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Set Lineup",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"formation\": \"4-3-3\",\n  \"players\": [\n    { \"playerId\": \"{{playerId}}\", \"position\": \"ST\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/lineup",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}", "lineup"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Match Events",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}", "events"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Match Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"GOAL\",\n  \"minute\": 23,\n  \"playerId\": \"{{playerId}}\",\n  \"details\": \"But de la tête\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}", "events"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Match Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}", "stats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Upsert Player Stat",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": \"{{playerId}}\",\n  \"goals\": 2,\n  \"assists\": 1,\n  \"minutesPlayed\": 90,\n  \"rating\": 8.5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}", "stats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Match Evaluations",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/evaluations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}", "evaluations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Upsert Evaluation",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": \"{{playerId}}\",\n  \"criteria\": {\n    \"technique\": 8,\n    \"tactique\": 7,\n    \"physique\": 9\n  },\n  \"globalNotes\": \"Très bonne prestation\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/evaluations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}", "evaluations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Match Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/report",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}", "report"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Save Match Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"summary\": \"Victoire 3-1\",\n  \"highlights\": [\"Deux buts en première mi-temps\"],\n  \"conclusions\": \"Bonne cohésion d'équipe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/report",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}", "report"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Generate AI Recommendations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('returns recommendations with STARTER/SUBSTITUTE/NOT_SELECTED', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(Array.isArray(body.data)).to.be.true;",
+                  "  if (body.data.length > 0) {",
+                  "    const statuses = body.data.map(r => r.recommended_status);",
+                  "    pm.expect(statuses).to.include.members(['STARTER', 'SUBSTITUTE', 'NOT_SELECTED'].filter(s => statuses.includes(s)));",
+                  "  }",
+                  "});",
+                  "pm.test('scores are within [0,1]', () => {",
+                  "  const body = pm.response.json();",
+                  "  (body.data || []).forEach(r => {",
+                  "    pm.expect(r.final_score).to.be.within(0, 1);",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerIds\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/ai-recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}", "ai-recommendations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET AI Recommendations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('response is an array of stored recommendations', () => {",
+                  "  pm.expect(Array.isArray(body.data)).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/matches/{{matchId}}/ai-recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "matches", "{{matchId}}", "ai-recommendations"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "GET List Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notifications"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipientId\": \"{{recipientId}}\",\n  \"title\": \"Nouvelle séance\",\n  \"body\": \"Une séance d'entraînement a été ajoutée\",\n  \"type\": \"TRAINING\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notifications"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Broadcast Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teamId\": \"{{teamId}}\",\n  \"title\": \"Match du week-end\",\n  \"body\": \"Pensez à confirmer votre présence\",\n  \"type\": \"MATCH\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/broadcast",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notifications", "broadcast"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Mark as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/{{notificationId}}/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notifications", "{{notificationId}}", "read"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Mark All as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notifications", "read-all"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "item": [
+        {
+          "name": "GET Player Attendance History",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/attendance/players/{{playerId}}/history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "attendance", "players", "{{playerId}}", "history"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Attendance by Training",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/attendance/trainings/{{trainingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "attendance", "trainings", "{{trainingId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Mark Attendance",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": \"{{playerId}}\",\n  \"status\": \"PRESENT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/attendance/trainings/{{trainingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "attendance", "trainings", "{{trainingId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Bulk Mark Attendance",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"records\": [\n    { \"playerId\": \"{{playerId}}\", \"status\": \"PRESENT\" },\n    { \"playerId\": \"player2\", \"status\": \"ABSENT\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/attendance/trainings/{{trainingId}}/bulk",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "attendance", "trainings", "{{trainingId}}", "bulk"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "GET My Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dashboard/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "dashboard", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Season Bilan",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dashboard/season-bilan?seasonId={{seasonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "dashboard", "season-bilan"],
+              "query": [
+                { "key": "seasonId", "value": "{{seasonId}}", "disabled": false }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Calendar Events",
+      "item": [
+        {
+          "name": "GET List Calendar Events",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/calendar-events",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "calendar-events"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Calendar Event by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/calendar-events/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "calendar-events", "{{eventId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Calendar Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Tournoi régional\",\n  \"type\": \"TOURNAMENT\",\n  \"startDate\": \"2024-12-01T09:00:00Z\",\n  \"endDate\": \"2024-12-01T18:00:00Z\",\n  \"teamId\": \"{{teamId}}\",\n  \"location\": \"Complexe sportif\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/calendar-events",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "calendar-events"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Update Calendar Event",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Tournoi régional (reporté)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/calendar-events/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "calendar-events", "{{eventId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Calendar Event",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/calendar-events/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "calendar-events", "{{eventId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Exercise Proposals",
+      "item": [
+        {
+          "name": "GET List Proposals",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/exercise-proposals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "exercise-proposals"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Proposal by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/exercise-proposals/{{proposalId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "exercise-proposals", "{{proposalId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Proposal",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Nouvel exercice d'échauffement\",\n  \"description\": \"Exercice de coordination\",\n  \"category\": \"WARMUP\",\n  \"difficulty\": \"EASY\",\n  \"duration\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/exercise-proposals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "exercise-proposals"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Review Proposal",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\",\n  \"reviewNote\": \"Exercice validé\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/exercise-proposals/{{proposalId}}/review",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "exercise-proposals", "{{proposalId}}", "review"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Weekly Plannings",
+      "item": [
+        {
+          "name": "GET List Weekly Plannings",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weekly-plannings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "weekly-plannings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Weekly Planning by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weekly-plannings/{{planningId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "weekly-plannings", "{{planningId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Weekly Planning",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"weekStart\": \"2024-11-04\",\n  \"weekEnd\": \"2024-11-10\",\n  \"teamId\": \"{{teamId}}\",\n  \"seasonId\": \"{{seasonId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weekly-plannings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "weekly-plannings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Update Weekly Planning",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"weekStart\": \"2024-11-04\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weekly-plannings/{{planningId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "weekly-plannings", "{{planningId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Weekly Planning",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weekly-plannings/{{planningId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "weekly-plannings", "{{planningId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Planning Slots",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weekly-plannings/{{planningId}}/slots",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "weekly-plannings", "{{planningId}}", "slots"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Upsert Slot",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"day\": \"MONDAY\",\n  \"startTime\": \"18:00\",\n  \"endTime\": \"19:00\",\n  \"title\": \"Entraînement principal\",\n  \"trainingId\": \"{{trainingId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weekly-plannings/{{planningId}}/slots",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "weekly-plannings", "{{planningId}}", "slots"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "AI Insights",
+      "item": [
+        {
+          "name": "POST Trend Detect",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": \"{{playerId}}\",\n  \"dataPoints\": [\n    { \"month\": \"2024-01\", \"value\": 6 },\n    { \"month\": \"2024-02\", \"value\": 7 },\n    { \"month\": \"2024-03\", \"value\": 8 },\n    { \"month\": \"2024-04\", \"value\": 9 },\n    { \"month\": \"2024-05\", \"value\": 8 }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{aiUrl}}/api/v1/trend/detect",
+              "host": ["{{aiUrl}}"],
+              "path": ["api", "v1", "trend", "detect"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Clustering Players",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"players\": [\n    {\n      \"playerId\": \"{{playerId}}\",\n      \"features\": {\n        \"goals\": 5,\n        \"assists\": 3,\n        \"minutesPlayed\": 540,\n        \"attendanceRate\": 0.85\n      }\n    }\n  ],\n  \"numClusters\": 2\n}"
+            },
+            "url": {
+              "raw": "{{aiUrl}}/api/v1/clustering/players",
+              "host": ["{{aiUrl}}"],
+              "path": ["api", "v1", "clustering", "players"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Tone Analyze",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comments\": [\n    \"Très bon match, continue comme ça !\",\n    \"Peut mieux faire à l'entraînement.\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{aiUrl}}/api/v1/tone/analyze",
+              "host": ["{{aiUrl}}"],
+              "path": ["api", "v1", "tone", "analyze"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Lineup Service",
+      "item": [
+        {
+          "name": "POST Get Recommendations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('contract: matchId + weightsVersion + recommendations', () => {",
+                  "  pm.expect(body.matchId).to.exist;",
+                  "  pm.expect(body.weightsVersion).to.be.a('string');",
+                  "  pm.expect(Array.isArray(body.recommendations)).to.be.true;",
+                  "});",
+                  "pm.test('every recommendation is well-formed (0-100 scores + status)', () => {",
+                  "  (body.recommendations || []).forEach(r => {",
+                  "    pm.expect(r.playerId).to.exist;",
+                  "    pm.expect(r.presenceScore).to.be.within(0, 100);",
+                  "    pm.expect(r.performanceScore).to.be.within(0, 100);",
+                  "    pm.expect(r.fatigueScore).to.be.within(0, 100);",
+                  "    pm.expect(r.finalScore).to.be.within(0, 100);",
+                  "    pm.expect(['STARTER', 'SUBSTITUTE', 'NOT_SELECTED']).to.include(r.recommendedStatus);",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"matchId\": 42,\n  \"players\": [\n    {\n      \"playerId\": 7,\n      \"presenceRate\": 0.9,\n      \"recentPerformanceRating\": 8.2,\n      \"acuteChronicWorkloadRatio\": 1.1,\n      \"daysSinceLastMatch\": 4\n    },\n    {\n      \"playerId\": 8,\n      \"presenceRate\": 0.4,\n      \"recentPerformanceRating\": 5.1,\n      \"acuteChronicWorkloadRatio\": 0.8,\n      \"daysSinceLastMatch\": 2\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{lineupUrl}}/api/v1/lineup/recommendations",
+              "host": ["{{lineupUrl}}"],
+              "path": ["api", "v1", "lineup", "recommendations"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

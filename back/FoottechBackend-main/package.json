@@ -1,0 +1,67 @@
+{
+  "name": "projet_footteh",
+  "version": "1.0.0",
+  "description": "Express + TypeScript + PostgreSQL API aligned with `foottech_v2_schema.sql` (bundled in this repo) — the simplified cahier des charges plus the fields pulled from the club's real documents (fiche joueur, planning type, fiche d'entrainement, bilan de saison).",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "npx tsx src/main.ts",
+    "build": "npx tsc",
+    "test": "npm run build && vitest run",
+    "test:watch": "vitest",
+    "start": "node dist/main.js"
+  },
+  "keywords": [],
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "compression": "^1.8.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-list-endpoints": "^7.1.1",
+    "express-rate-limit": "^8.5.2",
+    "firebase-admin": "^14.2.0",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.11.0",
+    "multer": "^2.2.0",
+    "nodemailer": "^9.0.3",
+    "pdfkit": "^0.20.2",
+    "pg": "^8.22.0",
+    "redis": "^6.2.1",
+    "socket.io": "^4.8.3",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1",
+    "twilio": "^6.1.0",
+    "winston": "^3.19.0",
+    "yamljs": "^0.3.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/compression": "^1.8.1",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.2.0",
+    "@types/nodemailer": "^8.0.1",
+    "@types/pdfkit": "^0.17.6",
+    "@types/pg": "^8.20.0",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/winston": "^2.4.4",
+    "eslint": "^10.7.0",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
+  }
+}

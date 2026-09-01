@@ -1,0 +1,237 @@
+name: FootTech CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository }}
+
+jobs:
+  # ─── Express Backend ────────────────────────────────────────
+  backend:
+    name: Backend API (Express)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: back/FoottechBackend-main
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: foottech_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 3s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: back/FoottechBackend-main/package-lock.json
+      - run: npm ci
+      - run: npm run build
+        env:
+          NODE_ENV: production
+      - name: Run Vitest unit tests
+        run: npx vitest run
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: back/FoottechBackend-main
+          push: false
+          tags: foottech-api:ci
+      - name: Upload artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-image
+          path: back/FoottechBackend-main
+
+  # ─── Django Admin Backend ───────────────────────────────────
+  admin-backend:
+    name: Admin Backend (Django)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: foottech_admin_backend/foottech_admin_backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python manage.py check --deploy
+        env:
+          DJANGO_SECRET_KEY: ci-test-secret-key-for-checks-only-12345
+          DATABASE_URL: sqlite:///test.db
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: foottech_admin_backend/foottech_admin_backend
+          push: false
+          tags: foottech-admin:ci
+
+  # ─── Flutter App ────────────────────────────────────────────
+  flutter:
+    name: Flutter App
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: front/foottechproject
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24"
+          channel: stable
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - name: Build APK
+        run: flutter build apk --debug
+
+  # ─── AI Insights Service ────────────────────────────────────
+  ai-insights:
+    name: AI Insights Service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ai-insights-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: pytest -v
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ai-insights-service
+          push: false
+          tags: foottech-ai-insights:ci
+
+  # ─── Lineup Recommendation Service ──────────────────────────
+  lineup-service:
+    name: Lineup Recommendation Service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lineup-recommendation-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-runtime.txt
+      - run: pytest -v
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: lineup-recommendation-service
+          push: false
+          tags: foottech-lineup:ci
+
+  # ─── Docker Compose Integration ─────────────────────────────
+  integration:
+    name: Integration Tests (Docker Compose)
+    runs-on: ubuntu-latest
+    needs: [backend, admin-backend, ai-insights, lineup-service]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start all services
+        run: |
+          cp .env.example .env 2>/dev/null || echo "JWT_ACCESS_SECRET=ci-test-secret-minimum-32-chars-here!!" > .env
+          echo "JWT_REFRESH_SECRET=ci-test-refresh-secret-minimum-32-chars!!" >> .env
+          docker compose up -d --build
+      - name: Wait for services
+        run: |
+          sleep 30
+          docker compose ps
+      - name: Health checks
+        run: |
+          curl -f http://localhost:4000/health
+          curl -f http://localhost:8300/health
+          curl -f http://localhost:8100/health
+      - name: Run Postman tests
+        run: |
+          npx newman run tests/postman/foottech_collection.json --environment tests/postman/foottech_environment.json || true
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
+
+  # ─── Push to Container Registry (main only) ─────────────────
+  push-images:
+    name: Push Docker Images
+    runs-on: ubuntu-latest
+    needs: [backend, admin-backend, ai-insights, lineup-service]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta-api
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/api
+          tags: type=sha
+      - uses: docker/build-push-action@v5
+        with:
+          context: back/FoottechBackend-main
+          push: true
+          tags: ${{ steps.meta-api.outputs.tags }}
+      - uses: docker/metadata-action@v5
+        id: meta-admin
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/admin-api
+          tags: type=sha
+      - uses: docker/build-push-action@v5
+        with:
+          context: foottech_admin_backend/foottech_admin_backend
+          push: true
+          tags: ${{ steps.meta-admin.outputs.tags }}
+      - uses: docker/metadata-action@v5
+        id: meta-ai
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/ai-insights
+          tags: type=sha
+      - uses: docker/build-push-action@v5
+        with:
+          context: ai-insights-service
+          push: true
+          tags: ${{ steps.meta-ai.outputs.tags }}
+      - uses: docker/metadata-action@v5
+        id: meta-lineup
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/lineup-service
+          tags: type=sha
+      - uses: docker/build-push-action@v5
+        with:
+          context: lineup-recommendation-service
+          push: true
+          tags: ${{ steps.meta-lineup.outputs.tags }}

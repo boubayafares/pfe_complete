@@ -1,0 +1,57 @@
+# ==============================
+# lineup-recommendation-service - Python / FastAPI
+# ==============================
+
+# ---- Environments ----
+.env
+.env.*
+!.env.example
+
+# ---- Python bytecode / cache ----
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+*.egg
+build/
+dist/
+develop-eggs/
+
+# ---- Virtual environments ----
+.venv/
+venv/
+env/
+ENV/
+
+# ---- Model / data artifacts (IA) ----
+models/
+*.onnx
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.bin
+*.npy
+*.npz
+
+# ---- Logs ----
+logs/
+*.log
+
+# ---- Kubernetes ----
+# (k8s/ est en general versionne : ne pas l'ignorer globalement, mais les
+#  fichiers de secrets eventuels.)
+k8s/*.secret.yaml
+k8s/*-secret.yaml
+
+# ---- OS / Editor ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

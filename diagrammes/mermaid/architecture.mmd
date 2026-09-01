@@ -1,0 +1,31 @@
+flowchart TB
+    subgraph Clients
+        F[Flutter App\nPortable / Tablette]
+        W[Admin Web\nDjango templates]
+    end
+
+    subgraph Backend["Backend - REST + JWT"]
+        API[API Express\n:4000\nauth, dashboard, trainings,\nmatches, players, notifications]
+    end
+
+    subgraph Admin["Administration"]
+        ADM[Django Admin API\n:8000\nfoottech_admin wsgi]
+    end
+
+    subgraph IA["Services IA"]
+        LINEUP[Lineup Recommendation Service\nFastAPI :8100\nweights + features]
+        INSIGHTS[AI Insights Service\nFastAPI :8300\ntrends / detect]
+    end
+
+    subgraph Data["Donnees"]
+        PG[(PostgreSQL 16\nschema platform)]
+        RD[(Redis 7\nsessions, rate-limit, cache)]
+    end
+
+    F -->|HTTPS| API
+    W -->|HTTPS| ADM
+    API --> RD
+    API --> PG
+    ADM --> PG
+    API -->|LINEUP_SERVICE_URL\ntimeout 5s| LINEUP
+    API -->|AI_INSIGHTS_SERVICE_URL\ntimeout 5s| INSIGHTS

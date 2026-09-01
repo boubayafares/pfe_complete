@@ -1,0 +1,121 @@
+@startuml
+!pragma layout smetana
+title FootTech - Gestion d'un Entraînement (Flux Complet)
+caption Création d'entraînement → assignation joueurs → présence → situations tactiques → fiche de séance
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+' ============================================================================
+' PARTICIPANTS
+' ============================================================================
+actor "Coach" as COACH <<HUMAIN>>
+actor "Adjoint" as ADJOINT <<HUMAIN>>
+
+' --- FLUTTER (VERT) ---
+participant "Flutter App\n(trainings feature)" as FLUTTER #2E8B57
+participant "Socket Service" as SOCKET #00695C
+
+' --- API (BLEU) ---
+participant "Trainings API\n(Express)" as TRAIN_API #1E88E5
+participant "Attendance API" as ATTEND_API #1976D2
+participant "Sheet API\n(fiche technique)" as SHEET_API #0D47A1
+
+' --- DB ---
+database "PostgreSQL" as PG #607D8B
+
+' ============================================================================
+' ÉTAPE 1 : CRÉATION DE L'ENTRAÎNEMENT
+' ============================================================================
+== 1. Création de l'entraînement ==
+
+COACH -> FLUTTER : saisit date, créneaux, lieu
+FLUTTER -> TRAIN_API : POST /trainings
+TRAIN_API -> PG : insert training (status=SCHEDULED)
+TRAIN_API --> FLUTTER : 201 { training }
+FLUTTER --> COACH : confirmation
+
+' Notifier les membres de l'équipe en temps réel
+TRAIN_API -> SOCKET : emit new_training (team)
+SOCKET --> FLUTTER : notification temps réel
+
+' ============================================================================
+' ÉTAPE 2 : ASSIGNATION DES JOUEURS (lié au planning)
+' ============================================================================
+== 2. Assignation des joueurs ==
+
+ADJOINT -> FLUTTER : sélectionne l'effectif prévu
+FLUTTER -> TRAIN_API : POST /trainings/:id/sheet (effectif)
+TRAIN_API -> PG : create training_sheet
+TRAIN_API --> FLUTTER : 200 { sheet }
+
+' Optionnel : relier une case du planning hebdo
+FLUTTER -> TRAIN_API : PUT /weekly-plannings/:id/slots (training_id)
+TRAIN_API -> PG : update weekly_planning_slots
+TRAIN_API --> FLUTTER : 200
+
+' ============================================================================
+' ÉTAPE 3 : MARQUAGE DE LA PRÉSENCE
+' ============================================================================
+== 3. Marquage de la présence (PRESENT / ABSENT / LATE / INJURED) ==
+
+COACH -> FLUTTER : liste les joueurs convoqués
+FLUTTER -> ATTEND_API : POST /attendance/training/:id (batch)
+ATTEND_API -> PG : upsert attendances
+ATTEND_API --> FLUTTER : 200 { attendances }
+FLUTTER --> COACH : mise à jour de la feuille de présence
+
+' ============================================================================
+' ÉTAPE 4 : AJOUT DES SITUATIONS
+' ============================================================================
+== 4. Ajout des situations (exercices) ==
+
+ADJOINT -> FLUTTER : ajoute une situation (titre, description, durées)
+FLUTTER -> SHEET_API : POST /trainings/:id/sheet/situations
+SHEET_API -> PG : insert training_situation (ordre)
+SHEET_API --> FLUTTER : 201 { situation }
+
+' Proposition d'exercice (workflow adjoint -> coach)
+ADJOINT -> FLUTTER : propose un exercice
+FLUTTER -> SHEET_API : POST /exercise-proposals (status=PENDING)
+SHEET_API -> PG : insert exercise_proposal
+SHEET_API --> FLUTTER : 201 { proposal }
+SHEET_API --> COACH : notifie (demande validation)
+COACH -> FLUTTER : valide / refuse
+FLUTTER -> SHEET_API : PATCH /exercise-proposals/:id/review
+SHEET_API --> FLUTTER : 200 { status }
+
+' ============================================================================
+' ÉTAPE 5 : DESSIN TACTIQUE (éditeur terrain)
+' ============================================================================
+== 5. Schémas tactiques (éditeur de terrain type TacticalPad) ==
+
+ADJOINT -> FLUTTER : dessine positions / flèches / formes
+FLUTTER -> SHEET_API : POST /trainings/situations/:id/drawings
+SHEET_API -> PG : save tactical_drawings (JSONB canvas)
+SHEET_API --> FLUTTER : 201 { drawing }
+FLUTTER --> ADJOINT : aperçu du schéma rendu
+
+' ============================================================================
+' ÉTAPE 6 : VALIDATION DE LA FICHE
+' ============================================================================
+== 6. Finalisation et clôture de la fiche d'entraînement ==
+
+COACH -> FLUTTER : relit objectifs + situations
+COACH -> FLUTTER : clôture la séance
+FLUTTER -> TRAIN_API : PATCH /trainings/:id (status=COMPLETED)
+TRAIN_API -> PG : update training status
+TRAIN_API --> FLUTTER : 200 { training fini }
+TRAIN_API -> SOCKET : emit training_completed
+SOCKET --> FLUTTER : confirmation équipe
+
+' Synthèse en fin de séance
+FLUTTER -> TRAIN_API : GET /trainings/:id/summary
+TRAIN_API -> PG : agrège feuille + présence + situations
+TRAIN_API --> FLUTTER : résumé complet (fiche)
+
+note over TRAIN_API, SHEET_API : La fiche d'entraînement regroupe objectifs, effectif,\nles situations ordonnées et leurs schémas tactiques
+
+@enduml

@@ -1,0 +1,45 @@
+# ==============================
+# foottech_admin_desktop - Java 21 / JavaFX / Maven
+# ==============================
+
+# ---- Maven build ----
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+
+# ---- IDE ----
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.classpath
+*.project
+.settings/
+.factorypath
+.classpath
+.project
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# ---- IntelliJ run/debug ----
+out/
+.idea_modules/
+
+# ---- Secrets ----
+.env
+.env.*
+!.env.example
+*.properties.local

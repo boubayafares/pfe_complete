@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lineup-recommendation-service
+  labels:
+    app: lineup-recommendation-service
+    tier: ai-microservice
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lineup-recommendation-service
+  template:
+    metadata:
+      labels:
+        app: lineup-recommendation-service
+        tier: ai-microservice
+    spec:
+      containers:
+        - name: lineup-recommendation-service
+          image: foottech/lineup-recommendation-service:latest
+          ports:
+            - containerPort: 8100
+          env:
+            - name: LINEUP_SVC_LOG_LEVEL
+              value: "info"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8100
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8100
+            initialDelaySeconds: 5
+            periodSeconds: 20
+          volumeMounts:
+            - name: calibrated-weights
+              mountPath: /app/app/infrastructure/persistence
+              readOnly: true
+      volumes:
+        - name: calibrated-weights
+          configMap:
+            name: lineup-weights-config
+            optional: true # absent tant qu'aucune calibration n'a été committée -> fallback ScoreWeights.default()

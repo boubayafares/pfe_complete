@@ -1,0 +1,134 @@
+@startuml
+!pragma layout smetana
+title FootTech - Gestion d'un Match (Flux Complet)
+caption Création match → alignement IA → suivi live (socket) → événements → évaluation post-match → recommandations IA
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+' ============================================================================
+' PARTICIPANTS
+' ============================================================================
+actor "Coach" as COACH <<HUMAIN>>
+actor "Adjoint" as ADJOINT <<HUMAIN>>
+actor "Joueur" as PLAYER <<HUMAIN>>
+
+' --- FLUTTER (VERT) ---
+participant "Flutter App\n(matches feature)" as FLUTTER #2E8B57
+participant "Socket Service" as SOCKET #00695C
+
+' --- API / SERVICES (BLEU / ORANGE) ---
+participant "Matches API\n(Express)" as MATCH_API #1E88E5
+participant "Lineup Service\n(FastAPI :8100)" as LINEUP #F57C00
+participant "AI Insights\n(FastAPI :8300)" as INSIGHTS #E65100
+
+' --- STOCKAGE ---
+database "PostgreSQL" as PG #607D8B
+database "Redis\n(cache)" as REDIS #B71C1C
+
+' ============================================================================
+' ÉTAPE 1 : CRÉATION DU MATCH
+' ============================================================================
+== 1. Création du match ==
+
+COACH -> FLUTTER : adversaire, date, lieu, formation
+FLUTTER -> MATCH_API : POST /matches
+MATCH_API -> PG : insert match (status=SCHEDULED)
+MATCH_API --> FLUTTER : 201 { match }
+MATCH_API -> SOCKET : emit match_created (team)
+SOCKET --> FLUTTER : notifie joueurs (convocation)
+
+' ============================================================================
+' ÉTAPE 2 : CALCUL DE L'ALIGNEMENT IA
+' ============================================================================
+== 2. Alignement recommandé par l'IA ==
+
+COACH -> FLUTTER : demande l'alignement recommandé
+FLUTTER -> MATCH_API : POST /matches/:id/ai-recommendation
+MATCH_API -> REDIS : check cache (scores récents)
+alt cache hit
+    REDIS --> MATCH_API : scores mis en cache
+else cache miss
+    MATCH_API -> LINEUP : calculer les scores (présence/perf/fatigue)
+    LINEUP -> REDIS : lire données fréquentes
+    LINEUP -> PG : lire stats joueurs
+    LINEUP --> MATCH_API : { presence_score, performance_score, fatigue_score, final_score }
+    MATCH_API -> REDIS : mettre en cache le résultat
+end
+MATCH_API -> PG : insert ai_lineup_recommendations
+MATCH_API --> FLUTTER : 200 { recommandations }
+FLUTTER --> COACH : liste triée titulaires / remplaçants
+
+COACH -> FLUTTER : ajuste manuellement la sélection
+FLUTTER -> MATCH_API : POST /matches/:id/lineups
+MATCH_API -> PG : save match_lineups (STARTER/SUB/...)
+MATCH_API --> FLUTTER : 200 { lineups }
+MATCH_API -> SOCKET : emit lineup_finalized (équipe)
+
+' ============================================================================
+' ÉTAPE 3 : SUIVI LIVE VIA SOCKET
+' ============================================================================
+== 3. Suivi live du match (Socket.io) ==
+
+ADJOINT -> FLUTTER : saisit un événement (but, carton, changement)
+FLUTTER -> MATCH_API : POST /matches/:id/events
+MATCH_API -> PG : insert match_event
+MATCH_API -> SOCKET : broadcast (event, minute, score)
+SOCKET --> FLUTTER : mise à jour live
+SOCKET --> PLAYER : score / événements en direct
+
+loop chaque événement pendant le match
+    ADJOINT -> FLUTTER : nouveau événement
+    FLUTTER -> MATCH_API : enregistre l'événement
+    MATCH_API -> SOCKET : broadcast temps réel
+    SOCKET --> FLUTTER : actualise score + timeline
+end
+
+' ============================================================================
+' ÉTAPE 4 : STATISTIQUES + FIN DE MATCH
+' ============================================================================
+== 4. Stats par joueur et fin de match ==
+
+ADJOINT -> FLUTTER : remplit les stats (minutes, buts, passes)
+FLUTTER -> MATCH_API : POST /matches/:id/stats
+MATCH_API -> PG : save match_player_stats
+MATCH_API --> FLUTTER : 200
+
+COACH -> FLUTTER : clôture le match
+FLUTTER -> MATCH_API : PATCH /matches/:id (status=FINISHED)
+MATCH_API -> PG : update match (scores finaux)
+MATCH_API --> FLUTTER : 200 { match fini }
+MATCH_API -> SOCKET : emit match_finished
+
+' ============================================================================
+' ÉTAPE 5 : ÉVALUATION POST-MATCH
+' ============================================================================
+== 5. Évaluation post-match ==
+
+COACH -> FLUTTER : note chaque joueur (0 à 10) + commentaire
+FLUTTER -> MATCH_API : POST /matches/:id/evaluations
+MATCH_API -> PG : save match_evaluations
+MATCH_API --> FLUTTER : 200 { évaluations }
+
+' ============================================================================
+' ÉTAPE 6 : RAPPORT + RECOMMANDATIONS IA
+' ============================================================================
+== 6. Rapport de match et recommandations IA ==
+
+COACH -> FLUTTER : demande le rapport
+FLUTTER -> MATCH_API : POST /matches/:id/report
+MATCH_API -> PG : insert match_report (pdf_url)
+MATCH_API --> FLUTTER : 200 { rapport PDF }
+
+FLUTTER -> MATCH_API : POST /matches/:id/ai-analysis
+MATCH_API -> INSIGHTS : analyser tendances / clustering / ton
+INSIGHTS --> MATCH_API : insights
+MATCH_API -> PG : mettre à jour les insights
+MATCH_API --> FLUTTER : recommandations post-match
+SOCKET --> FLUTTER : notify "Rapport disponible" (type REPORT_AVAILABLE)
+
+note over MATCH_API, SOCKET : Le suivi live repose sur Socket.io.\nRedis sert de cache pour accélérer les lectures de scores IA.
+
+@enduml

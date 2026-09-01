@@ -1,0 +1,91 @@
+@startuml
+!pragma layout smetana
+title FootTech - Flux de Notification (Push, SMS/OTP, In-App)
+caption Diffusion des notifications : Firebase push, Twilio SMS pour OTP, notifications in-app et diffusion (broadcast)
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+' ============================================================================
+' PARTICIPANTS
+' ============================================================================
+actor "Coach" as COACH <<HUMAIN>>
+actor "Adjoint" as ADJOINT <<HUMAIN>>
+actor "Joueur" as PLAYER <<HUMAIN>>
+
+' --- FLUTTER (VERT) ---
+participant "Flutter App\n(notifications)" as FLUTTER #2E8B57
+participant "FCM client\n(device)" as FCM_CLIENT #00695C
+
+' --- API (BLEU) ---
+participant "Notifications API\n(Express)" as NOTIF_API #1E88E5
+participant "Socket Server" as SOCKET #1976D2
+
+' --- EXTERNE (ROUGE) ---
+participant "Firebase Cloud\nMessaging" as FIREBASE #E53935
+participant "Twilio\n(SMS)" as TWILIO #F4511E
+
+' --- DB ---
+database "PostgreSQL" as PG #607D8B
+
+' ============================================================================
+' PARTIE 1 : PUSH NOTIFICATION (FIREBASE)
+' ============================================================================
+== 1. Notification push (Firebase Cloud Messaging) ==
+
+COACH -> NOTIF_API : déclenche une notification (ex: nouveau match)
+NOTIF_API -> PG : enregistre notification + récupère push_tokens
+NOTIF_API -> FIREBASE : send (tokens FCM, titre, message)
+FIREBASE -> FCM_CLIENT : remise push au device
+FCM_CLIENT --> FLUTTER : affiche la notification / badge
+FCM_CLIENT --> NOTIF_API : ack / update is_read
+
+' ============================================================================
+' PARTIE 2 : SMS / OTP (TWILIO)
+' ============================================================================
+== 2. Envoi de SMS / OTP (Twilio) ==
+
+' Activation joueur par code
+PLAYER -> NOTIF_API : demande activation (OTP)
+NOTIF_API -> PG : crée activation_code(expires_at)
+NOTIF_API -> TWILIO : envoi SMS OTP
+TWILIO --> PLAYER : SMS reçu (code 6 chiffres)
+PLAYER -> NOTIF_API : vérifie le code OTP
+NOTIF_API -> PG : marque code utilisé + active compte
+
+' ============================================================================
+' PARTIE 3 : NOTIFICATION IN-APP (temps réel)
+' ============================================================================
+== 3. Notification in-app (Socket.io temps réel) ==
+
+ADJOINT -> NOTIF_API : événement (ex: présence mise à jour)
+NOTIF_API -> PG : insère notification (user_id)
+NOTIF_API -> SOCKET : emit notification (type, payload)
+SOCKET --> FLUTTER : réception temps réel
+FLUTTER --> PLAYER : toast in-app + mise à jour liste
+FLUTTER -> NOTIF_API : PATCH /notifications/:id/read
+NOTIF_API -> PG : update is_read=true
+
+' ============================================================================
+' PARTIE 4 : BROADCAST À L'ÉQUIPE
+' ============================================================================
+== 4. Diffusion (broadcast) à toute l'équipe ==
+
+COACH -> NOTIF_API : POST /notifications/broadcast
+NOTIF_API -> PG : récupère tous les membres (push_tokens)
+NOTIF_API -> PG : insère notification pour chaque user
+
+' Push batch
+NOTIF_API -> FIREBASE : multicast (tokens équipe)
+FIREBASE -> FCM_CLIENT : remise push à tous les devices
+SOCKET --> FLUTTER : broadcast in-app (toute l'équipe)
+
+' En option SMS de masse
+NOTIF_API -> TWILIO : SMS groupé (convocation urgente)
+TWILIO --> PLAYER : SMS reçu
+
+note over NOTIF_API, PG : Types de notifications :\nMATCH_CONVOCATION, NEW_TRAINING, REPORT_AVAILABLE,\nPLANNING_CHANGE, OTHER
+
+@enduml

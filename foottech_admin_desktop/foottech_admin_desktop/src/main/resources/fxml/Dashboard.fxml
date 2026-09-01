@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" styleClass="view-root" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.foottech.admin.controller.DashboardController">
+    <VBox spacing="20">
+        <padding><Insets top="28" right="32" bottom="28" left="32" /></padding>
+
+        <Label text="Tableau de bord" styleClass="view-title" />
+        <Label text="Vue d'ensemble de la plateforme FootTech" styleClass="view-subtitle" />
+
+        <ProgressIndicator fx:id="loadingIndicator" maxWidth="32" maxHeight="32" />
+
+        <VBox fx:id="content" spacing="24" visible="false" managed="false">
+            <HBox fx:id="statCardsRow" spacing="16" />
+
+            <VBox spacing="8" styleClass="section-card">
+                <padding><Insets top="16" right="16" bottom="16" left="16" /></padding>
+                <Label text="Utilisateurs par rôle" styleClass="section-title" />
+                <VBox fx:id="roleBreakdownBox" spacing="6" />
+            </VBox>
+        </VBox>
+    </VBox>
+</ScrollPane>

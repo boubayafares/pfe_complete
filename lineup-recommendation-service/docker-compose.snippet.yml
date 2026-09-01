@@ -1,0 +1,24 @@
+# Extrait à fusionner dans le docker-compose.yml principal du monorepo
+# FootTech, aux côtés des autres microservices IA (detection/tracking/ocr)
+# et du backend Express.
+
+services:
+  lineup-recommendation-service:
+    build:
+      context: ./lineup-recommendation-service
+    ports:
+      - "8100:8100"
+    environment:
+      LINEUP_SVC_LOG_LEVEL: info
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8100/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+# Côté backend Express, ajouter dans le service `api`:
+#   environment:
+#     LINEUP_SERVICE_URL: http://lineup-recommendation-service:8100
+#   depends_on:
+#     - lineup-recommendation-service

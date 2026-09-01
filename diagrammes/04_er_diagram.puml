@@ -1,0 +1,443 @@
+@startuml
+!pragma layout smetana
+title FootTech - Diagramme Entité-Relation (Modèle de Données PostgreSQL)
+caption Schéma de la base PostgreSQL (schema "platform") - MPD v2
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+' ============================================================================
+' STEREOTYPES / COULEURS DES MODULES
+' ============================================================================
+skinparam entity {
+    BackgroundColor #ECEFF1
+    BorderColor #424242
+    FontColor #212121
+}
+
+skinparam entity<<Auth>> {
+    BackgroundColor #FFEBEE
+    BorderColor #B71C1C
+}
+skinparam entity<<Team>> {
+    BackgroundColor #E8F5FF
+    BorderColor #0D47A1
+}
+skinparam entity<<Player>> {
+    BackgroundColor #E8F5E9
+    BorderColor #1B5E20
+}
+skinparam entity<<Planning>> {
+    BackgroundColor #FFF8E1
+    BorderColor #E65100
+}
+skinparam entity<<Training>> {
+    BackgroundColor #F3E5F5
+    BorderColor #4A148C
+}
+skinparam entity<<Match>> {
+    BackgroundColor #E1F5FE
+    BorderColor #01579B
+}
+skinparam entity<<Notification>> {
+    BackgroundColor #FFF3E0
+    BorderColor #BF360C
+}
+skinparam entity<<Calendar>> {
+    BackgroundColor #E0F7FA
+    BorderColor #006064
+}
+
+' ============================================================================
+' AUTHENTIFICATION / COMPTES
+' ============================================================================
+entity "users" as USERS <<Auth>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    first_name : VARCHAR
+    last_name : VARCHAR
+    phone : VARCHAR
+    email : VARCHAR
+    password_hash : TEXT
+    account_status : enum[ACTIVE,INACTIVE,BLOCKED]
+}
+
+entity "roles" as ROLES <<Auth>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    name : VARCHAR [COACH|ADJOINT|JOUEUR]
+}
+
+entity "user_roles" as USER_ROLES <<Auth>> {
+    * user_id : BIGINT <<FK>>
+    * role_id : BIGINT <<FK>>
+}
+
+entity "activation_codes" as ACT_CODES <<Auth>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    user_id : BIGINT <<FK>>
+    code : VARCHAR
+    channel : enum[SMS,WHATSAPP]
+    expires_at : TIMESTAMPTZ
+}
+
+entity "refresh_tokens" as REF_TOKENS <<Auth>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    user_id : BIGINT <<FK>>
+    token_hash : TEXT
+    expires_at : TIMESTAMPTZ
+}
+
+entity "push_tokens" as PUSH_TOKENS <<Auth>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    user_id : BIGINT <<FK>>
+    token : TEXT
+    platform : VARCHAR
+}
+
+' ============================================================================
+' SEASONS / TEAMS
+' ============================================================================
+entity "seasons" as SEASONS <<Team>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    name : VARCHAR (ex: 2024/2025)
+    start_date : DATE
+    end_date : DATE
+    is_current : BOOLEAN
+}
+
+entity "teams" as TEAMS <<Team>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    coach_id : BIGINT <<FK>>
+    name : VARCHAR
+    category : VARCHAR
+    logo : VARCHAR
+}
+
+entity "team_staff" as TEAM_STAFF <<Team>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    team_id : BIGINT <<FK>>
+    adjoint_id : BIGINT <<FK>>
+}
+
+' ============================================================================
+' JOUEURS
+' ============================================================================
+entity "players" as PLAYERS <<Player>> {
+    * id : BIGINT <<PK,FK>>
+    --
+    team_id : BIGINT <<FK>>
+    date_naissance : DATE
+    taille_cm : NUMERIC
+    poids_kg : NUMERIC
+    poste_principal : VARCHAR
+    poste_secondaire : VARCHAR
+    pied_fort : enum[DROIT,GAUCHE,AMBIDEXTRE]
+    numero_maillot : INT
+}
+
+entity "guardians" as GUARDIANS <<Player>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    player_id : BIGINT <<FK>>
+    relation : enum[PERE,MERE,TUTEUR]
+    nom : VARCHAR
+    prenom : VARCHAR
+    tel1 : VARCHAR
+    tel2 : VARCHAR
+    email : VARCHAR
+}
+
+entity "player_addresses" as PLAYER_ADDR <<Player>> {
+    * player_id : BIGINT <<PK,FK>>
+    --
+    adresse_complete : TEXT
+    distance_club_km : NUMERIC
+    moyen_transport : VARCHAR
+    duree_trajet_min : INT
+}
+
+entity "school_info" as PLAYER_SCHOOL <<Player>> {
+    * player_id : BIGINT <<PK,FK>>
+    --
+    etablissement : VARCHAR
+    classe : VARCHAR
+    niveau_scolaire : enum
+}
+
+entity "player_season_profiles" as PLAYER_SEASON <<Player>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    player_id : BIGINT <<FK>>
+    season : VARCHAR
+    club_niveau : VARCHAR
+    poids_kg / taille_cm : NUMERIC
+    poste1 / poste2 : VARCHAR
+    points_forts / a_ameliorer : TEXT
+}
+
+entity "injuries" as INJURIES <<Player>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    player_id : BIGINT <<FK>>
+    date_blessure : DATE
+    description : TEXT
+    duree_indisponibilite_jours : INT
+    date_retour : DATE
+}
+
+' ============================================================================
+' PLANNING HEBDOMADAIRE
+' ============================================================================
+entity "weekly_plannings" as PLANNINGS <<Planning>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    team_id : BIGINT <<FK>>
+    season_id : BIGINT <<FK>>
+    date_debut / date_fin : DATE
+    nombre_seances : INT
+    intensite / volume : VARCHAR
+    match_prevu : BOOLEAN
+}
+
+entity "weekly_planning_slots" as PLANNING_SLOTS <<Planning>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    weekly_planning_id : BIGINT <<FK>>
+    jour : DATE
+    moment : enum[MATIN,APRES_MIDI,SOIR]
+    training_id : BIGINT <<FK>>
+}
+
+' ============================================================================
+' ENTRAINEMENT / FICHE TECHNIQUE
+' ============================================================================
+entity "trainings" as TRAININGS <<Training>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    team_id : BIGINT <<FK>>
+    date : DATE
+    start_time / end_time : TIME
+    location : VARCHAR
+    status : enum[SCHEDULED,COMPLETED,CANCELLED]
+    created_by : BIGINT <<FK>>
+}
+
+entity "training_sheets" as TRAINING_SHEETS <<Training>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    training_id : BIGINT <<FK>>
+    objectifs : TEXT
+    effectif : VARCHAR
+    created_by : BIGINT <<FK>>
+}
+
+entity "training_situations" as TRAINING_SITUATIONS <<Training>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    training_sheet_id : BIGINT <<FK>>
+    ordre : INT
+    titre : VARCHAR
+    description : TEXT
+    duree_travail / recuperation : VARCHAR
+    criteres_reussite : TEXT[]
+}
+
+entity "situation_drawings" as TACTICAL_DRAWINGS <<Training>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    training_situation_id : BIGINT <<FK>>
+    match_id : BIGINT <<FK>>
+    canvas_data : JSONB
+    created_by : BIGINT
+}
+
+entity "exercise_proposals" as EXERCISE_PROPOSALS <<Training>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    training_id : BIGINT <<FK>>
+    proposed_by : BIGINT <<FK>>
+    titre : VARCHAR
+    status : enum[PENDING,VALIDATED,REJECTED]
+    reviewed_by : BIGINT
+}
+
+entity "attendance" as ATTENDANCES <<Training>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    training_id : BIGINT <<FK>>
+    player_id : BIGINT <<FK>>
+    status : enum[PRESENT,ABSENT,LATE,INJURED]
+    comment : TEXT
+}
+
+' ============================================================================
+' MATCHS
+' ============================================================================
+entity "matches" as MATCHES <<Match>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    team_id : BIGINT <<FK>>
+    season_id : BIGINT <<FK>>
+    adversaire : VARCHAR
+    date_heure : TIMESTAMPTZ
+    is_home : BOOLEAN
+    formation : VARCHAR
+    home_score / away_score : INT
+    match_status : enum[SCHEDULED,LIVE,FINISHED,...]
+}
+
+entity "match_lineups" as MATCH_LINEUPS <<Match>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    match_id : BIGINT <<FK>>
+    player_id : BIGINT <<FK>>
+    status : enum[STARTER,SUBSTITUTE,NOT_SELECTED]
+    position_terrain : VARCHAR
+}
+
+entity "match_events" as MATCH_EVENTS <<Match>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    match_id : BIGINT <<FK>>
+    event_type : enum[GOAL,ASSIST,YELLOW_RED,SUBST,INJURY]
+    minute : INT
+    player_id : BIGINT <<FK>>
+    related_player_id : BIGINT
+}
+
+entity "match_stats" as MATCH_STATS <<Match>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    match_id : BIGINT <<FK>>
+    player_id : BIGINT <<FK>>
+    minutes_played : INT
+    goals / assists : INT
+    yellow / red_cards : INT
+}
+
+entity "match_evaluations" as MATCH_EVALS <<Match>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    match_id : BIGINT <<FK>>
+    player_id : BIGINT <<FK>>
+    note : NUMERIC (0-10)
+    commentaire : TEXT
+    evaluated_by : BIGINT <<FK>>
+}
+
+entity "match_reports" as MATCH_REPORTS <<Match>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    match_id : BIGINT <<FK>>
+    pdf_url : VARCHAR
+}
+
+entity "ai_lineup_recommendations" as AI_LINEUP <<Match>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    match_id : BIGINT <<FK>>
+    player_id : BIGINT <<FK>>
+    presence_score / performance_score : NUMERIC
+    fatigue_score / final_score : NUMERIC
+    recommended_status : enum
+}
+
+' ============================================================================
+' NOTIFICATIONS / CALENDRIER
+' ============================================================================
+entity "notifications" as NOTIFICATIONS <<Notification>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    user_id : BIGINT <<FK>>
+    type : enum[MATCH_CONVOCATION,NEW_TRAINING,...]
+    title / message : VARCHAR/TEXT
+    related_entity_type / id : VARCHAR/BIGINT
+    is_read : BOOLEAN
+}
+
+entity "calendar_events" as CALENDAR_EVENTS <<Calendar>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    team_id : BIGINT <<FK>>
+    title : VARCHAR
+    start_time / end_time : TIMESTAMPTZ
+    all_day : BOOLEAN
+    location / color : VARCHAR
+    created_by : BIGINT
+}
+
+' ============================================================================
+' RELATIONS
+' ============================================================================
+
+' Auth
+USERS ||--o{ USER_ROLES
+ROLES ||--o{ USER_ROLES
+USERS ||--o{ ACT_CODES : "active par OTP"
+USERS ||--o{ REF_TOKENS : "refresh tokens"
+USERS ||--o{ PUSH_TOKENS : "push FCM"
+
+' Teams
+USERS ||--o{ TEAMS : "coach de"
+USERS ||--o{ TEAM_STAFF : "adjoint"
+TEAMS ||--o{ TEAM_STAFF
+TEAMS ||--o{ PLAYERS : "compose"
+SEASONS ||..o{ TEAMS
+
+' Players
+USERS ||--|| PLAYERS : "profil joueur"
+PLAYERS ||--o{ GUARDIANS
+PLAYERS ||--|| PLAYER_ADDR : "1-1"
+PLAYERS ||--|| PLAYER_SCHOOL : "1-1"
+PLAYERS ||--o{ PLAYER_SEASON : "evolution"
+PLAYERS ||--o{ INJURIES : "blessures"
+
+' Planning
+TEAMS ||--o{ PLANNINGS
+SEASONS ||--o{ PLANNINGS
+PLANNINGS ||--o{ PLANNING_SLOTS
+TRAININGS ||--o{ PLANNING_SLOTS : "relie une case"
+
+' Trainings
+TEAMS ||--o{ TRAININGS
+USERS ||--o{ TRAININGS : "cree"
+TRAININGS ||--|| TRAINING_SHEETS : "1-1 fiche"
+TRAINING_SHEETS ||--o{ TRAINING_SITUATIONS
+TRAINING_SITUATIONS ||--o{ TACTICAL_DRAWINGS
+TRAININGS ||--o{ EXERCISE_PROPOSALS
+TRAININGS ||--o{ ATTENDANCES
+PLAYERS ||--o{ ATTENDANCES
+TRAININGS ||--o{ TRAINING_SHEETS
+
+' Matches
+TEAMS ||--o{ MATCHES
+SEASONS ||--o{ MATCHES
+MATCHES ||--o{ MATCH_LINEUPS
+PLAYERS ||--o{ MATCH_LINEUPS
+MATCHES ||--o{ TACTICAL_DRAWINGS : "schema match"
+MATCHES ||--o{ MATCH_EVENTS
+PLAYERS ||--o{ MATCH_EVENTS
+MATCHES ||--o{ MATCH_STATS
+PLAYERS ||--o{ MATCH_STATS
+MATCHES ||--o{ MATCH_EVALS
+PLAYERS ||--o{ MATCH_EVALS
+USERS ||--o{ MATCH_EVALS : "evalue"
+MATCHES ||--|| MATCH_REPORTS
+MATCHES ||--o{ AI_LINEUP
+PLAYERS ||--o{ AI_LINEUP
+
+' Notifications / Calendrier
+USERS ||--o{ NOTIFICATIONS
+TEAMS ||--o{ CALENDAR_EVENTS
+USERS ||--o{ CALENDAR_EVENTS : "cree"
+
+@enduml

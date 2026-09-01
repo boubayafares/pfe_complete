@@ -1,0 +1,26 @@
+flowchart TB
+    subgraph Dev["Developpement"]
+        GH[GitHub / GitLab\nCI]
+    end
+
+    GH --> BUILD[Build images\napi / admin-api / ai-insights / lineup]
+    BUILD --> TEST[Tests\nvitest 26 / pytest lineup 10\npytest ai-insights / postman]
+
+    subgraph Prod["Production (Docker Compose)"]
+        PG[(postgres:16)]
+        RD[(redis:7)]
+        API2[api :4000]
+        ADM2[admin-api :8000\nmigrate au demarrage]
+        LI2[lineup :8100]
+        AI2[ai-insights :8300]
+        NG[Reverse proxy / CORS]
+    end
+
+    TEST -->|docker compose up| Prod
+    API2 --> PG
+    ADM2 -->|migrate| PG
+    API2 --> RD
+    API2 -->|LINEUP_SERVICE_URL| LI2
+    API2 -->|AI_INSIGHTS_SERVICE_URL| AI2
+    NG --> API2
+    NG --> ADM2

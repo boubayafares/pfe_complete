@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="16" styleClass="splash-root" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
+    <padding><Insets top="40" right="40" bottom="40" left="40" /></padding>
+    <Label text="⚽ FootTech Admin" styleClass="splash-title" />
+    <ProgressIndicator progress="-1" />
+    <Label text="Vérification de la session..." styleClass="splash-subtitle" />
+</VBox>

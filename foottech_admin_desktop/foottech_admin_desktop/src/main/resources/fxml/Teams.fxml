@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="16" styleClass="view-root" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.foottech.admin.controller.TeamsController">
+    <padding><Insets top="28" right="32" bottom="28" left="32" /></padding>
+
+    <Label text="Équipes" styleClass="view-title" />
+    <Label text="Tous les clubs inscrits sur la plateforme" styleClass="view-subtitle" />
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <TextField fx:id="searchField" promptText="Rechercher une équipe ou un coach..." HBox.hgrow="ALWAYS" />
+        <ChoiceBox fx:id="statusFilter" />
+        <Button text="Rechercher" onAction="#applyFilters" styleClass="primary-button" />
+    </HBox>
+
+    <TableView fx:id="teamsTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colNom" text="Équipe" prefWidth="180" />
+            <TableColumn fx:id="colCategorie" text="Catégorie" prefWidth="110" />
+            <TableColumn fx:id="colSaison" text="Saison" prefWidth="100" />
+            <TableColumn fx:id="colCoach" text="Coach" prefWidth="180" />
+            <TableColumn fx:id="colJoueurs" text="Joueurs" prefWidth="80" />
+            <TableColumn fx:id="colStatut" text="Statut" prefWidth="110" />
+            <TableColumn fx:id="colActions" text="Action" prefWidth="140" />
+        </columns>
+    </TableView>
+</VBox>

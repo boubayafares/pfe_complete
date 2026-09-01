@@ -1,0 +1,143 @@
+@startuml
+!pragma layout smetana
+title FootTech - Diagramme de Flux de Données (Data Flow Diagram)
+caption Parcours des données à travers le système : de la saisie mobile jusqu'aux services IA et au stockage
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+' ============================================================================
+' COULEURS PAR COUCHE
+' ============================================================================
+skinparam actor {
+    BackgroundColor #FAFAFA
+}
+skinparam component {
+    BackgroundColor #EEEEEE
+    BorderColor #616161
+}
+skinparam component<<Frontend>> {
+    BackgroundColor #2E8B57
+    BorderColor #1F5C3D
+    FontColor #FFFFFF
+}
+skinparam component<<Backend>> {
+    BackgroundColor #1E88E5
+    BorderColor #0D47A1
+    FontColor #FFFFFF
+}
+skinparam component<<AI>> {
+    BackgroundColor #F57C00
+    BorderColor #E65100
+    FontColor #FFFFFF
+}
+skinparam component<<External>> {
+    BackgroundColor #E53935
+    BorderColor #B71C1C
+    FontColor #FFFFFF
+}
+skinparam database {
+    BackgroundColor #607D8B
+    BorderColor #37474F
+    FontColor #FFFFFF
+}
+
+' ============================================================================
+' ACTEURS EXTERNES
+' ============================================================================
+actor "Utilisateurs\n(Coach / Adjoint / Joueur)" as USERS
+actor "Admin\n(plateforme)" as ADMIN
+
+' ============================================================================
+' COUCHE PRÉSENTATION (FRONTEND)
+' ============================================================================
+component "Flutter App\n(écrans + Riverpod)" as FLUTTER <<Frontend>>
+component "JavaFX Desktop\n(Admin)" as JAVAFX <<Frontend>>
+
+' ============================================================================
+' COUCHE APPLICATION (BACKEND)
+' ============================================================================
+component "Express API\n(port 4000)" as EXPRESS <<Backend>>
+component "Django + DRF\n(port 8000)" as DJANGO <<Backend>>
+component "Socket.io\nServer" as SOCKET <<Backend>>
+
+' ============================================================================
+' SERVICES IA / EXTERNES
+' ============================================================================
+component "AI Insights\n(:8300)" as AI <<AI>>
+component "Lineup Service\n(:8100)" as RECO <<AI>>
+component "Firebase\npush" as FCM <<External>>
+component "Twilio\n(SMS/OTP)" as TWILIO <<External>>
+
+' ============================================================================
+' STOCKAGE
+' ============================================================================
+database "Redis\n(cache)" as REDIS
+database "PostgreSQL\n(platform)" as PG
+database "SQLite\n(local)" as LOCALDB
+
+' ============================================================================
+' FLUX DE DONNÉES
+' ============================================================================
+
+' 1) Entrée utilisateur -> Frontend
+USERS -> FLUTTER : "saisie (données structurées)"
+USERS -> FLUTTER : "requêtes"
+
+' 2) Frontend -> API
+FLUTTER -> EXPRESS : "REST + JWT (Dio)"
+FLUTTER -> SOCKET : "WebSocket (live events)"
+
+' 3) API -> données
+EXPRESS -> PG : "CRUD / requêtes SQL"
+EXPRESS -> REDIS : "cache (lecture/écriture)"
+
+' 4) API -> services IA (données enrichies)
+EXPRESS -> AI : "texte / stats pour analyse"
+EXPRESS -> RECO : "stats joueurs pour scoring"
+
+' 5) Services IA -> cache/stockage
+AI -> REDIS : "résultats analysés (cache)"
+RECO -> REDIS : "scores (cache)"
+AI -> PG : "persiste insights"
+RECO -> PG : "persiste ai_lineup_recommendations"
+RECO -> PG : "lit stats joueurs"
+
+' 6) Notifications
+EXPRESS -> FCM : "push payload (tokens)"
+EXPRESS -> TWILIO : "SMS OTP"
+SOCKET -> FLUTTER : "événements temps réel"
+FCM -> FLUTTER : "push notification"
+TWILIO -> USERS : "SMS reçu"
+SOCKET -> EXPRESS : "événements entrants réinjectés"
+
+' 7) Données locales device
+FLUTTER -> LOCALDB : "cache SQLite hors-ligne"
+
+' 8) Admin desktop + back-office
+ADMIN -> JAVAFX : "actions admin"
+JAVAFX -> DJANGO : "REST + JWT"
+DJANGO -> PG : "CRUD administré (modération, audit)"
+
+' ============================================================================
+' INVERSES / TELECHARGEMENT
+' ============================================================================
+EXPRESS --> FLUTTER : "réponses (JSON) + erreurs"
+FLUTTER --> USERS : "affichage / feedback"
+PG --> EXPRESS : "résultats de requêtes"
+
+' ============================================================================
+' NOTE SUR LE FLUX TYPE
+' ============================================================================
+note right of EXPRESS
+  Flux type d'un match live :\n
+  1. Adjoint saisit un événement\n
+  2. Express valide + écrit dans PostgreSQL\n
+  3. Socket.io diffuse à toute l'équipe\n
+  4. L'IA consomme les stats pour recommandations\n
+  5. Les résultats IA sont mis en cache Redis
+end note
+
+@enduml

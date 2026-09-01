@@ -1,0 +1,97 @@
+@startuml
+!pragma layout smetana
+title FootTech - Pipeline CI/CD (GitLab CI)
+caption Pipeline d'intégration et de déploiement continus : build, test, image Docker, push, déploiement
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+' ============================================================================
+' COULEURS PAR ÉTAPE
+' ============================================================================
+skinparam rectangle {
+    BackgroundColor #FAFAFA
+    BorderColor #BDBDBD
+    FontColor #212121
+}
+skinparam rectangle<<Build>> {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+}
+skinparam rectangle<<Test>> {
+    BackgroundColor #E8F5E9
+    BorderColor #2E7D32
+}
+skinparam rectangle<<Docker>> {
+    BackgroundColor #FFF3E0
+    BorderColor #E65100
+}
+skinparam rectangle<<Deploy>> {
+    BackgroundColor #FCE4EC
+    BorderColor #C2185B
+}
+
+' ============================================================================
+' ÉTAPES DU PIPELINE
+' ============================================================================
+
+' --- 1. BUILD ---
+package "Stage : build" {
+    rectangle "backend:build\nnode:22-alpine\nnpm ci + npm run build" as B_BACK <<Build>>
+    rectangle "admin:build\npython:3.12-slim\npip install + manage.py check" as B_ADMIN <<Build>>
+    rectangle "flutter:build\ncirruslabs/flutter\npub get + analyze + test\nbuild apk --debug" as B_FLUTTER <<Build>>
+}
+
+' --- 2. TEST ---
+package "Stage : test" {
+    rectangle "backend:test\nnode:22-alpine\ndeps: postgres:16 + redis:7\n(npm run build)" as T_BACK <<Test>>
+    rectangle "ai-insights:test\npython:3.12-slim\npytest -v" as T_AI <<Test>>
+    rectangle "lineup-service:test\npython:3.12-slim\npytest -v" as T_RECO <<Test>>
+}
+
+' --- 3. DOCKER ---
+package "Stage : docker" {
+    rectangle "docker:api\nbuild+push\n$CI_REGISTRY_IMAGE/api" as D_API <<Docker>>
+    rectangle "docker:admin\nbuild+push\n$CI_REGISTRY_IMAGE/admin-api" as D_ADMIN <<Docker>>
+    rectangle "docker:ai-insights\nbuild+push\n.../ai-insights" as D_AI <<Docker>>
+    rectangle "docker:lineup\nbuild+push\n.../lineup-service" as D_RECO <<Docker>>
+}
+
+' --- 4. DEPLOY ---
+package "Stage : deploy" {
+    rectangle "deploy:production\nalpine (+ openssh)\nssh → docker compose pull\n&& up -d (manuel)\nmain branch only" as DEPLOY <<Deploy>>
+}
+
+' ============================================================================
+' FLUX (bout en bout)
+' ============================================================================
+B_BACK --> T_BACK : "artifacts (dist/)"
+T_BACK --> D_API
+T_AI --> D_AI
+T_RECO --> D_RECO
+B_ADMIN --> D_ADMIN
+B_FLUTTER --> D_API : "(app build déployée séparément via store/APK)"
+
+D_API --> DEPLOY
+D_ADMIN --> DEPLOY
+D_AI --> DEPLOY
+D_RECO --> DEPLOY
+
+' ============================================================================
+' DÉPENDANCES / CONDITIONS
+' ============================================================================
+note bottom of DEPLOY
+  Déploiement manuel (when: manual) réservé sur la branche main.\n
+  Environment: production (url: https://foottech.example.com)\n
+  branches: docker:* only main/develop ; deploy only main.
+end note
+
+' Des services de test et de build courent avec des caches
+note top of B_BACK : "npm cache key: backend-{ref}"
+note top of T_BACK : "services: postgres:16-alpine, redis:7-alpine"
+note bottom of T_AI : "pytest -v"
+note bottom of T_RECO : "pytest -v (requirements-runtime)"
+
+@enduml

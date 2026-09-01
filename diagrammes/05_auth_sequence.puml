@@ -1,0 +1,103 @@
+@startuml
+!pragma layout smetana
+title FootTech - Séquence d'Authentification (Flux d'Auth)
+caption Parcours complet : enregistrement coach, login, JWT, refresh, OTP joueur, authentification biométrique
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+' ============================================================================
+' PARTICIPANTS AVEC COULEURS
+' ============================================================================
+actor "Coach / Adjoint" as USER <<HUMAIN>>
+actor "Joueur" as PLAYER <<HUMAIN>>
+
+' --- FLUTTER (VERT) ---
+participant "Flutter App\n(auth feature)" as FLUTTER #2E8B57
+participant "Token Storage\n(secure storage)" as TOKEN #00695C
+participant "Biometric\n(Local Auth)" as BIO #004D40
+
+' --- API (BLEU) ---
+participant "AuthService\n(Express)" as AUTH #1E88E5
+participant "JWT Manager" as JWT #0D47A1
+
+' --- EXTERNE (ROUGE) ---
+participant "Twilio\n(SMS)" as TWILIO #E53935
+
+' --- DB ---
+database "PostgreSQL" as PG #607D8B
+
+' ============================================================================
+' PARTIE 1 : ENREGISTREMENT + LOGIN (Coach / Adjoint)
+' ============================================================================
+== 1. Enregistrement et connexion (Coach / Adjoint) ==
+
+USER -> FLUTTER : saisit nom, email, mot de passe
+FLUTTER -> AUTH : POST /auth/register
+AUTH -> PG : créer user (role coach/adjoint)
+AUTH --> FLUTTER : 201 { user, message }
+FLUTTER --> USER : confirmation
+
+USER -> FLUTTER : email + mot de passe
+FLUTTER -> AUTH : POST /auth/login
+AUTH -> PG : vérifier credentials (bcrypt)
+AUTH -> JWT : signer { access, refresh }
+JWT --> AUTH : tokens signés
+AUTH --> FLUTTER : 200 { accessToken, refreshToken }
+FLUTTER -> TOKEN : stocke access + refresh (sécurisé)
+FLUTTER --> USER : session ouverte (dashboard)
+
+' ============================================================================
+' PARTIE 2 : FLUX REFRESH TOKEN
+' ============================================================================
+== 2. Renouvellement de session (refresh token) ==
+
+USER -> FLUTTER : utilise l'app (token expiré)
+FLUTTER -> AUTH : POST /auth/refresh (refresh token)
+AUTH -> PG : vérifier token_hash + non révoqué
+AUTH -> JWT : signer nouveaux tokens
+AUTH --> FLUTTER : 200 { new access, new refresh }
+FLUTTER -> TOKEN : rotation des tokens
+FLUTTER -> AUTH : retry requête initiale avec nouveau access
+
+' ============================================================================
+' PARTIE 3 : ACTIVATION JOUEUR PAR OTP
+' ============================================================================
+== 3. Activation d'un compte joueur via OTP (Twilio SMS) ==
+
+actor participant ordering
+
+PLAYER -> FLUTTER : saisit son numéro de téléphone
+FLUTTER -> AUTH : POST /auth/otp/request (phone)
+AUTH -> PG : créer user (status INACTIVE) + activation_code
+AUTH -> TWILIO : envoyer SMS avec code OTP
+TWILIO --> PLAYER : SMS recu (code à 6 chiffres)
+PLAYER -> FLUTTER : saisit le code OTP
+FLUTTER -> AUTH : POST /auth/otp/verify (code)
+AUTH -> PG : vérifier code + expiration + used
+AUTH --> FLUTTER : 200 { activate, tokens }
+FLUTTER -> TOKEN : stocke les tokens JWT
+FLUTTER --> PLAYER : compte activé
+
+' ============================================================================
+' PARTIE 4 : AUTHENTIFICATION BIOMETRIQUE
+' ============================================================================
+== 4. Ré-authentification par biométrie (empreinte / FaceID) ==
+
+PLAYER -> FLUTTER : réouvre l'app (session terminée)
+FLUTTER -> BIO : demander empreinte / FaceID
+BIO --> FLUTTER : succès biométrique
+FLUTTER -> TOKEN : récupère refresh token stocké
+FLUTTER -> AUTH : POST /auth/biometric (refresh)
+AUTH -> PG : valider token + user activé
+AUTH --> FLUTTER : 200 { new accessToken }
+FLUTTER --> PLAYER : session restaurée
+
+' ============================================================================
+' NOTES RÉCAPITULATIVES
+' ============================================================================
+note over FLUTTER, AUTH : Les tokens JWT sont stockés avec flutter_secure_storage\nLe refresh token permet une rotation sécurisée des sessions
+
+@enduml

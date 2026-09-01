@@ -1,0 +1,2494 @@
+openapi: 3.1.0
+info:
+  title: FootTech API
+  description: |
+    FootTech is a football team management platform for coaches, assistants (adjoint)
+    and players (joueur). This specification documents the main REST endpoints of the
+    backend Express service.
+
+    The API is versioned under `/api/v1`. All protected endpoints require a Bearer JWT.
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+    description: Local backend (Express)
+  - url: http://localhost:8000
+    description: Django admin
+tags:
+  - name: Health
+    description: Service health checks
+  - name: Auth
+    description: Authentication endpoints
+  - name: Teams
+    description: Team management
+  - name: Players
+    description: Player management
+  - name: Matches
+    description: Match management
+  - name: Trainings
+    description: Training session management
+  - name: Notifications
+    description: Notification management
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Service health check
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: ok
+                env: development
+                timestamp: '2024-11-01T10:00:00.000Z'
+
+  /api/v1/auth/register-coach:
+    post:
+      tags:
+        - Auth
+      summary: Register a new coach account
+      operationId: registerCoach
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterCoachRequest'
+            example:
+              firstName: John
+              lastName: Doe
+              email: coach@test.com
+              password: Test1234!
+              phone: '+33612345678'
+              clubName: FootTech FC
+      responses:
+        '201':
+          description: Coach created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Email already registered
+
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Authenticate a coach or adjoint
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: coach@test.com
+              password: Test1234!
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid credentials
+        '429':
+          description: Too many requests (rate limited)
+
+  /api/v1/auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: Refresh an access token
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+                  description: The refresh token issued at login
+      responses:
+        '200':
+          description: New access token issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /api/v1/auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: Revoke the current session
+      operationId: logout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '204':
+          description: Logged out successfully
+
+  /api/v1/auth/me:
+    get:
+      tags:
+        - Auth
+      summary: Get current authenticated user
+      operationId: getMe
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Not authenticated
+
+  /api/v1/teams:
+    get:
+      tags:
+        - Teams
+      summary: List teams for the authenticated user
+      operationId: listTeams
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of teams
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Team'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          description: Not authenticated
+    post:
+      tags:
+        - Teams
+      summary: Create a new team (COACH only)
+      operationId: createTeam
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTeamRequest'
+            example:
+              name: U15 A
+              category: U15
+              logoUrl: ''
+      responses:
+        '201':
+          description: Team created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '403':
+          description: Requires COACH role
+
+  /api/v1/teams/{id}:
+    get:
+      tags:
+        - Teams
+      summary: Get a team by ID
+      operationId: getTeam
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Team details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '404':
+          description: Team not found
+    patch:
+      tags:
+        - Teams
+      summary: Update a team (COACH only)
+      operationId: updateTeam
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                category:
+                  type: string
+                logoUrl:
+                  type: string
+      responses:
+        '200':
+          description: Team updated
+    delete:
+      tags:
+        - Teams
+      summary: Delete a team (COACH only)
+      operationId: deleteTeam
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Team deleted
+
+  /api/v1/teams/{id}/staff:
+    post:
+      tags:
+        - Teams
+      summary: Add an adjoint to a team (COACH only)
+      operationId: addTeamStaff
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddStaffRequest'
+      responses:
+        '201':
+          description: Staff added
+
+  /api/v1/players:
+    get:
+      tags:
+        - Players
+      summary: List players
+      operationId: listPlayers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: teamId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: position
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of players
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Player'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          description: Not authenticated
+    post:
+      tags:
+        - Players
+      summary: Create a new player (COACH/ADJOINT)
+      operationId: createPlayer
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlayerRequest'
+            example:
+              firstName: Lucas
+              lastName: Martin
+              dateOfBirth: '2012-05-14'
+              position: Attaquant
+              teamId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+              jerseyNumber: 9
+              phone: '+33611112222'
+      responses:
+        '201':
+          description: Player created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+
+  /api/v1/players/{id}:
+    get:
+      tags:
+        - Players
+      summary: Get a player's full profile
+      operationId: getPlayer
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Player profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+        '404':
+          description: Player not found
+    patch:
+      tags:
+        - Players
+      summary: Update a player (COACH/ADJOINT)
+      operationId: updatePlayer
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                dateOfBirth:
+                  type: string
+                  format: date
+                position:
+                  type: string
+                jerseyNumber:
+                  type: integer
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: Player updated
+
+  /api/v1/players/{id}/guardians:
+    get:
+      tags:
+        - Players
+      summary: List guardians of a player
+      operationId: listGuardians
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Player guardians
+    put:
+      tags:
+        - Players
+      summary: Create or update a guardian (COACH/ADJOINT)
+      operationId: upsertGuardian
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Guardian'
+      responses:
+        '200':
+          description: Guardian saved
+
+  /api/v1/players/{id}/address:
+    get:
+      tags:
+        - Players
+      summary: Get player address
+      operationId: getPlayerAddress
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Player address
+    put:
+      tags:
+        - Players
+      summary: Create or update player address (COACH/ADJOINT)
+      operationId: upsertPlayerAddress
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Address'
+      responses:
+        '200':
+          description: Address saved
+
+  /api/v1/players/{id}/school-info:
+    get:
+      tags:
+        - Players
+      summary: Get player school information
+      operationId: getPlayerSchoolInfo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: School information
+    put:
+      tags:
+        - Players
+      summary: Create or update school info (COACH/ADJOINT)
+      operationId: upsertSchoolInfo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SchoolInfo'
+      responses:
+        '200':
+          description: School info saved
+
+  /api/v1/players/{id}/season-profile:
+    get:
+      tags:
+        - Players
+      summary: List season profiles of a player
+      operationId: listPlayerSeasonProfiles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Season profiles
+    put:
+      tags:
+        - Players
+      summary: Create or update season profile (COACH/ADJOINT)
+      operationId: upsertSeasonProfile
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SeasonProfile'
+      responses:
+        '200':
+          description: Season profile saved
+
+  /api/v1/players/{id}/injuries:
+    get:
+      tags:
+        - Players
+      summary: List injuries of a player
+      operationId: listPlayerInjuries
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Player injuries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Injury'
+    post:
+      tags:
+        - Players
+      summary: Record a new injury (COACH/ADJOINT)
+      operationId: createPlayerInjury
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInjuryRequest'
+      responses:
+        '201':
+          description: Injury recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Injury'
+
+  /api/v1/players/{id}/injuries/{injuryId}:
+    patch:
+      tags:
+        - Players
+      summary: Update an injury (COACH/ADJOINT)
+      operationId: updateInjury
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: injuryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [ACTIVE, RECOVERED]
+                severity:
+                  type: string
+                  enum: [MILD, MODERATE, SEVERE]
+                recoveryDate:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: Injury updated
+    delete:
+      tags:
+        - Players
+      summary: Delete an injury (COACH/ADJOINT)
+      operationId: deleteInjury
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: injuryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Injury deleted
+
+  /api/v1/matches:
+    get:
+      tags:
+        - Matches
+      summary: List matches
+      operationId: listMatches
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: teamId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [SCHEDULED, IN_PROGRESS, FINISHED, CANCELLED]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of matches
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Match'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          description: Not authenticated
+    post:
+      tags:
+        - Matches
+      summary: Create a new match (COACH/ADJOINT)
+      operationId: createMatch
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMatchRequest'
+            example:
+              date: '2024-11-10'
+              opponent: AS Romains
+              location: Stade de Genève
+              homeAway: HOME
+              teamId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+              seasonId: 3fa85f64-5717-4562-b3fc-2c963f66afa7
+      responses:
+        '201':
+          description: Match created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+
+  /api/v1/matches/{id}:
+    get:
+      tags:
+        - Matches
+      summary: Get a match by ID
+      operationId: getMatch
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Match details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+        '404':
+          description: Match not found
+    delete:
+      tags:
+        - Matches
+      summary: Delete a match (COACH only)
+      operationId: deleteMatch
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Match deleted
+
+  /api/v1/matches/{id}/status:
+    patch:
+      tags:
+        - Matches
+      summary: Update match status (COACH/ADJOINT)
+      operationId: updateMatchStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [SCHEDULED, IN_PROGRESS, FINISHED, CANCELLED]
+                  example: FINISHED
+      responses:
+        '200':
+          description: Match status updated
+
+  /api/v1/matches/{id}/lineup:
+    get:
+      tags:
+        - Matches
+      summary: Get match lineup
+      operationId: getMatchLineup
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Match lineup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchLineup'
+    put:
+      tags:
+        - Matches
+      summary: Set match lineup (COACH/ADJOINT)
+      operationId: setMatchLineup
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [formation, players]
+              properties:
+                formation:
+                  type: string
+                  example: 4-3-3
+                players:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      playerId:
+                        type: string
+                        format: uuid
+                      position:
+                        type: string
+                        example: ST
+      responses:
+        '200':
+          description: Lineup set
+
+  /api/v1/matches/{id}/events:
+    get:
+      tags:
+        - Matches
+      summary: List match events
+      operationId: listMatchEvents
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Match events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MatchEvent'
+    post:
+      tags:
+        - Matches
+      summary: Create a match event (COACH/ADJOINT)
+      operationId: createMatchEvent
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, minute]
+              properties:
+                type:
+                  type: string
+                  enum: [GOAL, YELLOW_CARD, RED_CARD, SUBSTITUTION, ASSIST, OTHERS]
+                  example: GOAL
+                minute:
+                  type: integer
+                  example: 23
+                playerId:
+                  type: string
+                  format: uuid
+                details:
+                  type: string
+                  example: But de la tête
+      responses:
+        '201':
+          description: Match event created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchEvent'
+
+  /api/v1/matches/{id}/stats:
+    get:
+      tags:
+        - Matches
+      summary: List player stats for a match
+      operationId: listMatchPlayerStats
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Player stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlayerStat'
+    put:
+      tags:
+        - Matches
+      summary: Create or update a player stat (COACH/ADJOINT)
+      operationId: upsertPlayerStat
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayerStatUpsert'
+      responses:
+        '200':
+          description: Player stat saved
+
+  /api/v1/matches/{id}/evaluations:
+    get:
+      tags:
+        - Matches
+      summary: List player evaluations for a match
+      operationId: listMatchEvaluations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Evaluations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Evaluation'
+    put:
+      tags:
+        - Matches
+      summary: Create or update a player evaluation (COACH/ADJOINT)
+      operationId: upsertEvaluation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvaluationUpsert'
+      responses:
+        '200':
+          description: Evaluation saved
+
+  /api/v1/matches/{id}/report:
+    get:
+      tags:
+        - Matches
+      summary: Get match report
+      operationId: getMatchReport
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Match report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchReport'
+    post:
+      tags:
+        - Matches
+      summary: Save match report (COACH/ADJOINT)
+      operationId: saveMatchReport
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchReport'
+      responses:
+        '200':
+          description: Report saved
+
+  /api/v1/matches/{id}/ai-recommendations:
+    post:
+      tags:
+        - Matches
+      summary: Generate AI recommendations for a match (COACH/ADJOINT)
+      operationId: generateAiRecommendations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                analysisType:
+                  type: string
+                  enum: [PERFORMANCE, TACTICAL, PLAYER_INSIGHT]
+                  example: PERFORMANCE
+                focus:
+                  type: array
+                  items:
+                    type: string
+                  example: [ATTACK, DEFENSE]
+      responses:
+        '200':
+          description: AI recommendations generated
+    get:
+      tags:
+        - Matches
+      summary: Get generated AI recommendations
+      operationId: getMatchAiRecommendations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Existing AI recommendations
+
+  /api/v1/trainings:
+    get:
+      tags:
+        - Trainings
+      summary: List training sessions
+      operationId: listTrainings
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: teamId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of trainings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Training'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          description: Not authenticated
+    post:
+      tags:
+        - Trainings
+      summary: Create a training session (COACH/ADJOINT)
+      operationId: createTraining
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTrainingRequest'
+            example:
+              title: Séance vitesse
+              date: '2024-11-05'
+              startTime: '18:00'
+              endTime: '19:30'
+              location: Stade Municipal
+              teamId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+              seasonId: 3fa85f64-5717-4562-b3fc-2c963f66afa7
+      responses:
+        '201':
+          description: Training created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Training'
+
+  /api/v1/trainings/{id}:
+    get:
+      tags:
+        - Trainings
+      summary: Get a training session by ID
+      operationId: getTraining
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Training details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Training'
+        '404':
+          description: Training not found
+    patch:
+      tags:
+        - Trainings
+      summary: Update a training session (COACH/ADJOINT)
+      operationId: updateTraining
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                date:
+                  type: string
+                  format: date
+                startTime:
+                  type: string
+                  example: '18:00'
+                endTime:
+                  type: string
+                  example: '19:30'
+                location:
+                  type: string
+      responses:
+        '200':
+          description: Training updated
+    delete:
+      tags:
+        - Trainings
+      summary: Delete a training session (COACH/ADJOINT)
+      operationId: deleteTraining
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Training deleted
+
+  /api/v1/trainings/{id}/sheet:
+    get:
+      tags:
+        - Trainings
+      summary: Get training technical sheet
+      operationId: getTrainingSheet
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Training sheet
+    put:
+      tags:
+        - Trainings
+      summary: Create or update training sheet (COACH/ADJOINT)
+      operationId: upsertTrainingSheet
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                objectives:
+                  type: array
+                  items:
+                    type: string
+                  example: [Améliorer la vitesse, Travail technique]
+                expectedAttendance:
+                  type: integer
+                  example: 18
+                equipment:
+                  type: array
+                  items:
+                    type: string
+                  example: [Cônes, Ballons]
+      responses:
+        '200':
+          description: Sheet saved
+
+  /api/v1/trainings/{id}/situations:
+    get:
+      tags:
+        - Trainings
+      summary: List situations of a training
+      operationId: listTrainingSituations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Training situations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Situation'
+    post:
+      tags:
+        - Trainings
+      summary: Create a situation (COACH/ADJOINT)
+      operationId: createSituation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  example: Exercice 1 - Conduite de balle
+                description:
+                  type: string
+                duration:
+                  type: integer
+                  example: 15
+                objective:
+                  type: string
+                  example: Technique
+      responses:
+        '201':
+          description: Situation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Situation'
+
+  /api/v1/trainings/{id}/situations/{situationId}:
+    patch:
+      tags:
+        - Trainings
+      summary: Update a situation (COACH/ADJOINT)
+      operationId: updateSituation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: situationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                duration:
+                  type: integer
+                objective:
+                  type: string
+      responses:
+        '200':
+          description: Situation updated
+    delete:
+      tags:
+        - Trainings
+      summary: Delete a situation (COACH/ADJOINT)
+      operationId: deleteSituation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: situationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Situation deleted
+
+  /api/v1/trainings/{id}/situations/{situationId}/drawing:
+    get:
+      tags:
+        - Trainings
+      summary: Get tactical drawing for a situation
+      operationId: getSituationDrawing
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: situationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Tactical drawing
+    post:
+      tags:
+        - Trainings
+      summary: Save tactical drawing (COACH/ADJOINT)
+      operationId: saveSituationDrawing
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: situationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [elements]
+              properties:
+                elements:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        example: player
+                      x:
+                        type: number
+                      y:
+                        type: number
+                      team:
+                        type: string
+                        example: A
+                width:
+                  type: integer
+                  example: 800
+                height:
+                  type: integer
+                  example: 500
+      responses:
+        '200':
+          description: Drawing saved
+
+  /api/v1/notifications:
+    get:
+      tags:
+        - Notifications
+      summary: List notifications for the authenticated user
+      operationId: listMyNotifications
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+        '401':
+          description: Not authenticated
+    post:
+      tags:
+        - Notifications
+      summary: Create a notification (COACH/ADJOINT)
+      operationId: createNotification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [recipientId, title, body]
+              properties:
+                recipientId:
+                  type: string
+                  format: uuid
+                title:
+                  type: string
+                  example: Nouvelle séance
+                body:
+                  type: string
+                  example: Une séance d'entraînement a été ajoutée
+                type:
+                  type: string
+                  enum: [TRAINING, MATCH, GENERAL]
+                  example: TRAINING
+      responses:
+        '201':
+          description: Notification created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+
+  /api/v1/notifications/broadcast:
+    post:
+      tags:
+        - Notifications
+      summary: Broadcast a notification to a team (COACH/ADJOINT)
+      operationId: broadcastNotification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [teamId, title, body]
+              properties:
+                teamId:
+                  type: string
+                  format: uuid
+                title:
+                  type: string
+                body:
+                  type: string
+                type:
+                  type: string
+                  enum: [TRAINING, MATCH, GENERAL]
+      responses:
+        '201':
+          description: Notification broadcast
+
+  /api/v1/notifications/{id}/read:
+    patch:
+      tags:
+        - Notifications
+      summary: Mark a notification as read
+      operationId: markNotificationAsRead
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Notification marked as read
+
+  /api/v1/notifications/read-all:
+    patch:
+      tags:
+        - Notifications
+      summary: Mark all notifications as read
+      operationId: markAllNotificationsAsRead
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All notifications marked as read
+
+  /api/v1/attendance/players/{playerId}/history:
+    get:
+      tags:
+        - Notifications
+      summary: Get attendance history for a player
+      operationId: getPlayerAttendanceHistory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Attendance history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Attendance'
+
+  /api/v1/attendance/trainings/{id}:
+    get:
+      tags:
+        - Notifications
+      summary: Get attendance for a training
+      operationId: getTrainingAttendance
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Attendance records for the training
+    post:
+      tags:
+        - Notifications
+      summary: Mark attendance for one player (COACH/ADJOINT)
+      operationId: markAttendance
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [playerId, status]
+              properties:
+                playerId:
+                  type: string
+                  format: uuid
+                status:
+                  type: string
+                  enum: [PRESENT, ABSENT, LATE, EXCUSED]
+                  example: PRESENT
+      responses:
+        '200':
+          description: Attendance marked
+
+  /api/v1/attendance/trainings/{id}/bulk:
+    post:
+      tags:
+        - Notifications
+      summary: Bulk mark attendance for training (COACH/ADJOINT)
+      operationId: bulkMarkAttendance
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [records]
+              properties:
+                records:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      playerId:
+                        type: string
+                        format: uuid
+                      status:
+                        type: string
+                        enum: [PRESENT, ABSENT, LATE, EXCUSED]
+      responses:
+        '200':
+          description: Attendance marked in bulk
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token returned by the login endpoint
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          example: ok
+        env:
+          type: string
+          example: development
+        timestamp:
+          type: string
+          format: date-time
+          example: '2024-11-01T10:00:00.000Z'
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        statusCode:
+          type: integer
+        errors:
+          type: array
+          items:
+            type: object
+
+    RegisterCoachRequest:
+      type: object
+      required: [firstName, lastName, email, password]
+      properties:
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: coach@test.com
+        password:
+          type: string
+          format: password
+          example: Test1234!
+        phone:
+          type: string
+          example: +33612345678
+        clubName:
+          type: string
+          example: FootTech FC
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: coach@test.com
+        password:
+          type: string
+          format: password
+          example: Test1234!
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        accessToken:
+          type: string
+          description: JWT bearer token
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+          description: Token validity in seconds
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        role:
+          type: string
+          enum: [COACH, ADJOINT, JOUEUR]
+        avatarUrl:
+          type: string
+          nullable: true
+        teamId:
+          type: string
+          format: uuid
+          nullable: true
+
+    PaginationMeta:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: U15 A
+        category:
+          type: string
+          example: U15
+        logoUrl:
+          type: string
+          nullable: true
+        coachId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateTeamRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          example: U15 A
+        category:
+          type: string
+          example: U15
+        logoUrl:
+          type: string
+
+    AddStaffRequest:
+      type: object
+      required: [firstName, lastName, email]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+
+    Player:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        position:
+          type: string
+        teamId:
+          type: string
+          format: uuid
+        jerseyNumber:
+          type: integer
+        phone:
+          type: string
+        photoUrl:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [ACTIVE, INJURED, INACTIVE]
+        createdAt:
+          type: string
+          format: date-time
+
+    CreatePlayerRequest:
+      type: object
+      required: [firstName, lastName, dateOfBirth, teamId]
+      properties:
+        firstName:
+          type: string
+          example: Lucas
+        lastName:
+          type: string
+          example: Martin
+        dateOfBirth:
+          type: string
+          format: date
+          example: '2012-05-14'
+        position:
+          type: string
+          example: Attaquant
+        teamId:
+          type: string
+          format: uuid
+        jerseyNumber:
+          type: integer
+          example: 9
+        phone:
+          type: string
+        photoUrl:
+          type: string
+
+    Guardian:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        relation:
+          type: string
+          example: Père
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+        additionalInfo:
+          type: string
+
+    SchoolInfo:
+      type: object
+      properties:
+        schoolName:
+          type: string
+        grade:
+          type: string
+        notes:
+          type: string
+
+    SeasonProfile:
+      type: object
+      properties:
+        seasonId:
+          type: string
+          format: uuid
+        medicalCertificate:
+          type: boolean
+        insuranceNumber:
+          type: string
+        skillLevel:
+          type: string
+        footedness:
+          type: string
+          enum: [LEFT, RIGHT, BOTH]
+
+    Injury:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        injuryType:
+          type: string
+          example: Entorse cheville
+        date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [ACTIVE, RECOVERED]
+        severity:
+          type: string
+          enum: [MILD, MODERATE, SEVERE]
+        notes:
+          type: string
+        recoveryDate:
+          type: string
+          format: date
+          nullable: true
+
+    CreateInjuryRequest:
+      type: object
+      required: [injuryType, date]
+      properties:
+        injuryType:
+          type: string
+          example: Entorse cheville
+        date:
+          type: string
+          format: date
+        severity:
+          type: string
+          enum: [MILD, MODERATE, SEVERE]
+        notes:
+          type: string
+
+    Match:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        opponent:
+          type: string
+        location:
+          type: string
+        homeAway:
+          type: string
+          enum: [HOME, AWAY]
+        status:
+          type: string
+          enum: [SCHEDULED, IN_PROGRESS, FINISHED, CANCELLED]
+        teamId:
+          type: string
+          format: uuid
+        seasonId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateMatchRequest:
+      type: object
+      required: [date, opponent, teamId]
+      properties:
+        date:
+          type: string
+          format: date
+        opponent:
+          type: string
+        location:
+          type: string
+        homeAway:
+          type: string
+          enum: [HOME, AWAY]
+          example: HOME
+        teamId:
+          type: string
+          format: uuid
+        seasonId:
+          type: string
+          format: uuid
+
+    MatchLineup:
+      type: object
+      properties:
+        formation:
+          type: string
+          example: 4-3-3
+        players:
+          type: array
+          items:
+            type: object
+            properties:
+              playerId:
+                type: string
+                format: uuid
+              position:
+                type: string
+              shirtNumber:
+                type: integer
+
+    MatchEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [GOAL, YELLOW_CARD, RED_CARD, SUBSTITUTION, ASSIST, OTHERS]
+        minute:
+          type: integer
+        playerId:
+          type: string
+          format: uuid
+          nullable: true
+        details:
+          type: string
+        matchId:
+          type: string
+          format: uuid
+
+    PlayerStat:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        playerId:
+          type: string
+          format: uuid
+        matchId:
+          type: string
+          format: uuid
+        goals:
+          type: integer
+        assists:
+          type: integer
+        minutesPlayed:
+          type: integer
+        rating:
+          type: number
+          format: float
+
+    PlayerStatUpsert:
+      type: object
+      required: [playerId]
+      properties:
+        playerId:
+          type: string
+          format: uuid
+        goals:
+          type: integer
+        assists:
+          type: integer
+        minutesPlayed:
+          type: integer
+        rating:
+          type: number
+          format: float
+
+    Evaluation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        playerId:
+          type: string
+          format: uuid
+        matchId:
+          type: string
+          format: uuid
+        criteria:
+          type: object
+          additionalProperties:
+            type: number
+          example:
+            technique: 8
+            tactique: 7
+            physique: 9
+        globalNotes:
+          type: string
+
+    EvaluationUpsert:
+      type: object
+      required: [playerId]
+      properties:
+        playerId:
+          type: string
+          format: uuid
+        criteria:
+          type: object
+          additionalProperties:
+            type: number
+        globalNotes:
+          type: string
+
+    MatchReport:
+      type: object
+      properties:
+        summary:
+          type: string
+          example: Victoire 3-1
+        highlights:
+          type: array
+          items:
+            type: string
+        conclusions:
+          type: string
+
+    Training:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        date:
+          type: string
+          format: date
+        startTime:
+          type: string
+          example: '18:00'
+        endTime:
+          type: string
+          example: '19:30'
+        location:
+          type: string
+        teamId:
+          type: string
+          format: uuid
+        seasonId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateTrainingRequest:
+      type: object
+      required: [title, date, teamId]
+      properties:
+        title:
+          type: string
+        date:
+          type: string
+          format: date
+        startTime:
+          type: string
+          example: '18:00'
+        endTime:
+          type: string
+          example: '19:30'
+        location:
+          type: string
+        teamId:
+          type: string
+          format: uuid
+        seasonId:
+          type: string
+          format: uuid
+
+    Situation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        trainingId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        duration:
+          type: integer
+        objective:
+          type: string
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        recipientId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        body:
+          type: string
+        type:
+          type: string
+          enum: [TRAINING, MATCH, GENERAL]
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    Attendance:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        playerId:
+          type: string
+          format: uuid
+        trainingId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [PRESENT, ABSENT, LATE, EXCUSED]
+        date:
+          type: string
+          format: date
+security:
+  - bearerAuth: []
