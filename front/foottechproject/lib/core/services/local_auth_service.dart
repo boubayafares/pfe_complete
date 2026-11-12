@@ -32,6 +32,7 @@ class LocalAuthService {
       return false;
     }
   }
+
   /// FAILLE CORRIGÉE: `catch (_) { return true; }` traitait toute exception
   /// levée pendant une tentative d'authentification RÉELLE comme un succès
   /// — pas seulement l'absence de matériel biométrique. Le plugin local_auth
@@ -45,7 +46,4 @@ class LocalAuthService {
   /// amont par isAvailable) vs "une tentative d'authentification a échoué
   /// ou a levé une erreur" (fail CLOSED — reste verrouillé, l'utilisateur
   /// peut réessayer via le bouton "Déverrouiller").
-
 }
-
-

@@ -1,0 +1,46 @@
+@startuml
+title FootTech — Activité — Épopée 9 : Match en direct et après-match
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam ActivityBackgroundColor #E8F5E9
+skinparam ActivityBorderColor #2E7D32
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityDiamondBorderColor #F57F17
+start
+:Ouvrir le module;
+:Vérifier la session, le rôle et l'équipe active;
+if (Accès autorisé ?) then (oui)
+  :Choisir la User Story;
+  switch (Fonction sélectionnée)
+  case (US-38)
+    :Enregistrer les événements en direct\nPOST /matches/:id/events;
+    :Événement diffusé en temps réel;
+  case (US-39)
+    :Consulter la timeline en temps réel\nSocket.IO room match/:id;
+    :Timeline synchronisée;
+  case (US-40)
+    :Saisir les statistiques du match\nPUT /matches/:id/stats;
+    :Statistiques enregistrées;
+  case (US-41)
+    :Évaluer les joueurs après le match\nPUT /matches/:id/evaluations;
+    :Notes et commentaires enregistrés;
+  case (US-42)
+    :Générer le rapport de match\nPOST /matches/:id/report/generate;
+    :Rapport PDF archivé;
+  endswitch
+  :Actualiser l'état Riverpod / interface;
+else (non)
+  :Afficher 401 ou 403;
+endif
+if (Erreur métier ou technique ?) then (oui)
+  :Normaliser l'erreur et proposer une reprise;
+else (non)
+  :Confirmer l'opération;
+endif
+stop
+@enduml

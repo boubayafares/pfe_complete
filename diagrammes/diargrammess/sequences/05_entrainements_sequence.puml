@@ -1,0 +1,106 @@
+@startuml
+title FootTech — Séquence — Épopée 5 : Gestion des entraînements
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Coach / Adjoint / Utilisateur" as ACT
+boundary "Application Flutter" as APP
+control "API Express" as API
+control "TrainingService" as SVC
+database "PostgreSQL" as DB
+
+group US-20 — Créer un entraînement
+  ACT -> APP: Créer un entraînement
+  APP -> API: POST /trainings
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-20)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Séance planifiée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Séance planifiée
+end
+
+group US-21 — Remplir la fiche de séance
+  ACT -> APP: Remplir la fiche de séance
+  APP -> API: PUT /trainings/:id/sheet
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-21)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Objectifs et effectif enregistrés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Objectifs et effectif enregistrés
+end
+
+group US-22 — Ajouter des situations d'exercices
+  ACT -> APP: Ajouter des situations d'exercices
+  APP -> API: POST /trainings/:id/situations
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-22)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Situations ajoutées
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Situations ajoutées
+end
+
+group US-23 — Dessiner un schéma tactique
+  ACT -> APP: Dessiner un schéma tactique
+  APP -> API: POST /trainings/:id/situations/:sid/drawing
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-23)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Dessin JSONB sauvegardé
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Dessin JSONB sauvegardé
+end
+
+group US-24 — Proposer un exercice au coach
+  ACT -> APP: Proposer un exercice au coach
+  APP -> API: POST /exercise-proposals
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-24)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Proposition en attente
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Proposition en attente
+end
+
+group US-25 — Valider ou rejeter une proposition
+  ACT -> APP: Valider ou rejeter une proposition
+  APP -> API: PATCH /exercise-proposals/:id/review
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-25)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Décision historisée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Décision historisée
+end
+
+group US-26 — Lister les entraînements de l'équipe
+  ACT -> APP: Lister les entraînements de l'équipe
+  APP -> API: GET /trainings
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-26)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Séances autorisées affichées
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Séances autorisées affichées
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

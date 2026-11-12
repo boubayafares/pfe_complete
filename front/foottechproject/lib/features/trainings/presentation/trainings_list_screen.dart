@@ -21,7 +21,11 @@ class TrainingsListScreen extends ConsumerWidget {
       floatingActionButton: user?.canManageTeam == true
           ? FloatingActionButton(
               onPressed: () async {
-                final created = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (_) => const CreateTrainingScreen()));
+                final created = await Navigator.of(context).push<bool>(
+                  MaterialPageRoute(
+                    builder: (_) => const CreateTrainingScreen(),
+                  ),
+                );
                 if (created == true) ref.invalidate(teamTrainingsProvider);
               },
               child: const Icon(Icons.add),
@@ -31,7 +35,12 @@ class TrainingsListScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('$error')),
         data: (trainings) => trainings.isEmpty
-            ? Center(child: Text(context.l10n.noTrainingPlanned, style: const TextStyle(color: AppColors.textSecondary)))
+            ? Center(
+                child: Text(
+                  context.l10n.noTrainingPlanned,
+                  style: const TextStyle(color: AppColors.textSecondary),
+                ),
+              )
             : ListView.builder(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 itemCount: trainings.length,
@@ -41,12 +50,21 @@ class TrainingsListScreen extends ConsumerWidget {
                     margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                     child: ListTile(
                       onTap: () => context.push('/trainings/${training.id}'),
-                      title: Text(DateFormat('EEEE d MMM', 'en_US').format(training.date), style: const TextStyle(fontWeight: FontWeight.w600)),
+                      title: Text(
+                        DateFormat('EEEE d MMM', 'en_US').format(training.date),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
                       subtitle: Text(
                         '${training.startTime.substring(0, 5)} - ${training.endTime.substring(0, 5)}${training.location != null ? " · ${training.location}" : ""}',
-                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
                       ),
-                      trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                      trailing: const Icon(
+                        Icons.chevron_right,
+                        color: AppColors.textMuted,
+                      ),
                     ),
                   );
                 },

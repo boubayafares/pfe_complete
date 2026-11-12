@@ -1,0 +1,1796 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>FootTech — Mémoire de Projet de Fin d'Études</title>
+<style>
+  @page { size: A4; margin: 20mm 16mm; }
+  body { font-family: "Segoe UI", Calibri, Arial, sans-serif; font-size: 11pt; color: #212121; line-height: 1.6; margin: 0; padding: 0; }
+  h1 { font-size: 18pt; color: #0D47A1; margin-top: 28px; }
+  h2 { font-size: 15pt; color: #0D47A1; border-bottom: 2px solid #0D47A1; padding-bottom: 4px; margin-top: 30px; }
+  h3 { font-size: 12.5pt; color: #1565C0; margin-top: 20px; }
+  h4 { font-size: 11.5pt; color: #333; margin-top: 16px; }
+  .page-break { page-break-before: always; }
+  p { text-align: justify; }
+  figure { text-align: center; margin: 20px 0; page-break-inside: avoid; }
+  figure img { max-width: 96%; border: 1px solid #ccc; }
+  figcaption { font-size: 9.5pt; color: #555; margin-top: 6px; font-style: italic; text-align: center; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 9.5pt; page-break-inside: avoid; }
+  th, td { border: 1px solid #9E9E9E; padding: 5px 8px; text-align: left; vertical-align: top; }
+  th { background: #E3F2FD; color: #0D47A1; }
+  tr:nth-child(even) td { background: #F5F8FF; }
+  caption { caption-side: top; text-align: left; font-size: 9.5pt; font-style: italic; color: #555; margin-bottom: 4px; }
+  .cover { text-align: center; margin-top: 50px; }
+  .cover h1 { font-size: 28pt; color: #0D47A1; margin: 8px 0; }
+  .cover .subtitle { font-size: 14pt; color: #1565C0; }
+  .cover .meta { margin-top: 50px; font-size: 12pt; line-height: 2.2; }
+  .cover .box { display: inline-block; border: 2px solid #0D47A1; padding: 22px 60px; margin: 30px auto; }
+  .badge { display: inline-block; background: #0D47A1; color: #fff; border-radius: 12px; padding: 2px 12px; font-size: 9pt; }
+  ul, ol { margin: 6px 0 6px 22px; }
+  li { margin-bottom: 4px; }
+  code { background: #ECEFF1; padding: 1px 5px; border-radius: 3px; font-size: 9.5pt; font-family: Consolas, monospace; }
+  .toc { line-height: 1.8; }
+  .toc a { color: #0D47A1; text-decoration: none; }
+  .toc ul { margin-top: 2px; margin-bottom: 10px; }
+  .toc li { margin-bottom: 2px; }
+  .note { background: #FFF8E1; border-left: 4px solid #F57F17; padding: 8px 12px; margin: 10px 0; font-size: 10pt; }
+  .small { font-size: 9pt; color: #555; }
+  pre { background: #263238; color: #ECEFF1; padding: 12px 16px; border-radius: 4px; font-size: 9pt; overflow-x: auto; line-height: 1.4; }
+  pre code { background: none; padding: 0; color: inherit; }
+  .highlight { background: #E3F2FD; padding: 2px 6px; border-radius: 3px; }
+  blockquote { border-left: 4px solid #1565C0; margin: 12px 0; padding: 8px 16px; background: #F5F8FF; }
+  .flex-img { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 16px 0; }
+  .flex-img figure { flex: 1; min-width: 300px; max-width: 48%; }
+  .source-note { background: #F3F7FB; border-left: 4px solid #607D8B; padding: 8px 12px; margin: 10px 0; font-size: 9.5pt; }
+  .success { color: #1B5E20; font-weight: 700; }
+  .partial { color: #E65100; font-weight: 700; }
+  .missing { color: #B71C1C; font-weight: 700; }
+  .comparison-table { font-size: 8.3pt; }
+  .comparison-table th, .comparison-table td { padding: 4px 5px; }
+  .avoid-break { page-break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<!-- ============================ COUVERTURE ============================ -->
+<div class="cover">
+  <h1>FOOTTECH</h1>
+  <p class="subtitle">Plateforme intelligente de gestion et d'analyse des performances footballistiques</p>
+  <p style="margin-top:8px"><span class="badge">Application mobile &bull; API REST &bull; Services IA &bull; Back-office</span></p>
+  <div class="box">
+    <p><b>Mémoire de Projet de Fin d'Études</b></p>
+    <p>Présenté pour l'obtention du diplôme de<br>Licence en Informatique</p>
+  </div>
+  <div class="meta">
+    <p><b>Réalisé par :</b> [Nom et prénom]</p>
+    <p><b>Encadrant académique :</b> [Nom]</p>
+    <p><b>Encadrant professionnel :</b> [Nom]</p>
+    <p><b>Entreprise :</b> [Nom de l'entreprise]</p>
+    <p><b>Année universitaire :</b> 2025–2026</p>
+  </div>
+</div>
+
+<!-- ============================ DÉDICACE ============================ -->
+<div class="page-break"></div>
+<h2>Dédicace</h2>
+<p>Je dédie ce travail à mes parents, pour leur amour, leur soutien indéfectible et tous les sacrifices qu'ils ont consentis pour mon éducation et ma réussite. À mes frères et sœurs, pour leur présence et leurs encouragements. À tous ceux qui, de près ou de loin, ont contribué à la réalisation de ce projet.</p>
+
+<!-- ============================ REMERCIEMENTS ============================ -->
+<div class="page-break"></div>
+<h2>Remerciements</h2>
+<p>Au terme de ce projet de fin d'études, je tiens à exprimer ma profonde gratitude à toutes les personnes qui ont contribué, directement ou indirectement, à la réalisation de ce travail.</p>
+<p>Je remercie tout particulièrement mon encadrant académique pour son accompagnement, ses conseils et ses remarques qui m'ont permis d'améliorer progressivement la qualité de ce projet.</p>
+<p>J'adresse également mes sincères remerciements à mon encadrant professionnel ainsi qu'à l'ensemble de l'équipe pour leur disponibilité, leur confiance et leur soutien tout au long de la réalisation de FootTech.</p>
+<p>Je remercie enfin ma famille et mes proches pour leur soutien et leurs encouragements durant toute la période consacrée à ce projet.</p>
+<!-- ============================ RÉSUMÉ ============================ -->
+<div class="page-break"></div>
+<h2>Résumé</h2>
+<p>Le développement des technologies numériques et de l'intelligence artificielle transforme progressivement les méthodes de gestion et d'analyse dans le domaine sportif. Dans le football, les entraîneurs doivent gérer quotidiennement un grand nombre d'informations relatives aux joueurs, aux entraînements, aux matchs, aux présences, aux performances et à l'évolution des athlètes.</p>
+<p>Dans ce contexte, ce projet de fin d'études consiste à concevoir et développer <b>FootTech</b>, une plateforme intelligente dédiée à la gestion des équipes de football et à l'aide à la décision sportive.</p>
+<p>La solution proposée repose sur une architecture composée de plusieurs applications et services. Elle comprend une application principale destinée aux entraîneurs, adjoints et joueurs, un backend assurant la gestion des données et des règles métier, des microservices d'intelligence artificielle dédiés à la recommandation de compositions et à l'analyse des performances, ainsi qu'une plateforme d'administration permettant la supervision globale du système.</p>
+<p>FootTech permet notamment de gérer les équipes et les joueurs, organiser les saisons et les entraînements, suivre les présences, préparer les matchs, enregistrer les événements en direct, évaluer les performances des joueurs et consulter les bilans saisonniers.</p>
+<p>L'intelligence artificielle constitue également une composante importante de la solution. Un service de recommandation analyse la présence, la performance et la fatigue afin de proposer une composition d'équipe. Un second service fournit différentes fonctionnalités d'analyse telles que la détection des tendances de performance, le regroupement des joueurs, l'analyse du ton des commentaires, la transcription vocale et l'extraction d'informations à partir de documents.</p>
+<p><b>Mots-clés :</b> Football, gestion sportive, intelligence artificielle, recommandation, analyse de performance, microservices, Flutter, Node.js, FastAPI, Django, PostgreSQL.</p>
+
+<!-- ============================ ABSTRACT ============================ -->
+<div class="page-break"></div>
+<h2>Abstract</h2>
+<p>The development of digital technologies and artificial intelligence is progressively transforming sports management and performance analysis. In football, coaches need to manage a large amount of information related to players, training sessions, matches, attendance, performance and player development.</p>
+<p>In this context, this final-year project aims to design and develop <b>FootTech</b>, an intelligent platform dedicated to football team management and sports decision support.</p>
+<p>The proposed solution is based on a multi-component architecture including a main application for coaches, assistants and players, a backend responsible for business logic and data management, artificial intelligence microservices dedicated to lineup recommendation and performance analysis, and an administration platform for global system supervision.</p>
+<p>FootTech provides features for managing teams and players, organizing seasons and training sessions, monitoring attendance, preparing matches, recording live match events, evaluating player performance and analyzing season statistics.</p>
+<p>Artificial intelligence is an important component of the platform. A recommendation service analyzes factors such as attendance, performance and fatigue to generate lineup recommendations. Another AI service provides performance trend detection, player clustering, comment tone analysis, speech transcription and document information extraction.</p>
+<p>The objective of this project is therefore to centralize football-related information within a single platform and provide coaches with analytical and decision-support tools while keeping the final sporting decision under their control.</p>
+<p><b>Keywords:</b> Football, sports management, artificial intelligence, recommendation, performance analysis, microservices, Flutter, Node.js, FastAPI, Django, PostgreSQL.</p>
+<!-- ============================ TABLE DES MATIÈRES ============================ -->
+<div class="page-break"></div>
+<h2>Table des matières</h2>
+<div class="toc">
+  <p><b>Introduction générale</b></p>
+  <ul>
+    <li>Contexte général</li>
+    <li>Problématique</li>
+    <li>Objectifs du projet</li>
+    <li>Architecture globale</li>
+    <li>Organisation du mémoire</li>
+  </ul>
+  <p><b>Chapitre 1 — Contexte général et étude préalable</b></p>
+  <ul>
+    <li>1.1 Présentation du projet FootTech</li>
+    <li>1.2 Problématique</li>
+    <li>1.3 Étude comparative de l'existant</li>
+    <li>1.3.1 Méthode et périmètre de comparaison</li>
+    <li>1.3.2 Analyse de TacticalPad</li>
+    <li>1.3.3 Analyse de MyCoachSport</li>
+    <li>1.3.4 Comparaison multicritère</li>
+    <li>1.3.5 Positionnement de FootTech</li>
+    <li>1.4 Limites des solutions traditionnelles</li>
+    <li>1.5 Solution proposée</li>
+    <li>1.6 Objectifs du projet (méthode SMART)</li>
+    <li>1.7 Méthodologie de développement</li>
+  </ul>
+  <p><b>Chapitre 2 — Analyse et spécification des besoins</b></p>
+  <ul>
+    <li>2.1 Identification des acteurs</li>
+    <li>2.2 Identification des épopées</li>
+    <li>2.3 Product Backlog (74 User Stories)</li>
+    <li>2.4 Besoins fonctionnels</li>
+    <li>2.5 Besoins non fonctionnels</li>
+    <li>2.6 Priorisation</li>
+  </ul>
+  <p><b>Chapitre 3 — Conception de la solution</b></p>
+  <ul>
+    <li>3.1 Architecture générale</li>
+    <li>3.2 Architecture logicielle</li>
+    <li>3.3 Architecture des microservices</li>
+    <li>3.4 Diagramme de cas d'utilisation</li>
+    <li>3.5 Diagrammes de séquence</li>
+    <li>3.6 Diagramme d'activité</li>
+    <li>3.7 Diagramme de classes</li>
+    <li>3.8 Modèle de données (PostgreSQL)</li>
+    <li>3.9 Diagramme de flux de données</li>
+    <li>3.10 Sécurité</li>
+  </ul>
+  <p><b>Chapitre 4 — Choix technologiques</b></p>
+  <ul>
+    <li>4.1 Frontend (Flutter)</li>
+    <li>4.2 Backend et données</li>
+    <li>4.3 Services IA</li>
+    <li>4.4 Justification d'ensemble</li>
+  </ul>
+  <p><b>Chapitre 5 — Réalisation et implémentation</b></p>
+  <ul>
+    <li>5.1 Environnement de développement</li>
+    <li>5.2 Backend principal (Express + TypeScript)</li>
+    <li>5.3 Application Frontend (Flutter)</li>
+    <li>5.4 Authentification</li>
+    <li>5.5 Gestion des équipes et joueurs</li>
+    <li>5.6 Gestion des entraînements</li>
+    <li>5.7 Gestion des matchs</li>
+    <li>5.8 Suivi des performances</li>
+    <li>5.9 Service de recommandation IA</li>
+    <li>5.10 Service AI Insights</li>
+    <li>5.11 Administration (Django + JavaFX)</li>
+    <li>5.12 Notifications et calendrier</li>
+    <li>5.13 Déploiement Docker</li>
+    <li>5.14 Pipeline CI/CD</li>
+  </ul>
+  <p><b>Chapitre 6 — Tests et validation</b></p>
+  <ul>
+    <li>6.1 Stratégie de test</li>
+    <li>6.2 Tests fonctionnels</li>
+    <li>6.3 Tests API (Postman)</li>
+    <li>6.4 Tests unitaires backend (Vitest)</li>
+    <li>6.5 Tests des microservices IA (pytest)</li>
+    <li>6.6 Tests E2E (Playwright / Cypress / Selenium)</li>
+    <li>6.7 Tests de charge (JMeter)</li>
+    <li>6.8 Tests de sécurité</li>
+    <li>6.9 Résultats globaux</li>
+  </ul>
+  <p><b>Chapitre 7 — Résultats, limites et perspectives</b></p>
+  <ul>
+    <li>7.1 Résultats obtenus</li>
+    <li>7.2 Apports du projet</li>
+    <li>7.3 Difficultés rencontrées</li>
+    <li>7.4 Limites</li>
+    <li>7.5 Perspectives d'amélioration</li>
+    <li>7.6 Feuille de route issue du benchmark</li>
+  </ul>
+  <p><b>Conclusion générale</b></p>
+  <p><b>Bibliographie</b></p>
+  <p><b>Annexes</b></p>
+  <ul>
+    <li>A. Liste des diagrammes UML</li>
+    <li>B. Endpoints API complets</li>
+    <li>C. Tables PostgreSQL (schéma platform)</li>
+    <li>D. Sources Mermaid</li>
+    <li>E. Ressources du projet</li>
+  </ul>
+</div>
+
+<!-- ============================ LISTE DES FIGURES ============================ -->
+<div class="page-break"></div>
+<h2>Liste des figures</h2>
+<table>
+  <tr><th>Fig.</th><th>Description</th><th>Chapitre</th></tr>
+  <tr><td>1</td><td>Architecture globale de FootTech</td><td>Introduction</td></tr>
+  <tr><td>2</td><td>Diagramme de cas d'utilisation global</td><td>3.4</td></tr>
+  <tr><td>3</td><td>Diagramme de cas d'utilisation côté encadrement</td><td>3.4</td></tr>
+  <tr><td>4</td><td>Diagramme de cas d'utilisation côté joueur</td><td>3.4</td></tr>
+  <tr><td>5</td><td>Séquence d'authentification</td><td>3.5</td></tr>
+  <tr><td>6</td><td>Séquence de gestion d'un entraînement</td><td>3.5</td></tr>
+  <tr><td>7</td><td>Séquence de gestion d'un match</td><td>3.5</td></tr>
+  <tr><td>8</td><td>Séquence des notifications</td><td>3.5</td></tr>
+  <tr><td>9</td><td>Diagramme d'activité — séance d'entraînement</td><td>3.6</td></tr>
+  <tr><td>10</td><td>Diagramme de classes du domaine métier</td><td>3.7</td></tr>
+  <tr><td>11</td><td>Diagramme de classes du backend Express</td><td>3.7</td></tr>
+  <tr><td>12</td><td>Modèle conceptuel de données (ER)</td><td>3.8</td></tr>
+  <tr><td>13</td><td>Diagramme de flux de données</td><td>3.9</td></tr>
+  <tr><td>14</td><td>Architecture globale du système</td><td>3.1</td></tr>
+  <tr><td>15</td><td>Architecture logicielle en couches</td><td>3.2</td></tr>
+  <tr><td>16</td><td>Architecture Riverpod (Flutter)</td><td>5.3</td></tr>
+  <tr><td>17</td><td>Communication entre microservices</td><td>3.3</td></tr>
+  <tr><td>18</td><td>Composants frontend</td><td>5.3</td></tr>
+  <tr><td>19</td><td>Module admin Django</td><td>5.11</td></tr>
+  <tr><td>20</td><td>Déploiement Docker</td><td>5.13</td></tr>
+  <tr><td>21</td><td>Pipeline CI/CD</td><td>5.14</td></tr>
+</table>
+
+<!-- ============================ LISTE DES TABLEAUX ============================ -->
+<div class="page-break"></div>
+<h2>Liste des tableaux</h2>
+<table>
+  <tr><th>Tab.</th><th>Description</th><th>Chapitre</th></tr>
+  <tr><td>1A</td><td>Profil des trois solutions étudiées</td><td>1.3</td></tr>
+  <tr><td>1B</td><td>Comparaison détaillée FootTech / TacticalPad / MyCoachSport</td><td>1.3</td></tr>
+  <tr><td>1C</td><td>Analyse stratégique et positionnement de FootTech</td><td>1.3</td></tr>
+  <tr><td>2</td><td>Objectifs SMART</td><td>1.6</td></tr>
+  <tr><td>3</td><td>Comparaison des méthodologies</td><td>1.7</td></tr>
+  <tr><td>4</td><td>Planning prévisionnel du projet</td><td>1.7</td></tr>
+  <tr><td>5</td><td>Découpage des sprints</td><td>1.7</td></tr>
+  <tr><td>6</td><td>Épopées et User Stories</td><td>2.2</td></tr>
+  <tr><td>7</td><td>Choix technologiques — Frontend</td><td>4.1</td></tr>
+  <tr><td>8</td><td>Choix technologiques — Backend</td><td>4.2</td></tr>
+  <tr><td>9</td><td>Choix technologiques — Services IA</td><td>4.3</td></tr>
+  <tr><td>10</td><td>Description des cas d'utilisation</td><td>3.4</td></tr>
+  <tr><td>11</td><td>Tables PostgreSQL (schéma platform)</td><td>3.8</td></tr>
+  <tr><td>12</td><td>Endpoints API Express</td><td>5.2</td></tr>
+  <tr><td>13</td><td>Tests fonctionnels</td><td>6.2</td></tr>
+  <tr><td>14</td><td>Résultats des tests</td><td>6.9</td></tr>
+  <tr><td>15</td><td>Feuille de route fonctionnelle et industrielle</td><td>7.6</td></tr>
+</table>
+<!-- ============================ INTRODUCTION GÉNÉRALE ============================ -->
+<div class="page-break"></div>
+<h2>Introduction générale</h2>
+
+<h3>Contexte général du projet</h3>
+<p>Le football moderne est devenu un domaine dans lequel la donnée occupe une place de plus en plus importante. La gestion d'une équipe ne se limite plus à la préparation des entraînements et à l'organisation des matchs. Les entraîneurs doivent également suivre l'assiduité des joueurs, leurs performances individuelles, leur temps de jeu, leur évolution, leur état physique ainsi que de nombreux événements survenant pendant les rencontres.</p>
+<p>Dans une organisation traditionnelle, ces informations peuvent être dispersées entre des fichiers, des documents, des applications de messagerie et des outils différents. Cette dispersion rend leur exploitation plus difficile et peut limiter la capacité de l'entraîneur à disposer rapidement d'une vision globale de son équipe.</p>
+<p>Par ailleurs, l'intelligence artificielle offre aujourd'hui de nouvelles possibilités dans le domaine de l'analyse sportive. Les techniques de traitement des données peuvent être utilisées afin d'identifier des tendances, regrouper des profils similaires ou encore fournir des recommandations destinées à assister les professionnels dans leurs prises de décision.</p>
+<p>C'est dans ce contexte que s'inscrit le projet <b>FootTech</b>. L'objectif est de concevoir une plateforme centralisée permettant aux différents acteurs d'une équipe de football de gérer leurs activités sportives tout en bénéficiant de fonctionnalités intelligentes. La plateforme distingue principalement plusieurs profils : le coach, l'adjoint, le joueur et l'administrateur.</p>
+<p>La solution est organisée autour d'un backend principal, d'une application cliente, de microservices dédiés à l'intelligence artificielle et d'une plateforme d'administration. Cette architecture permet de séparer les responsabilités et de faire évoluer indépendamment les différents composants.</p>
+
+<h3>Problématique</h3>
+<p>La gestion d'une équipe de football implique la manipulation quotidienne de nombreuses informations. Les données relatives aux joueurs, aux entraînements, aux présences, aux matchs et aux performances peuvent être difficiles à exploiter lorsqu'elles sont stockées dans différents supports. Cette situation pose plusieurs problèmes :</p>
+<ul>
+  <li><b>Absence de centralisation</b> : les informations multi-supports entraînent une perte de temps dans la recherche.</li>
+  <li><b>Exploitation manuelle</b> : l'analyse manuelle des statistiques rend difficile l'identification rapide des tendances individuelles et collectives.</li>
+  <li><b>Composition complexe</b> : la préparation d'une composition nécessite la prise en compte simultanée de plusieurs facteurs (performance, présence, fatigue).</li>
+</ul>
+<p>La problématique principale peut être formulée ainsi :</p>
+<blockquote>
+  <p><em>Comment concevoir une plateforme centralisée permettant de gérer efficacement une équipe de football tout en exploitant l'intelligence artificielle afin d'améliorer l'analyse et l'aide à la décision sportive ?</em></p>
+</blockquote>
+
+<h3>Objectifs du projet</h3>
+<p><b>Objectif général :</b> Développer une plateforme intelligente permettant de centraliser la gestion sportive et administrative d'une équipe de football.</p>
+<p><b>Objectifs spécifiques :</b></p>
+<ul>
+  <li>Gérer les utilisateurs et leurs rôles (Coach, Adjoint, Joueur, Administrateur).</li>
+  <li>Gérer les équipes et les joueurs (fiches complètes : identité, tuteurs, adresse, scolarité, blessures).</li>
+  <li>Gérer les saisons.</li>
+  <li>Organiser les entraînements (planification, fiches de séance, situations, schémas tactiques).</li>
+  <li>Suivre les présences (individuelles et en lot).</li>
+  <li>Préparer les matchs et gérer les compositions.</li>
+  <li>Enregistrer les événements en direct (live).</li>
+  <li>Évaluer les joueurs post-match (note + commentaire).</li>
+  <li>Produire des statistiques et des bilans saisonniers.</li>
+  <li>Générer des recommandations de composition grâce à l'IA.</li>
+  <li>Analyser les tendances des joueurs (clustering, détection de tendance).</li>
+  <li>Faciliter les évaluations grâce à l'IA (analyse de ton, transcription vocale, OCR).</li>
+  <li>Centraliser les notifications et le calendrier.</li>
+  <li>Fournir une plateforme d'administration.</li>
+</ul>
+
+<h3>Architecture globale</h3>
+<p>L'un des points forts de FootTech est la séparation des responsabilités :</p>
+<figure>
+  <img src="images/01_system_architecture.png" alt="Architecture globale de FootTech">
+  <figcaption>Figure 1. Architecture globale de FootTech (clients, API, services IA, données).</figcaption>
+</figure>
+<ul>
+  <li><b>Application Flutter</b> : client principal pour Coach, Adjoint et Joueur (mobile / web / desktop).</li>
+  <li><b>Backend Express + TypeScript</b> : API REST et orchestration de la logique métier.</li>
+  <li><b>AI Insights Service</b> : microservice FastAPI (tendances, clustering, ton, transcription, OCR).</li>
+  <li><b>Lineup Recommendation Service</b> : microservice FastAPI (recommandation de composition).</li>
+  <li><b>Backend Admin Django + DRF</b> : back-office d'administration.</li>
+  <li><b>Client Desktop JavaFX</b> : interface de supervision pour l'administrateur.</li>
+  <li><b>PostgreSQL 16</b> : base de données centralisée (32 tables, 1 vue).</li>
+  <li><b>Redis 7</b> : cache et infrastructure.</li>
+  <li><b>Socket.IO</b> : communication temps réel (suivi live des matchs).</li>
+  <li><b>Firebase FCM + Twilio</b> : notifications push et SMS OTP.</li>
+</ul>
+
+<h3>Organisation du mémoire</h3>
+<ul>
+  <li><b>Chapitre 1</b> — présente le contexte, la problématique et l'étude de l'existant.</li>
+  <li><b>Chapitre 2</b> — est consacré à l'analyse et à la spécification des besoins (74 User Stories).</li>
+  <li><b>Chapitre 3</b> — présente la conception de l'architecture et du modèle de données.</li>
+  <li><b>Chapitre 4</b> — détaille les choix technologiques.</li>
+  <li><b>Chapitre 5</b> — décrit la réalisation technique.</li>
+  <li><b>Chapitre 6</b> — présente les tests et la validation.</li>
+  <li><b>Chapitre 7</b> — expose les résultats, les limites et les perspectives.</li>
+</ul>
+<!-- ============================ CHAPITRE 1 ============================ -->
+<div class="page-break"></div>
+<h2>Chapitre 1 — Contexte général et étude préalable</h2>
+
+<h3>1.1 Présentation du projet FootTech</h3>
+<p>FootTech est une plateforme logicielle destinée à accompagner la gestion quotidienne d'une équipe de football. Elle centralise plusieurs domaines :</p>
+<ul>
+  <li>Gestion des joueurs (fiches complètes : identité, représentant légal, adresse, scolarité, blessures, évolution annuelle).</li>
+  <li>Gestion des équipes et du staff (coach + adjoints).</li>
+  <li>Gestion des saisons.</li>
+  <li>Gestion des entraînements (planification, fiches de séance, situations d'exercices, schémas tactiques, plannings hebdomadaires).</li>
+  <li>Suivi des présences (individuelles et en lot).</li>
+  <li>Gestion des matchs (pré-match, live, post-match).</li>
+  <li>Gestion des compositions (manuelle + recommandation IA).</li>
+  <li>Suivi des événements en direct (buts, cartons, changements, blessures).</li>
+  <li>Statistiques et bilans saisonniers.</li>
+  <li>Évaluations post-match.</li>
+  <li>Notifications (push + SMS) et calendrier partagé.</li>
+  <li>Intelligence artificielle (recommandation de composition, tendances, clustering, analyse de ton, transcription, OCR).</li>
+  <li>Administration (back-office Django + client JavaFX).</li>
+</ul>
+<p>La solution est donc plus qu'une simple application de gestion : elle constitue un système d'information sportif complet.</p>
+
+<h3>1.2 Problématique</h3>
+<p>La gestion d'une équipe de football implique la manipulation quotidienne de nombreuses informations. Les données relatives aux joueurs, aux entraînements, aux présences, aux matchs et aux performances peuvent être difficiles à exploiter lorsqu'elles sont stockées dans différents supports.</p>
+<p>Cette situation pose plusieurs problèmes :</p>
+<ul>
+  <li><b>Absence de centralisation</b> : perte de temps dans la recherche des informations.</li>
+  <li><b>Exploitation manuelle des statistiques</b> : difficulté d'identification rapide des tendances individuelles et collectives.</li>
+  <li><b>Préparation de composition complexe</b> : nécessité de prendre en compte simultanément la performance, la présence et la fatigue.</li>
+  <li><b>Communication fragmentée</b> : informations dispersées entre entraîneurs, joueurs et familles.</li>
+  <li><b>Suivi médical et scolaire incomplet</b> : le suivi des blessures et de la scolarité est souvent réalisé sur papier.</li>
+</ul>
+<p>La problématique principale : <em>Comment concevoir une plateforme centralisée permettant de gérer efficacement une équipe de football tout en exploitant l'intelligence artificielle afin d'améliorer l'analyse et l'aide à la décision sportive ?</em></p>
+
+<h3>1.3 Étude comparative de l'existant</h3>
+
+<h4>1.3.1 Méthode et périmètre de comparaison</h4>
+<p>L'étude de l'existant a été recentrée sur les deux références expressément retenues pour ce projet : <b>TacticalPad</b> et <b>MyCoachSport</b>. L'analyse repose sur les pages publiques officielles accessibles le 2 septembre 2026, les écrans de connexion visibles sans compte et l'inspection fonctionnelle du code de FootTech. Elle ne prétend donc pas décrire des modules privés qui nécessitent un abonnement ou des identifiants. Lorsqu'une fonction n'est pas présentée publiquement, elle est notée « non établie publiquement » plutôt que « inexistante ».</p>
+<p>Les critères ont été choisis selon quatre axes : (1) gestion organisationnelle, (2) préparation sportive et tactique, (3) analyse et aide à la décision, (4) architecture, sécurité et exploitation. Cette méthode évite une comparaison limitée à l'apparence des interfaces et met en évidence la valeur métier réelle de chaque produit.</p>
+
+<table class="comparison-table">
+  <caption>Tableau 1A. Profil des trois solutions étudiées</caption>
+  <tr><th>Solution</th><th>Positionnement principal</th><th>Public cible</th><th>Éléments différenciateurs visibles</th></tr>
+  <tr><td><b>FootTech</b></td><td>Système d'information footballistique intégré et aide à la décision</td><td>Clubs, coachs, adjoints, joueurs et administrateurs</td><td>Cycle complet équipe–saison–entraînement–match, temps réel, dossiers joueurs détaillés, microservices IA et back-office.</td></tr>
+  <tr><td><b>TacticalPad</b></td><td>Tableau tactique et création de contenus d'entraînement</td><td>Entraîneurs, analystes, éducateurs et staffs de plusieurs sports</td><td>Éditeur visuel, animation 2D/3D, nombreux terrains, export et partage de contenus, applications desktop et mobiles.</td></tr>
+  <tr><td><b>MyCoachSport</b></td><td>Organisation opérationnelle d'un effectif et de la saison</td><td>Éducateurs, clubs et joueurs</td><td>Effectif, convocations, calendrier, présences, compositions, séances et bibliothèque communautaire d'exercices.</td></tr>
+</table>
+
+<h4>1.3.2 Analyse de TacticalPad</h4>
+<p>TacticalPad se présente comme une application destinée à dessiner des exercices, des compositions et des tactiques. Son avantage principal est la richesse de la représentation visuelle : création de séances, tableaux animés, visualisation 2D et 3D, terrains personnalisables et prise en charge de plusieurs sports. La page officielle indique une disponibilité sur Windows, macOS, iOS et Android. Les tutoriels officiels présentent également l'export d'images, de vidéos et de documents PDF, des formats adaptés aux réseaux sociaux, l'analyse sur photo ainsi que l'utilisation de dépôts cloud tels que Google Drive, OneDrive et Dropbox.</p>
+<p>TacticalPad possède donc une forte maturité pour la <b>communication tactique</b>. Le coach peut transformer une idée en support visuel compréhensible, l'animer et la partager. En revanche, les pages publiques étudiées ne décrivent pas un système d'information complet équivalent à FootTech pour les dossiers administratifs et médicaux des joueurs, la gestion des tuteurs et de la scolarité, le suivi live structuré des événements de match, l'administration multi-rôle ou la recommandation de composition fondée sur la présence, la performance et la fatigue.</p>
+<p>Au moment de la consultation, la page publique affichait des offres annuelles distinctes : formule complète desktop et mobile, formule PC/Mac, formule mobile et licences en volume. Ces prix sont des informations commerciales susceptibles d'évoluer et sont donc conservés uniquement comme observation datée, pas comme caractéristique permanente.</p>
+<div class="source-note"><b>Sources officielles consultées :</b> site TacticalPad en français et centre de formation rapide TacticalPad, consultation du 02/09/2026.</div>
+
+<h4>1.3.3 Analyse de MyCoachSport</h4>
+<p>L'adresse <code>classic.mycoachsport.com/login</code> donne accès à une interface d'authentification (identifiant, mot de passe, récupération de mot de passe et inscription). Sans compte, le contenu privé n'est pas consultable. Pour compléter l'étude de façon vérifiable, les fonctionnalités ont été relevées sur la page publique officielle historique de MyCoach Football, appartenant au même écosystème produit.</p>
+<p>Cette documentation met en avant un parcours très proche du quotidien d'un éducateur : gestion des informations personnelles et médicales, convocations différenciées par courriel ou SMS, calendrier de saison, matchs et entraînements, choix des joueurs, composition tactique, suivi de la présence et préparation des séances. Elle présente aussi des fiches d'exercices illustrées partageables avec une communauté, une bibliothèque publique annoncée à plus de mille exercices et un mécanisme de proposition de séance selon la catégorie, la durée et l'intensité.</p>
+<p>MyCoachSport constitue ainsi un concurrent fonctionnel plus proche de FootTech que TacticalPad sur l'<b>organisation de l'équipe</b>. Ses atouts publics sont la logique métier éprouvée du coach, la communication des convocations et la mutualisation d'exercices. Les pages accessibles publiquement ne permettent toutefois pas d'établir la présence d'un moteur comparable aux deux microservices IA de FootTech, d'un suivi temps réel par Socket.IO, d'une API auto-hébergeable documentée ou d'un back-office technique séparé. Le prix de la plateforme classique n'est pas affiché sur la page de connexion étudiée.</p>
+<div class="source-note"><b>Sources officielles consultées :</b> connexion MyCoachSport Classic, vitrine MyCoach Pro et page publique des fonctionnalités MyCoach Football, consultation du 02/09/2026.</div>
+
+<h4>1.3.4 Comparaison multicritère</h4>
+<table class="comparison-table">
+  <caption>Tableau 1B. Comparaison détaillée FootTech / TacticalPad / MyCoachSport</caption>
+  <tr><th>Critère</th><th><b>FootTech</b></th><th>TacticalPad</th><th>MyCoachSport / MyCoach Football</th></tr>
+  <tr><td>Finalité principale</td><td><span class="success">Gestion intégrée + décision</span></td><td>Conception tactique visuelle</td><td>Gestion quotidienne du coach</td></tr>
+  <tr><td>Sports couverts</td><td>Football</td><td><span class="success">Multisport</span></td><td>Football sur la source fonctionnelle étudiée ; vitrine actuelle multisport</td></tr>
+  <tr><td>Plateformes clientes</td><td>Flutter mobile, web et desktop</td><td><span class="success">Windows, macOS, iOS, Android</span></td><td>Plateforme web ; applications évoquées par l'écosystème public</td></tr>
+  <tr><td>Gestion des équipes et du staff</td><td><span class="success">Oui, rôles COACH/ADJOINT/JOUEUR</span></td><td><span class="partial">Gestion d'équipes orientée dessin</span></td><td><span class="success">Oui</span></td></tr>
+  <tr><td>Dossier joueur enrichi</td><td><span class="success">Identité, tuteur, adresse, école, blessure, profil saison</span></td><td>Non établie publiquement</td><td><span class="success">Informations personnelles et médicales</span></td></tr>
+  <tr><td>Isolation multi-équipe / saison</td><td><span class="success">Oui, ressources rattachées à l'équipe</span></td><td>Plusieurs équipes configurables</td><td>Calendrier et saison présentés publiquement</td></tr>
+  <tr><td>Planification entraînements et matchs</td><td><span class="success">Oui</span></td><td><span class="success">Planification de séances</span></td><td><span class="success">Oui</span></td></tr>
+  <tr><td>Présences</td><td><span class="success">Oui, saisie individuelle et atomique en lot</span></td><td>Non établie publiquement</td><td><span class="success">Oui, compteur en direct annoncé</span></td></tr>
+  <tr><td>Fiches et bibliothèque d'exercices</td><td><span class="success">Fiches, situations et propositions rattachées à l'équipe</span></td><td><span class="success">Création visuelle avancée</span></td><td><span class="success">Bibliothèque communautaire importante</span></td></tr>
+  <tr><td>Éditeur tactique</td><td><span class="partial">Dessins tactiques structurés</span></td><td><span class="success">Fonction centrale et mature</span></td><td>Composition tactique</td></tr>
+  <tr><td>Animation 2D/3D</td><td><span class="missing">Non</span></td><td><span class="success">Oui</span></td><td>Non établie publiquement</td></tr>
+  <tr><td>Partage / export média</td><td><span class="partial">Rapport de match PDF et notifications</span></td><td><span class="success">Images, vidéos, PDF, cloud et réseaux sociaux</span></td><td>Partage de séances et convocations</td></tr>
+  <tr><td>Cycle complet du match</td><td><span class="success">Pré-match, live, post-match</span></td><td><span class="partial">Préparation tactique</span></td><td>Matchs, sélection et composition</td></tr>
+  <tr><td>Événements en temps réel</td><td><span class="success">Buts, cartons, changements et blessures via Socket.IO</span></td><td>Non établi publiquement</td><td>Non établi publiquement</td></tr>
+  <tr><td>Statistiques et évaluations</td><td><span class="success">Statistiques, évaluations, tendances</span></td><td>Orientation analyse et présentation tactiques</td><td>Suivi joueur présenté, profondeur non visible sans compte</td></tr>
+  <tr><td>Recommandation de composition par IA</td><td><span class="success">Oui, présence + performance + fatigue</span></td><td>Non présentée publiquement</td><td>Non présentée publiquement</td></tr>
+  <tr><td>Analyses IA complémentaires</td><td><span class="success">Tendance, clustering, ton, transcription et OCR</span></td><td>Non présentées publiquement</td><td>Proposition de séance selon des critères ; méthode non détaillée</td></tr>
+  <tr><td>Communication</td><td>FCM, notifications internes et OTP SMS</td><td>Supports visuels et exports</td><td><span class="success">Courriel/SMS et convocations</span></td></tr>
+  <tr><td>Administration globale</td><td><span class="success">Django/DRF + client JavaFX + audit</span></td><td>Licences en volume ; back-office non étudié</td><td>Fonctions privées non visibles</td></tr>
+  <tr><td>Contrôle de l'hébergement</td><td><span class="success">Architecture conteneurisée auto-hébergeable</span></td><td>Produit propriétaire</td><td>Service propriétaire</td></tr>
+  <tr><td>Maturité commerciale</td><td><span class="partial">Prototype PFE validé techniquement</span></td><td><span class="success">Produit international établi</span></td><td><span class="success">Écosystème métier établi</span></td></tr>
+</table>
+
+<h4>1.3.5 Positionnement et analyse stratégique de FootTech</h4>
+<p>FootTech ne doit pas être présenté comme supérieur sur tous les axes. Il se distingue surtout par l'<b>intégration</b> de fonctions qui sont spécialisées chez les concurrents. TacticalPad reste plus avancé pour créer et animer des supports tactiques ; MyCoachSport dispose d'une logique communautaire et organisationnelle plus mature. FootTech apporte, dans une seule architecture maîtrisée, les dossiers joueurs, l'isolation par équipe, les entraînements, les présences, le cycle de match, le temps réel, les statistiques, l'administration et deux services d'aide à la décision.</p>
+
+<table class="comparison-table">
+  <caption>Tableau 1C. Analyse stratégique et positionnement de FootTech</caption>
+  <tr><th>Forces</th><th>Faiblesses</th><th>Opportunités</th><th>Menaces</th></tr>
+  <tr>
+    <td>Architecture modulaire ; couverture métier de bout en bout ; rôles séparés ; données jeunesse détaillées ; suivi live ; IA explicable ; auto-hébergement possible.</td>
+    <td>Pas d'animation tactique 3D ; bibliothèque d'exercices limitée ; expérience terrain encore courte ; dépendance à la qualité des données et à des services externes.</td>
+    <td>Importer/exporter des séances ; créer une communauté d'exercices ; mode hors ligne ; analyse vidéo ; pilotes avec académies et clubs formateurs.</td>
+    <td>Concurrents installés ; coût d'industrialisation ; exigences de protection des données des mineurs ; adoption difficile si la saisie est trop lourde.</td>
+  </tr>
+</table>
+
+<p>Le positionnement recommandé est celui d'une <b>plateforme footballistique intelligente pour académies et clubs de formation</b>. FootTech doit préserver son avantage d'intégration tout en empruntant deux bonnes pratiques aux références : la puissance de création visuelle de TacticalPad et la simplicité opérationnelle ainsi que la bibliothèque partagée de MyCoachSport.</p>
+
+<h3>1.4 Limites des solutions traditionnelles</h3>
+<p>Les solutions existantes souffrent de plusieurs limites :</p>
+<ul>
+  <li>La plupart sont des applications généralistes non spécifiques au football.</li>
+  <li>Elles ne couvrent qu'une partie du besoin (organisation, communication ou suivi statistique).</li>
+  <li>Aucune ne réunit, à coût raisonnable pour un club de jeunes, la triple dimension organisationnelle, technique et décisionnelle.</li>
+  <li>L'intégration de services d'intelligence artificielle est généralement limitée ou inexistante.</li>
+  <li>Les clubs professionnels utilisent des solutions lourdes et coûteuses, hors de portée des équipes de jeunes.</li>
+</ul>
+
+<h3>1.5 Solution proposée</h3>
+<p>FootTech se positionne sur ce créneau : une plateforme modulaire, mobile d'abord, multi-acteurs, qui combine :</p>
+<ul>
+  <li>Une dimension <b>organisationnelle</b> : effectif, présences, plannings hebdomadaires.</li>
+  <li>Une dimension <b>technique</b> : fiches de séance, schémas tactiques (TacticalPad-like), suivi live, évaluations.</li>
+  <li>Une dimension <b>décisionnelle</b> : recommandation d'alignement et analyses IA.</li>
+</ul>
+<p>Le rôle de l'IA est celui d'un outil d'aide à la décision, et non d'un remplacement de l'entraîneur. Les recommandations générées assistent le coach tout en conservant la décision finale sous sa responsabilité.</p>
+
+<h3>1.6 Objectifs du projet (méthode SMART)</h3>
+<table>
+  <caption>Tableau 2. Objectifs du projet déclinés selon la méthode SMART</caption>
+  <tr><th>Critère</th><th>Objectif du projet</th></tr>
+  <tr><td><b>S</b>pécifique</td><td>Concevoir et déployer une plateforme de gestion de club regroupant mobile, API, IA et back-office.</td></tr>
+  <tr><td><b>M</b>esurable</td><td>Fournir au moins 15 fonctionnalités métier couvrant effectif, entraînements, matchs et notifications.</td></tr>
+  <tr><td><b>A</b>tteignable</td><td>Réaliser avec des technologies maîtrisées (Flutter, Node.js, Python) sur une durée de 4 mois.</td></tr>
+  <tr><td><b>R</b>éaliste</td><td>S'appuyer sur des microservices rapides à déployer (Docker) et une architecture modulaire.</td></tr>
+  <tr><td><b>T</b>emporel</td><td>Livrer une version utilisable (démo) en fin de projet, avec pipeline CI/CD fonctionnel.</td></tr>
+</table>
+
+<h3>1.7 Méthodologie de développement</h3>
+
+<table>
+  <caption>Tableau 3. Tableau comparatif des méthodologies de travail</caption>
+  <tr><th>Critère</th><th>Cycle en cascade (V)</th><th>Scrum</th><th>Kanban</th><th>Choix retenu</th></tr>
+  <tr><td>Adaptation aux changements</td><td>Faible</td><td>Forte</td><td>Forte</td><td rowspan="5"><b>Scrum : itérations courtes de 2 semaines permettant d'ajuster le périmètre au fil des sprints et de livrer tôt les modules critiques (auth, effectif, entraînements).</b></td></tr>
+  <tr><td>Cadence de livraison</td><td>En fin de cycle</td><td>Fin de chaque sprint</td><td>Continue</td></tr>
+  <tr><td>Gestion des priorités</td><td>Figée</td><td>Backlog priorisé</td><td>Column Kanban</td></tr>
+  <tr><td>Rôles définis</td><td>Non</td><td>PO / Scrum Master / Équipe</td><td>Non</td></tr>
+  <tr><td>Retour utilisateur</td><td>Tardif</td><td>Régulier</td><td>Continue</td></tr>
+</table>
+
+<table>
+  <caption>Tableau 4. Planning prévisionnel et découpage des sprints</caption>
+  <tr><th>Sprint</th><th>Objectif (thème)</th><th>Livrables clés</th></tr>
+  <tr><td>Sprint 1</td><td>Fondations</td><td>Analyse du besoin, monorepo, base PostgreSQL (32 tables), API Express (auth JWT + refresh + OTP SMS).</td></tr>
+  <tr><td>Sprint 2</td><td>Effectif</td><td>Modules équipes / joueurs (fiches, tuteurs, scolarité, blessures), saisons, modélisation UML.</td></tr>
+  <tr><td>Sprint 3</td><td>Entraînements</td><td>Planification, présences (bulk), situations et schémas tactiques, propositions d'exercices.</td></tr>
+  <tr><td>Sprint 4</td><td>Matchs</td><td>Cycle de match complet, suivi live Socket.IO, évaluations, rapport PDF, écrans Flutter.</td></tr>
+  <tr><td>Sprint 5</td><td>Intelligence</td><td>Lineup Service (scoring + seuils), AI Insights, recommandations persistées.</td></tr>
+  <tr><td>Sprint 6</td><td>Exploitation</td><td>Notifications (FCM + Twilio), back-office Django, client JavaFX, Docker, CI/CD.</td></tr>
+  <tr><td>Sprint 7</td><td>Validation</td><td>Tests (Postman, Playwright, JMeter), recette, corrections.</td></tr>
+  <tr><td>Sprint 8</td><td>Finalisation</td><td>Rédaction du mémoire, préparation de la soutenance.</td></tr>
+</table>
+<!-- ============================ CHAPITRE 2 ============================ -->
+<div class="page-break"></div>
+<h2>Chapitre 2 — Analyse et spécification des besoins</h2>
+
+<h3>2.1 Identification des acteurs</h3>
+<p>Le système distingue quatre profils d'utilisateurs :</p>
+
+<h4>Coach</h4>
+<p>Le coach représente l'acteur principal. Il peut :</p>
+<ul>
+  <li>Gérer son équipe (paramétrage, ajout/suppression d'adjoints).</li>
+  <li>Gérer les joueurs (fiches complètes).</li>
+  <li>Créer et organiser les entraînements et les plannings hebdomadaires.</li>
+  <li>Gérer les matchs (création, compositions, statuts, rapports).</li>
+  <li>Consulter les statistiques et les bilans saisonniers.</li>
+  <li>Obtenir des recommandations IA de composition.</li>
+  <li>Évaluer les joueurs post-match.</li>
+  <li>Valider ou rejeter les propositions d'exercices des adjoints.</li>
+  <li>Diffuser des notifications et consulter le calendrier (CRUD).</li>
+</ul>
+
+<h4>Adjoint</h4>
+<p>L'adjoint assiste le coach dans les opérations quotidiennes :</p>
+<ul>
+  <li>Marquer les présences (individuelles ou en lot).</li>
+  <li>Gérer les détails d'un entraînement (situations, schémas tactiques).</li>
+  <li>Suivre le match en temps réel (événements live).</li>
+  <li>Proposer des exercices (workflow de validation par le coach).</li>
+  <li>Consulter les informations des joueurs.</li>
+</ul>
+
+<h4>Joueur</h4>
+<p>Le joueur accède à ses propres informations :</p>
+<ul>
+  <li>Profil personnel.</li>
+  <li>Calendrier de l'équipe (lecture seule).</li>
+  <li>Statistiques personnelles.</li>
+  <li>Notifications.</li>
+  <li>Informations de son équipe.</li>
+</ul>
+
+<h4>Administrateur</h4>
+<p>L'administrateur supervise l'ensemble de la plateforme :</p>
+<ul>
+  <li>Gestion des équipes (suspension / réactivation).</li>
+  <li>Gestion des utilisateurs (suspension / réactivation).</li>
+  <li>Consultation des matchs et entraînements (lecture seule).</li>
+  <li>Diffusion de notifications (broadcast).</li>
+  <li>Journal d'audit.</li>
+  <li>Tableau de bord de supervision (KPI).</li>
+  <li>Gestion des comptes administrateurs.</li>
+</ul>
+
+<h3>2.2 Identification des épopées</h3>
+<p>Les besoins ont été regroupés en <b>15 épopées</b> et <b>74 User Stories</b> :</p>
+
+<table>
+  <caption>Tableau 6. Épopées et répartition des User Stories</caption>
+  <tr><th>#</th><th>Épopée</th><th>Nombre</th></tr>
+  <tr><td>1</td><td>Authentification</td><td>6</td></tr>
+  <tr><td>2</td><td>Équipes</td><td>4</td></tr>
+  <tr><td>3</td><td>Joueurs</td><td>6</td></tr>
+  <tr><td>4</td><td>Saisons</td><td>3</td></tr>
+  <tr><td>5</td><td>Entraînements</td><td>7</td></tr>
+  <tr><td>6</td><td>Présences</td><td>4</td></tr>
+  <tr><td>7</td><td>Matchs</td><td>3</td></tr>
+  <tr><td>8</td><td>IA Composition</td><td>4</td></tr>
+  <tr><td>9</td><td>Match Live</td><td>5</td></tr>
+  <tr><td>10</td><td>Statistiques</td><td>4</td></tr>
+  <tr><td>11</td><td>Bilan saison</td><td>3</td></tr>
+  <tr><td>12</td><td>Notifications / Calendrier</td><td>5</td></tr>
+  <tr><td>13</td><td>AI Insights</td><td>5</td></tr>
+  <tr><td>14</td><td>Administration</td><td>11</td></tr>
+  <tr><td>15</td><td>Dashboards</td><td>4</td></tr>
+  <tr><td colspan="2"><b>Total</b></td><td><b>74</b></td></tr>
+</table>
+
+<h3>2.3 Product Backlog — 74 User Stories</h3>
+
+<h4>Épopée 1 : Authentification</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-01</td><td>En tant que Coach, je veux m'inscrire avec email et mot de passe pour créer mon compte.</td></tr>
+  <tr><td>US-02</td><td>En tant que Coach/Adjoint, je veux me connecter avec email + mot de passe pour accéder à l'application.</td></tr>
+  <tr><td>US-03</td><td>En tant qu'utilisateur, je veux que ma session soit automatiquement renouvelée grâce au refresh token.</td></tr>
+  <tr><td>US-04</td><td>En tant que Coach, je veux activer un Joueur par code OTP (SMS/WhatsApp).</td></tr>
+  <tr><td>US-05</td><td>En tant que Joueur, je veux me connecter par numéro de téléphone + OTP.</td></tr>
+  <tr><td>US-06</td><td>En tant qu'utilisateur, je veux me déconnecter.</td></tr>
+</table>
+
+<h4>Épopée 2 : Équipes</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-07</td><td>En tant que Coach, je veux créer une équipe (nom, catégorie, logo, description).</td></tr>
+  <tr><td>US-08</td><td>En tant que Coach, je veux lister mes équipes.</td></tr>
+  <tr><td>US-09</td><td>En tant que Coach, je veux ajouter un Adjoint à mon équipe.</td></tr>
+  <tr><td>US-10</td><td>En tant que Coach, je veux supprimer un Adjoint de mon équipe.</td></tr>
+</table>
+
+<h4>Épopée 3 : Joueurs</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-11</td><td>En tant que Coach, je veux ajouter un joueur à mon équipe (activation par OTP).</td></tr>
+  <tr><td>US-12</td><td>En tant que Coach, je veux consulter la fiche complète d'un joueur.</td></tr>
+  <tr><td>US-13</td><td>En tant que Coach, je veux modifier les informations d'un joueur.</td></tr>
+  <tr><td>US-14</td><td>En tant que Coach, je veux ajouter les informations de scolarité d'un joueur.</td></tr>
+  <tr><td>US-15</td><td>En tant que Coach, je veux enregistrer les blessures d'un joueur.</td></tr>
+  <tr><td>US-16</td><td>En tant que Coach, je veux consulter le profil saisonnier d'un joueur (évolution morphologique et sportive).</td></tr>
+</table>
+
+<h4>Épopée 4 : Saisons</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-17</td><td>En tant que Coach, je veux créer une saison (nom, dates, is_current).</td></tr>
+  <tr><td>US-18</td><td>En tant qu'utilisateur, je veux lister les saisons disponibles.</td></tr>
+  <tr><td>US-19</td><td>En tant que Coach, je veux modifier les dates d'une saison.</td></tr>
+</table>
+
+<h4>Épopée 5 : Entraînements</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-20</td><td>En tant que Coach, je veux créer un entraînement (date, heure, lieu).</td></tr>
+  <tr><td>US-21</td><td>En tant que Coach, je veux remplir la fiche de séance (objectifs, effectif).</td></tr>
+  <tr><td>US-22</td><td>En tant que Coach, je veux ajouter des situations d'exercices à la séance.</td></tr>
+  <tr><td>US-23</td><td>En tant que Coach, je veux dessiner un schéma tactique pour une situation.</td></tr>
+  <tr><td>US-24</td><td>En tant qu'Adjoint, je veux proposer un exercice au coach.</td></tr>
+  <tr><td>US-25</td><td>En tant que Coach, je veux valider ou rejeter une proposition d'exercice.</td></tr>
+  <tr><td>US-26</td><td>En tant qu'utilisateur, je veux lister les entraînements de mon équipe.</td></tr>
+</table>
+
+<h4>Épopée 6 : Présences</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-27</td><td>En tant qu'Adjoint, je veux marquer la présence d'un joueur à un entraînement.</td></tr>
+  <tr><td>US-28</td><td>En tant qu'Adjoint, je veux marquer les présences en lot (bulk) pour un entraînement.</td></tr>
+  <tr><td>US-29</td><td>En tant qu'utilisateur, je veux consulter les présences d'un entraînement.</td></tr>
+  <tr><td>US-30</td><td>En tant qu'utilisateur, je veux consulter l'historique des présences d'un joueur.</td></tr>
+</table>
+
+<h4>Épopée 7 : Matchs</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-31</td><td>En tant que Coach, je veux créer un match (adversaire, date, lieu, formation).</td></tr>
+  <tr><td>US-32</td><td>En tant que Coach, je veux définir la composition d'équipe (titulaires, remplaçants).</td></tr>
+  <tr><td>US-33</td><td>En tant que Coach, je veux modifier le statut d'un match (scheduled → live → finished).</td></tr>
+</table>
+
+<h4>Épopée 8 : IA Composition</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-34</td><td>En tant que Coach, je veux obtenir une recommandation IA de composition.</td></tr>
+  <tr><td>US-35</td><td>En tant que Coach, je veux consulter les scores IA d'un match.</td></tr>
+  <tr><td>US-36</td><td>En tant que Coach, je veux valider ou modifier la composition recommandée par l'IA.</td></tr>
+  <tr><td>US-37</td><td>En tant que Coach, je veux que la recommandation IA soit recalculable à tout moment.</td></tr>
+</table>
+
+<h4>Épopée 9 : Match Live</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-38</td><td>En tant qu'Adjoint, je veux enregistrer les événements live d'un match (buts, cartons, changements).</td></tr>
+  <tr><td>US-39</td><td>En tant qu'utilisateur, je veux consulter la timeline d'un match en cours (temps réel).</td></tr>
+  <tr><td>US-40</td><td>En tant que Coach, je veux saisir les statistiques d'un match (buts, passes, minutes jouées).</td></tr>
+  <tr><td>US-41</td><td>En tant que Coach, je veux évaluer les joueurs après un match (note + commentaire).</td></tr>
+  <tr><td>US-42</td><td>En tant que Coach, je veux générer un rapport de match (PDF).</td></tr>
+</table>
+
+<h4>Épopée 10 : Statistiques</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-43</td><td>En tant qu'utilisateur, je veux consulter mes statistiques personnelles.</td></tr>
+  <tr><td>US-44</td><td>En tant que Coach, je veux consulter les statistiques de mon équipe.</td></tr>
+  <tr><td>US-45</td><td>En tant que Coach, je veux comparer les performances entre joueurs.</td></tr>
+  <tr><td>US-46</td><td>En tant que Coach, je veux consulter l'évolution d'un joueur sur la saison.</td></tr>
+</table>
+
+<h4>Épopée 11 : Bilan saison</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-47</td><td>En tant que Coach, je veux consulter le bilan de saison de mon équipe.</td></tr>
+  <tr><td>US-48</td><td>En tant que Coach, je veux exporter le bilan en PDF.</td></tr>
+  <tr><td>US-49</td><td>En tant que Coach, je veux filtrer le bilan par joueur ou par poste.</td></tr>
+</table>
+
+<h4>Épopée 12 : Notifications / Calendrier</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-50</td><td>En tant qu'utilisateur, je veux recevoir des notifications push (FCM).</td></tr>
+  <tr><td>US-51</td><td>En tant que Coach, je veux envoyer une notification à toute l'équipe (broadcast).</td></tr>
+  <tr><td>US-52</td><td>En tant qu'utilisateur, je veux marquer une notification comme lue.</td></tr>
+  <tr><td>US-53</td><td>En tant qu'utilisateur, je veux consulter le calendrier partagé de mon équipe.</td></tr>
+  <tr><td>US-54</td><td>En tant que Coach, je veux créer un événement dans le calendrier.</td></tr>
+</table>
+
+<h4>Épopée 13 : AI Insights</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-55</td><td>En tant que Coach, je veux détecter la tendance de performance d'un joueur (PROGRESSING / STABLE / DECLINING).</td></tr>
+  <tr><td>US-56</td><td>En tant que Coach, je veux regrouper mes joueurs par profils similaires (clustering).</td></tr>
+  <tr><td>US-57</td><td>En tant que Coach, je veux analyser le ton de mes commentaires d'évaluation (TOO_HARSH / TOO_GENERIC / OK).</td></tr>
+  <tr><td>US-58</td><td>En tant que Coach, je veux transcrire une observation vocale en texte (speech-to-text).</td></tr>
+  <tr><td>US-59</td><td>En tant que Coach, je veux extraire des informations d'un document (certificat médical, fiche scolaire) par OCR.</td></tr>
+</table>
+
+<h4>Épopée 14 : Administration</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-60</td><td>En tant qu'Admin, je veux me connecter au back-office (email + mot de passe).</td></tr>
+  <tr><td>US-61</td><td>En tant qu'Admin, je veux consulter le tableau de bord (KPI).</td></tr>
+  <tr><td>US-62</td><td>En tant qu'Admin, je veux lister les équipes avec recherche et filtres.</td></tr>
+  <tr><td>US-63</td><td>En tant qu'Admin, je veux suspendre une équipe.</td></tr>
+  <tr><td>US-64</td><td>En tant qu'Admin, je veux réactiver une équipe suspendue.</td></tr>
+  <tr><td>US-65</td><td>En tant qu'Admin, je veux lister les utilisateurs.</td></tr>
+  <tr><td>US-66</td><td>En tant qu'Admin, je veux suspendre un utilisateur.</td></tr>
+  <tr><td>US-67</td><td>En tant qu'Admin, je veux réactiver un utilisateur.</td></tr>
+  <tr><td>US-68</td><td>En tant qu'Admin, je veux diffuser une notification à tous les utilisateurs (broadcast).</td></tr>
+  <tr><td>US-69</td><td>En tant qu'Admin, je veux consulter les logs d'audit.</td></tr>
+  <tr><td>US-70</td><td>En tant qu'Admin, je veux gérer les comptes administrateurs.</td></tr>
+</table>
+
+<h4>Épopée 15 : Dashboards</h4>
+<table>
+  <tr><th>ID</th><th>User Story</th></tr>
+  <tr><td>US-71</td><td>En tant que Coach, je veux consulter mon dashboard personnel.</td></tr>
+  <tr><td>US-72</td><td>En tant que Joueur, je veux consulter mon dashboard personnel.</td></tr>
+  <tr><td>US-73</td><td>En tant qu'Admin, je veux consulter le dashboard de supervision.</td></tr>
+  <tr><td>US-74</td><td>En tant qu'Admin, je veux voir les joueurs en attente d'activation.</td></tr>
+</table>
+
+<h4>Exemple illustratif — US-34 : Générer une composition avec l'IA</h4>
+<p>Cette User Story correspond directement au microservice <code>lineup-recommendation-service</code>. Le principe est particulièrement intéressant dans le mémoire car il montre comment une User Story métier devient une fonctionnalité technique :</p>
+<pre><code>User Story (US-34)
+    ↓
+Données joueurs (présence, performance, fatigue)
+    ↓
+Service IA (Lineup Recommendation Service :8100)
+    ↓
+Score des joueurs (0-100)
+    ↓
+Composition recommandée (STARTER ≥ 70, SUB ≥ 40)
+    ↓
+Coach
+    ↓
+Validation / modification</code></pre>
+<p>Le rôle de l'IA est celui d'un outil d'aide à la décision, et non d'un remplacement de l'entraîneur.</p>
+
+<h3>2.4 Besoins fonctionnels</h3>
+<p>Les besoins fonctionnels couvrent l'ensemble des 74 User Stories organisées en 15 épopées. Chaque fonctionnalité est traçable de la User Story au code source via le pattern :</p>
+<pre><code>User Story → Cas d'utilisation → Conception → Code concerné → Interface → Test → Résultat</code></pre>
+<p>Cette correspondance donne au mémoire un aspect réellement basé sur le projet FootTech plutôt qu'un simple mémoire théorique.</p>
+
+<h3>2.5 Besoins non fonctionnels</h3>
+<table>
+  <tr><th>Catégorie</th><th>Besoin</th><th>Implémentation</th></tr>
+  <tr><td>Sécurité</td><td>Authentification sécurisée</td><td>JWT (access 30 min / refresh 7 j), OTP SMS, RBAC</td></tr>
+  <tr><td>Sécurité</td><td>Protection des données</td><td>Bcrypt, Helmet.js, CORS, Zod, secrets absents des logs</td></tr>
+  <tr><td>Confidentialité</td><td>Isolation des clubs et équipes</td><td>Contrôles resource/team/self-access ; saisons et propositions rattachées à l'équipe</td></tr>
+  <tr><td>Vie privée</td><td>Données potentiellement sensibles de joueurs mineurs</td><td>Minimisation, droits par rôle et journal d'audit ; consentement et rétention à formaliser avant production</td></tr>
+  <tr><td>Intégrité</td><td>Pas d'enregistrement partiel d'un lot</td><td>Transaction PostgreSQL pour les présences en lot</td></tr>
+  <tr><td>Performance</td><td>Temps de réponse</td><td>Redis (cache), pagination, index PostgreSQL, timeout IA 5 s</td></tr>
+  <tr><td>Disponibilité</td><td>Dégradation gracieuse</td><td>503 si service IA indisponible ; fallback composition manuelle</td></tr>
+  <tr><td>Évolutivité</td><td>Architecture modulaire</td><td>Microservices indépendants, Docker Compose</td></tr>
+  <tr><td>Internationalisation</td><td>Multi-langue</td><td>Flutter i18n (FR / EN / AR)</td></tr>
+  <tr><td>Portabilité</td><td>Cross-platform</td><td>Flutter (iOS, Android, Web, Desktop)</td></tr>
+  <tr><td>Maintenabilité</td><td>Code typé</td><td>TypeScript (backend), Dart (frontend), Python (IA)</td></tr>
+  <tr><td>Observabilité</td><td>Logging</td><td>Morgan + Winston (backend), audit logs (admin)</td></tr>
+  <tr><td>Intégration continue</td><td>CI/CD</td><td>GitHub Actions + GitLab CI, Docker</td></tr>
+</table>
+
+<h3>2.6 Priorisation</h3>
+<p>La priorisation suit une approche MoSCoW :</p>
+<ul>
+  <li><b>Must Have</b> : Authentification, Équipes, Joueurs, Entraînements, Présences, Matchs, Notifications.</li>
+  <li><b>Should Have</b> : IA Composition, Match Live, Statistiques, Bilan saison, Dashboards.</li>
+  <li><b>Could Have</b> : AI Insights (tendances, clustering, ton, transcription, OCR).</li>
+  <li><b>Won't Have (cette version)</b> : Analyse vidéo, métriques avancées (xG), orchestration Kubernetes.</li>
+</ul>
+<!-- ============================ CHAPITRE 3 ============================ -->
+<div class="page-break"></div>
+<h2>Chapitre 3 — Conception de la solution</h2>
+
+<h3>3.1 Architecture générale</h3>
+<p>L'architecture de FootTech suit une logique de séparation des responsabilités. Le backend principal gère le métier, tandis que les services IA exposent leurs capacités sous forme de services indépendants.</p>
+<figure>
+  <img src="images/01_system_architecture.png" alt="Architecture globale">
+  <figcaption>Figure 14. Architecture globale de FootTech (clients, API, services IA, données).</figcaption>
+</figure>
+<p>Les composants interagissent comme suit :</p>
+<ul>
+  <li><b>Flutter</b> communique avec l'<b>API Express</b> via REST (Dio) et Socket.IO.</li>
+  <li><b>Flutter</b> communique directement avec <b>AI Insights</b> pour les analyses autonomes.</li>
+  <li><b>API Express</b> communique avec le <b>Lineup Service</b> pour la recommandation (orchestration).</li>
+  <li><b>API Express</b> accède à <b>PostgreSQL</b> et <b>Redis</b>.</li>
+  <li><b>API Express</b> envoie des notifications via <b>Firebase FCM</b> et des SMS via <b>Twilio</b>.</li>
+  <li><b>Client JavaFX</b> communique avec le <b>Backend Django</b>.</li>
+  <li><b>Backend Django</b> accède à PostgreSQL (schéma <code>platform</code> en lecture + tables admin en écriture).</li>
+</ul>
+
+<h3>3.2 Architecture logicielle</h3>
+<figure>
+  <img src="images/19_architecture_logicielle.png" alt="Architecture logicielle">
+  <figcaption>Figure 15. Architecture logicielle de la solution, vue par couches.</figcaption>
+</figure>
+<p>L'architecture est organisée en couches :</p>
+<ul>
+  <li><b>Couche Présentation</b> : Flutter (Riverpod + GoRouter), JavaFX.</li>
+  <li><b>Couche Application</b> : Controllers (Express), Use Cases (FastAPI Clean Architecture), Serializers (DRF).</li>
+  <li><b>Couche Domaine</b> : Services métier (Express), Entities (FastAPI), Models (Django).</li>
+  <li><b>Couche Données</b> : Repositories (Express BaseRepository), Infrastructure (FastAPI), ORM (Django).</li>
+</ul>
+
+<h3>3.3 Architecture des microservices</h3>
+<figure>
+  <img src="images/13_microservices_communication.png" alt="Communication microservices">
+  <figcaption>Figure 17. Communication entre Express et les services IA.</figcaption>
+</figure>
+<p>Les deux microservices IA fonctionnent selon des paradigmes différents :</p>
+<ul>
+  <li><b>Lineup Recommendation Service</b> (:8100) — <b>orchestré</b> : Express envoie toutes les données (features) dans la requête ; le service calcule les scores et retourne les recommandations. Il est sans état.</li>
+  <li><b>AI Insights Service</b> (:8300) — <b>autonome</b> : Flutter l'appelle directement pour chaque analyse (tendances, clustering, ton, transcription, OCR).</li>
+</ul>
+<p>Cette distinction permet à chacun des services d'évoluer indépendamment et de supporter une charge différente.</p>
+
+<h3>3.4 Diagramme de cas d'utilisation</h3>
+<figure>
+  <img src="images/11_use_case_diagram.png" alt="Cas d'utilisation global">
+  <figcaption>Figure 2. Diagramme de cas d'utilisation global (3 rôles).</figcaption>
+</figure>
+<figure>
+  <img src="images/15_use_case_encadrement.png" alt="Cas d'utilisation encadrement">
+  <figcaption>Figure 3. Diagramme de cas d'utilisation côté encadrement (Coach + Adjoint).</figcaption>
+</figure>
+<figure>
+  <img src="images/16_use_case_joueur.png" alt="Cas d'utilisation joueur">
+  <figcaption>Figure 4. Diagramme de cas d'utilisation côté joueur.</figcaption>
+</figure>
+
+<h4>Descriptions textuelles des cas d'utilisation</h4>
+<table>
+  <caption>Tableau 10a. Cas d'utilisation « S'authentifier »</caption>
+  <tr><th>Élément</th><th>Description</th></tr>
+  <tr><td>Acteurs</td><td>Coach, Adjoint, Joueur</td></tr>
+  <tr><td>Précondition</td><td>Le compte existe (COACH/ADJOINT créés par l'administrateur ; JOUEUR activé par code OTP).</td></tr>
+  <tr><td>Scénario nominal</td><td>1. L'utilisateur saisit email + mot de passe (ou téléphone + OTP). 2. L'API valide et émet un token d'accès (30 min) + un refresh token (7 j). 3. L'application stocke les tokens en storage sécurisé.</td></tr>
+  <tr><td>Postcondition</td><td>Session ouverte ; le rôle détermine les droits d'accès.</td></tr>
+  <tr><td>Scénarios alternatifs</td><td>Identifiants invalides → 401 ; compte inactif → activation requise ; token expiré → refresh automatique.</td></tr>
+</table>
+
+<table>
+  <caption>Tableau 10b. Cas d'utilisation « Créer un entraînement et gérer la séance »</caption>
+  <tr><th>Élément</th><th>Description</th></tr>
+  <tr><td>Acteurs</td><td>Coach, Adjoint</td></tr>
+  <tr><td>Précondition</td><td>Utilisateur connecté avec rôle COACH ou ADJOINT ; une équipe existe.</td></tr>
+  <tr><td>Scénario nominal</td><td>1. Création d'un entraînement (POST /trainings). 2. Renseignement de la fiche (PUT /trainings/:id/sheet). 3. Relevé des présences en lot (POST /attendance/trainings/:id/bulk). 4. Ajout des situations (POST /trainings/:id/situations). 5. Schémas tactiques (POST /.../drawing). 6. Clôture de la séance.</td></tr>
+  <tr><td>Postcondition</td><td>Fiche de séance complète : présences, situations, dessins, propositions éventuelles.</td></tr>
+</table>
+
+<table>
+  <caption>Tableau 10c. Cas d'utilisation « Calculer l'alignement IA »</caption>
+  <tr><th>Élément</th><th>Description</th></tr>
+  <tr><td>Acteurs</td><td>Coach</td></tr>
+  <tr><td>Précondition</td><td>Un match est créé ; les statistiques des joueurs sont disponibles.</td></tr>
+  <tr><td>Scénario nominal</td><td>1. POST /matches/:id/ai-recommendations. 2. Express assemble les features (présence 10 séances, performance 5 matchs, ACWR 7j/28j). 3. Le Lineup Service calcule les scores 0-100. 4. Express persiste les scores normalisés 0-1. 5. Le coach valide/modifie (PUT /matches/:id/lineup).</td></tr>
+  <tr><td>Postcondition</td><td>Composition du match mise à jour ; recommandation archivée.</td></tr>
+  <tr><td>Scénario alternatif</td><td>Service indisponible (timeout 5 s) → 503 ; le coach garde la composition manuelle.</td></tr>
+</table>
+
+<table>
+  <caption>Tableau 10d. Cas d'utilisation « Générer le rapport de match »</caption>
+  <tr><th>Élément</th><th>Description</th></tr>
+  <tr><td>Acteurs</td><td>Coach, Adjoint (consultation : Joueur)</td></tr>
+  <tr><td>Précondition</td><td>Match terminé ; alignement, événements, stats et évaluations renseignés.</td></tr>
+  <tr><td>Scénario nominal</td><td>1. POST /matches/:id/report/generate. 2. Express agrège les données. 3. PDF généré (pdfkit) et archivé (match_reports). 4. Notification REPORT_AVAILABLE envoyée.</td></tr>
+  <tr><td>Postcondition</td><td>Rapport PDF consultable par l'encadrement et les joueurs.</td></tr>
+</table>
+
+<h3>3.5 Diagrammes de séquence</h3>
+<figure>
+  <img src="images/05_auth_sequence.png" alt="Séquence authentification">
+  <figcaption>Figure 5. Diagramme de séquence — authentification (login, refresh, OTP).</figcaption>
+</figure>
+<figure>
+  <img src="images/06_training_flow.png" alt="Séquence entraînement">
+  <figcaption>Figure 6. Diagramme de séquence — gestion d'un entraînement.</figcaption>
+</figure>
+<figure>
+  <img src="images/07_match_management.png" alt="Séquence match">
+  <figcaption>Figure 7. Diagramme de séquence — gestion d'un match (IA, live, stats, rapport).</figcaption>
+</figure>
+<figure>
+  <img src="images/08_notification_flow.png" alt="Séquence notifications">
+  <figcaption>Figure 8. Diagramme de séquence — notifications et activation OTP.</figcaption>
+</figure>
+
+<h3>3.6 Diagramme d'activité</h3>
+<figure>
+  <img src="images/17_activity_seance.png" alt="Activité séance">
+  <figcaption>Figure 9. Diagramme d'activité « Gérer une séance d'entraînement ».</figcaption>
+</figure>
+
+<h3>3.7 Diagrammes de classes</h3>
+<figure>
+  <img src="images/18_class_diagram_domaine.png" alt="Classes domaine">
+  <figcaption>Figure 10. Diagramme de classes du domaine métier.</figcaption>
+</figure>
+<figure>
+  <img src="images/02_backend_class_diagram.png" alt="Classes backend">
+  <figcaption>Figure 11. Diagramme de classes du backend Express.</figcaption>
+</figure>
+
+<h3>3.8 Modèle de données (PostgreSQL)</h3>
+<figure>
+  <img src="images/04_er_diagram.png" alt="MCD">
+  <figcaption>Figure 12. Modèle conceptuel de données (diagramme entité-association).</figcaption>
+</figure>
+<p>La base PostgreSQL constitue le référentiel central des données. Elle comprend <b>32 tables</b> dans le schéma <code>platform</code>, <b>1 vue</b> (<code>player_season_bilan</code>), 13 types enum et un trigger de mise à jour automatique de <code>updated_at</code>.</p>
+
+<h4>Arbre des entités principales</h4>
+<pre><code>User
+ │
+ ├── Coach
+ ├── Assistant (Adjoint)
+ └── Player (1:1 avec users.id)
+        │
+        ▼
+      Team
+        │
+        ├── Season
+        │
+        ├── Training  ────── Attendance
+        │      └── Training Sheet ── Training Situation ── Tactical Drawing
+        │
+        ├── Weekly Planning ── Weekly Planning Slots
+        │
+        └── Match
+               ├── Match Lineup
+               ├── AI Lineup Recommendations
+               ├── Match Events
+               ├── Player Statistics
+               ├── Evaluations
+               └── Match Report (PDF)</code></pre>
+
+<h4>Récapitulatif des tables</h4>
+<table>
+  <caption>Tableau 11. Tables PostgreSQL (schéma platform)</caption>
+  <tr><th>Module</th><th>Tables</th><th>Description</th></tr>
+  <tr><td>Auth</td><td>users, roles, user_roles, activation_codes, refresh_tokens, push_tokens</td><td>Comptes, rôles, activation OTP (SMS/WhatsApp), tokens</td></tr>
+  <tr><td>Équipes</td><td>seasons, teams, team_staff</td><td>Saisons, équipes, adjoints affectés</td></tr>
+  <tr><td>Joueurs</td><td>players, player_guardians, player_address, player_school_info, player_season_profile, player_injuries</td><td>Fiches complètes des joueurs</td></tr>
+  <tr><td>Entraînements</td><td>weekly_plannings, weekly_planning_slots, trainings, training_sheets, training_situations, tactical_drawings, exercise_proposals</td><td>Planification, fiches de séance, situations, schémas, propositions</td></tr>
+  <tr><td>Présences</td><td>attendances</td><td>Présences aux entraînements (UNIQUE training+player)</td></tr>
+  <tr><td>Matchs</td><td>matches, match_lineups, ai_lineup_recommendations, match_events, match_player_stats, match_evaluations, match_reports</td><td>Cycle complet du match</td></tr>
+  <tr><td>Notifications</td><td>notifications</td><td>Notifications internes + index partiel non-lues</td></tr>
+  <tr><td>Calendrier</td><td>calendar_events</td><td>Calendrier partagé par équipe</td></tr>
+</table>
+
+<h4>La vue player_season_bilan</h4>
+<p>Cette vue reproduit directement la structure du fichier <code>Bilan_Cadet_A.xlsx</code> du club :</p>
+<pre><code>CREATE OR REPLACE VIEW player_season_bilan AS
+SELECT
+    p.id AS player_id,
+    u.first_name, u.last_name,
+    p.poste_principal, p.poste_secondaire,
+    m.season_id,
+    COUNT(DISTINCT mps.match_id) FILTER (WHERE mps.minutes_played &gt; 0) AS nombre_matchs_joues,
+    COALESCE(SUM(mps.minutes_played), 0) AS temps_de_jeu_minutes,
+    ROUND(AVG(me.note), 2) AS moyenne_note,
+    COALESCE(SUM(mps.goals), 0) AS total_buts,
+    COALESCE(SUM(mps.assists), 0) AS total_passes_decisives,
+    COALESCE(SUM(mps.goals_conceded), 0) AS total_buts_encaisses
+FROM players p
+INNER JOIN users u ON u.id = p.id
+LEFT JOIN match_player_stats mps ON mps.player_id = p.id
+LEFT JOIN matches m ON m.id = mps.match_id
+LEFT JOIN match_evaluations me ON me.match_id = mps.match_id AND me.player_id = p.id
+GROUP BY p.id, u.first_name, u.last_name, p.poste_principal, p.poste_secondaire, m.season_id;</code></pre>
+
+<h3>3.9 Diagramme de flux de données</h3>
+<figure>
+  <img src="images/12_data_flow.png" alt="Data flow">
+  <figcaption>Figure 13. Diagramme de flux de données : saisie mobile → API → services IA → stockage.</figcaption>
+</figure>
+
+<h3>3.10 Sécurité</h3>
+<ul>
+  <li><b>Authentification</b> : JWT avec access token (30 min) et refresh token (7 j), hashé (SHA-256) en base.</li>
+  <li><b>OTP</b> : codes d'activation par SMS (Twilio) pour les joueurs, avec expiration et statut d'utilisation ; la valeur du code n'est jamais écrite dans les journaux applicatifs.</li>
+  <li><b>RBAC</b> : trois rôles (COACH, ADJOINT, JOUEUR) avec middlewares d'autorisation et contrôle d'accès aux ressources (resource-access, self-access, team-access).</li>
+  <li><b>Isolation multi-équipe</b> : le contexte d'équipe est résolu à partir de l'utilisateur authentifié et les ressources sensibles sont filtrées par équipe. Les saisons et propositions d'exercices possèdent un rattachement explicite à l'équipe.</li>
+  <li><b>Cohérence transactionnelle</b> : l'enregistrement des présences en lot s'exécute dans une transaction PostgreSQL atomique ; une erreur annule l'ensemble du lot.</li>
+  <li><b>Rate limiting</b> : express-rate-limit sur les routes sensibles (authentification, OTP).</li>
+  <li><b>Helmet</b> : en-têtes HTTP de sécurité (XSS, CSRF, nosniff, etc.).</li>
+  <li><b>CORS</b> : restriction des origines autorisées.</li>
+  <li><b>Bcrypt</b> : hachage des mots de passe avec salt.</li>
+  <li><b>Validation Zod</b> : validation stricte de toutes les entrées API.</li>
+  <li><b>Protection des secrets de notification</b> : les tokens FCM sont stockés pour la livraison mais ne sont pas exposés dans les logs.</li>
+  <li><b>Erreurs maîtrisées</b> : les erreurs PostgreSQL sont normalisées en réponses applicatives sans divulgation de la requête ni de détails internes.</li>
+  <li><b>Django</b> : JWT (SimpleJWT), rôles SUPER_ADMIN / MODERATEUR / SUPPORT, <code>manage.py check --deploy</code>.</li>
+</ul>
+<!-- ============================ CHAPITRE 4 ============================ -->
+<div class="page-break"></div>
+<h2>Chapitre 4 — Choix technologiques</h2>
+
+<h3>4.1 Frontend</h3>
+<table>
+  <caption>Tableau 7. Choix technologiques pour la partie frontend</caption>
+  <tr><th>Composant</th><th>Technologie</th><th>Justification</th></tr>
+  <tr><td>Application mobile</td><td><b>Flutter</b> (Dart SDK ^3.12.2)</td><td>UI native iOS/Android/Web/Desktop depuis un seul code, performances élevées, écosystème riche.</td></tr>
+  <tr><td>State management</td><td><b>Riverpod</b> (StateNotifier / FutureProvider)</td><td>Typé, testable ; providers par feature, injection d'API simple.</td></tr>
+  <tr><td>Routing</td><td><b>GoRouter</b></td><td>Routing déclaratif avec auth redirect et StatefulShellRoute.indexedStack.</td></tr>
+  <tr><td>Client HTTP</td><td><b>Dio</b> + interceptor JWT</td><td>Gère access/refresh token (single in-flight), retries, téléversement de fichiers.</td></tr>
+  <tr><td>Temps réel</td><td><b>Socket.IO client</b></td><td>Suivi live des matchs et notifications instantanées (rooms user:ID, match:ID).</td></tr>
+  <tr><td>Stockage local</td><td>shared_preferences + flutter_secure_storage + sqflite</td><td>Préférences, tokens JWT sécurisés, cache local.</td></tr>
+  <tr><td>Push notifications</td><td><b>Firebase Cloud Messaging</b></td><td>Réception des notifications dans l'application.</td></tr>
+  <tr><td>Sécurité locale</td><td><b>local_auth</b> (biométrie)</td><td>Verrouillage biométrique de l'application (BiometricLockGate).</td></tr>
+  <tr><td>i18n</td><td>ARB files (FR / EN / AR)</td><td>Internationalisation en 3 langues.</td></tr>
+  <tr><td>Back-office desktop</td><td><b>Java 21 + JavaFX 21.0.2</b></td><td>Client de bureau autonome pour l'administrateur (Maven, Jackson, fat-jar).</td></tr>
+</table>
+
+<h3>4.2 Backend et données</h3>
+<table>
+  <caption>Tableau 8. Choix technologiques pour le backend et le traitement des données</caption>
+  <tr><th>Composant</th><th>Technologie</th><th>Justification</th></tr>
+  <tr><td>API principale</td><td><b>Node.js 22 / Express 5 + TypeScript 7</b></td><td>Modulaire, typé, validations Zod, REST + Socket.IO intégré, ESM.</td></tr>
+  <tr><td>Authentification</td><td><b>JWT</b> (access 30 min / refresh 7 j) + OTP SMS + RBAC</td><td>Sécurité des accès et rôles strictement séparés.</td></tr>
+  <tr><td>Base de données</td><td><b>PostgreSQL 16</b> (schéma <code>platform</code>)</td><td>Relationnel fiable, transactions, pérennité des données club.</td></tr>
+  <tr><td>Cache / file</td><td><b>Redis 7</b></td><td>Infrastructure prête ; cache des lectures fréquentes.</td></tr>
+  <tr><td>Back-office admin</td><td><b>Django 5.2 + Django REST Framework</b></td><td>Apps administrateurs, core (miroir lecture), moderation (audit, broadcast).</td></tr>
+  <tr><td>Notifications</td><td><b>Firebase FCM</b> (push) + <b>Twilio</b> (SMS OTP)</td><td>Diffusion mobile et activation par SMS.</td></tr>
+  <tr><td>PDF</td><td><b>pdfkit</b></td><td>Génération de rapports de match côté serveur.</td></tr>
+  <tr><td>Documentation</td><td><b>Swagger</b> (swagger-jsdoc + swagger-ui-express)</td><td>Documentation auto-générée des endpoints (/docs).</td></tr>
+</table>
+
+<h3>4.3 Services IA</h3>
+<table>
+  <caption>Tableau 9. Choix technologiques pour les services d'intelligence artificielle</caption>
+  <tr><th>Service</th><th>Technologie</th><th>Rôle</th></tr>
+  <tr><td><b>Lineup Recommendation Service</b> (:8100)</td><td><b>Python 3.12 + FastAPI</b></td><td>Score 0-100 : présence (10 séances), performance (5 matchs), fatigue (ACWR, Gabbett 0.8-1.3). Poids égaux (1/3). Seuils STARTER ≥ 70, SUB ≥ 40. Sans état.</td></tr>
+  <tr><td><b>AI Insights Service</b> (:8300)</td><td><b>Python 3.12 + FastAPI</b> (Clean Architecture)</td><td>Tendances (régression linéaire), clustering (KMeans/scikit-learn), ton (lexique FR/AR), transcription (faster-whisper), OCR (PaddleOCR).</td></tr>
+</table>
+
+<h3>4.4 Justification d'ensemble</h3>
+<p>L'architecture retenue sépare clairement les responsabilités :</p>
+<ul>
+  <li><b>Flutter</b> porte l'expérience utilisateur.</li>
+  <li><b>Express</b> porte les règles métier et l'orchestration.</li>
+  <li><b>FastAPI</b> porte le calcul (alignement) et l'analyse (insights).</li>
+  <li><b>Django</b> porte l'administration.</li>
+</ul>
+<p>Cette séparation autorise le déploiement indépendant de chaque brique (Docker Compose) et l'évolution isolée des algorithmes IA. Elle facilite également la maintenance, les tests et le passage à l'échelle de chaque composant.</p>
+<!-- ============================ CHAPITRE 5 ============================ -->
+<div class="page-break"></div>
+<h2>Chapitre 5 — Réalisation et implémentation</h2>
+
+<h3>5.1 Environnement de développement</h3>
+<table>
+  <caption>Tableau 5. Environnement matériel et logiciel utilisé</caption>
+  <tr><th>Ressource</th><th>Détail</th></tr>
+  <tr><td>Machine de développement</td><td>PC / portable, OS Windows, 16 Go RAM, SSD (Docker Desktop).</td></tr>
+  <tr><td>Outils de modélisation</td><td>PlantUML (diagrammes UML/ER rendus en PNG), Mermaid (diagrammes texte).</td></tr>
+  <tr><td>Outils de développement</td><td>VS Code, Android Studio / Flutter SDK, Node.js 22, Python 3.12, Java 21.</td></tr>
+  <tr><td>Conteneurisation</td><td>Docker Compose (postgres 16, redis 7, api :4000, admin :8000, lineup :8100, ai-insights :8300).</td></tr>
+  <tr><td>Test &amp; CI</td><td>Vitest, pytest, Postman/Newman, Playwright, Cypress, Selenium, JMeter, GitHub Actions, GitLab CI.</td></tr>
+</table>
+
+<h3>5.2 Backend principal (Express + TypeScript)</h3>
+<p>Le backend constitue le cœur métier de FootTech. Il est responsable de la communication entre le frontend, la base de données, les services IA et les différents acteurs.</p>
+
+<h4>Structure du code (monorepo)</h4>
+<pre><code>back/FoottechBackend-main/
+├── src/
+│   ├── main.ts              # Bootstrap : DB, Redis, Firebase, HTTP + Socket.IO
+│   ├── app.ts               # Express : helmet, cors, swagger, router /api/v1
+│   ├── config/              # env.ts, database.ts, swagger.ts, index.ts
+│   ├── middleware/           # auth, role, validation, error, rate-limit, upload,
+│   │                        #   resource-access, self-access, team-access, logger
+│   ├── modules/             # 13 feature modules
+│   │   ├── auth/            # register-coach, login, refresh, set-adjoint-password,
+│   │   │                    #   adjoint/activate, player OTP, coach OTP, logout, me
+│   │   ├── users/           # GET/PATCH /:id, POST /:id/avatar
+│   │   ├── teams/           # CRUD + staff (adjoints)
+│   │   ├── players/         # CRUD + guardians, address, school-info, season-profile, injuries
+│   │   ├── seasons/         # CRUD
+│   │   ├── weekly-plannings/# CRUD + slots
+│   │   ├── trainings/       # CRUD + sheet, situations, drawings
+│   │   ├── exercise-proposals/ # list/detail/review (adjoint → coach)
+│   │   ├── attendance/      # history, per-training, bulk
+│   │   ├── matches/         # CRUD + status, lineup, AI recos, events, stats, evaluations, report
+│   │   ├── notifications/   # mine, send, broadcast, read, read-all, push-token
+│   │   ├── dashboard/       # me, season-bilan
+│   │   └── calendar-events/ # CRUD
+│   ├── shared/
+│   │   ├── clients/         # lineup.client.ts (client Zod-validated, timeout 5 s)
+│   │   ├── database/        # BaseRepository (couche d'accès générique)
+│   │   ├── errors/          # AppError
+│   │   ├── services/        # redis, firebase, twilio, notification, report (pdfkit), team-resolver
+│   │   └── utils/           # jwt, otp, bcrypt, normalizeScore
+│   └── socket/              # Socket.IO : rooms user:ID et match:ID
+└── resources/               # Uploads, templates PDF</code></pre>
+
+<h4>Intégrité, rattachement aux équipes et liaison frontend–backend</h4>
+<p>Le backend expose un contrat REST versionné sous <code>/api/v1</code>. Le client Flutter centralise les appels avec Dio, ajoute le JWT dans un intercepteur et renouvelle une seule fois le token lorsqu'il expire. Les modèles Dart traduisent les réponses JSON et les providers Riverpod propagent l'état aux écrans. Pour éviter les fuites de données entre plusieurs équipes d'un même coach, le token et le contexte sélectionné servent à résoudre l'équipe active ; les requêtes sur joueurs, saisons, entraînements, propositions, présences et matchs sont ensuite limitées à ce périmètre.</p>
+<p>Deux choix renforcent la cohérence métier. Premièrement, les saisons et les propositions d'exercices sont explicitement rattachées à une équipe par migration SQL et contrôlées au niveau service. Deuxièmement, la saisie de présence en lot utilise une transaction : soit toutes les lignes valides sont persistées, soit aucune ne l'est. Cette approche empêche les états partiellement enregistrés dans l'interface Flutter.</p>
+
+<h4>Principaux endpoints API (/api/v1)</h4>
+<table>
+  <caption>Tableau 12. Endpoints API Express principaux</caption>
+  <tr><th>Méthode</th><th>Endpoint</th><th>Rôle / Accès</th></tr>
+  <tr><td>POST</td><td>/auth/register-coach</td><td>Création d'un compte coach</td></tr>
+  <tr><td>POST</td><td>/auth/login</td><td>Connexion (access + refresh)</td></tr>
+  <tr><td>POST</td><td>/auth/refresh</td><td>Rafraîchissement de session</td></tr>
+  <tr><td>POST</td><td>/auth/player/request-otp</td><td>Demande du code OTP joueur (SMS)</td></tr>
+  <tr><td>POST</td><td>/auth/player/verify-otp</td><td>Vérification OTP et activation</td></tr>
+  <tr><td>GET/PATCH</td><td>/users/:id</td><td>Profil utilisateur (self-access)</td></tr>
+  <tr><td>GET/POST</td><td>/teams</td><td>Liste / création d'équipe (COACH)</td></tr>
+  <tr><td>GET/POST</td><td>/teams/:id/staff</td><td>Gestion des adjoints (COACH)</td></tr>
+  <tr><td>GET/POST</td><td>/players</td><td>Liste / création de joueur (COACH/ADJOINT)</td></tr>
+  <tr><td>GET/PUT</td><td>/players/:id/guardians</td><td>Tuteurs du joueur</td></tr>
+  <tr><td>GET/POST</td><td>/seasons</td><td>Liste / création de saison (COACH)</td></tr>
+  <tr><td>POST</td><td>/trainings</td><td>Création d'un entraînement (COACH)</td></tr>
+  <tr><td>PUT</td><td>/trainings/:id/sheet</td><td>Fiche de séance</td></tr>
+  <tr><td>POST</td><td>/trainings/:id/situations</td><td>Ajout d'une situation</td></tr>
+  <tr><td>POST</td><td>/trainings/:id/situations/:sid/drawing</td><td>Schéma tactique (JSONB)</td></tr>
+  <tr><td>POST</td><td>/attendance/trainings/:id/bulk</td><td>Présences en lot (ADJOINT)</td></tr>
+  <tr><td>POST</td><td>/matches</td><td>Création d'un match (COACH)</td></tr>
+  <tr><td>POST</td><td>/matches/:id/ai-recommendations</td><td>Recommandation IA (COACH/ADJOINT)</td></tr>
+  <tr><td>PUT</td><td>/matches/:id/lineup</td><td>Validation de la composition (COACH)</td></tr>
+  <tr><td>GET/POST</td><td>/matches/:id/events</td><td>Événements live (ADJOINT)</td></tr>
+  <tr><td>PUT</td><td>/matches/:id/stats</td><td>Statistiques du match</td></tr>
+  <tr><td>PUT</td><td>/matches/:id/evaluations</td><td>Évaluations post-match</td></tr>
+  <tr><td>POST</td><td>/matches/:id/report/generate</td><td>Génération du rapport PDF</td></tr>
+  <tr><td>POST</td><td>/notifications/broadcast</td><td>Diffusion (COACH/ADJOINT)</td></tr>
+  <tr><td>PATCH</td><td>/notifications/:id/read</td><td>Marquer comme lue</td></tr>
+  <tr><td>POST</td><td>/notifications/push-token</td><td>Enregistrer un token FCM</td></tr>
+  <tr><td>GET</td><td>/dashboard/me</td><td>Dashboard personnel</td></tr>
+  <tr><td>GET</td><td>/dashboard/season-bilan</td><td>Bilan de saison</td></tr>
+  <tr><td>GET</td><td>/calendar-events</td><td>Calendrier partagé</td></tr>
+  <tr><td>GET</td><td>/health</td><td>Health check</td></tr>
+</table>
+
+<h3>5.3 Application Frontend (Flutter)</h3>
+<p>L'application frontend fournit l'interface utilisée par les acteurs de la plateforme. Elle transforme les fonctionnalités backend en parcours utilisateur.</p>
+
+<h4>Structure du code</h4>
+<pre><code>front/foottechproject/
+├── lib/
+│   ├── main.dart             # Entry: Riverpod + GoRouter + MaterialApp.router
+│   ├── core/
+│   │   ├── providers/        # Global providers (auth, theme, locale)
+│   │   ├── routing/          # app_router.dart (GoRouter, auth redirect, StatefulShellRoute)
+│   │   ├── network/          # ApiClient (Dio + JWT interceptor), SocketService
+│   │   ├── storage/          # SecureStorage (tokens), SharedPreferences
+│   │   ├── database/         # sqflite (cache local)
+│   │   └── localization/     # i18n (FR / EN / AR)
+│   └── features/
+│       ├── auth/             # login, register-coach, OTP, activate-adjoint, player-login
+│       ├── dashboard/        # stats, season-bilan
+│       ├── teams/            # list, detail, staff
+│       ├── players/          # list, profile, new-player
+│       ├── trainings/        # list, detail, create, attendance, situations, drawing
+│       ├── attendance/       # bulk attendance
+│       ├── matches/          # list, detail, create, live, stats, evaluations, AI, report
+│       ├── calendar/         # shared calendar
+│       ├── notifications/    # list
+│       ├── exercise-proposals/# proposals review
+│       ├── seasons/          # list, detail
+│       ├── weekly-plannings/ # planning editor
+│       └── profile/          # user profile
+└── test/                     # widget_test.dart (boot onboarding)</code></pre>
+
+<figure>
+  <img src="images/20_riverpod_architecture.png" alt="Architecture Riverpod">
+  <figcaption>Figure 16. Architecture de state management Flutter (Riverpod : UI, providers, repositories, sources de données).</figcaption>
+</figure>
+<figure>
+  <img src="images/03_frontend_component_diagram.png" alt="Composants frontend">
+  <figcaption>Figure 18. Vue par composants de l'application client (core, features, data).</figcaption>
+</figure>
+
+<h4>Parcours utilisateur principaux</h4>
+<pre><code>Parcours Coach :
+Connexion → Dashboard → Mon équipe → Joueurs → Fiche joueur → Statistiques
+         → Matchs → Composition → Recommandation IA → Analyse → Validation
+         → Entraînements → Fiche de séance → Présences → Schémas tactiques
+
+Parcours Joueur :
+Connexion SMS/OTP → Dashboard → Mes stats → Calendrier → Notifications → Profil</code></pre>
+
+<h3>5.4 Authentification</h3>
+<p>Le système d'authentification gère trois flux distincts :</p>
+<ul>
+  <li><b>Coach/Adjoint</b> : inscription coach (email + mdp), connexion email + mdp, activation par OTP.</li>
+  <li><b>Joueur</b> : activation par code SMS/WhatsApp envoyé lors de la création du profil, connexion par téléphone + OTP (pas de mot de passe initial).</li>
+  <li><b>Admin</b> : connexion dédiée via le client JavaFX avec JWT SimpleJWT (Django).</li>
+</ul>
+
+<figure>
+  <img src="images/05_auth_sequence.png" alt="Séquence authentification">
+  <figcaption>Figure 5. Diagramme de séquence — authentification (login, refresh, OTP).</figcaption>
+</figure>
+
+<h3>5.5 Gestion des équipes et joueurs</h3>
+<p>La fiche joueur constitue une entité riche du système. Elle regroupe :</p>
+<ul>
+  <li><b>Identité</b> : prénom, nom, date de naissance, téléphone, email.</li>
+  <li><b>Informations sportives</b> : taille, poids, postes (principal/secondaire), pied fort, numéro de maillot (1-99).</li>
+  <li><b>Représentants légaux</b> : père, mère ou tuteur (nom, prénom, date naissance, téléphones, email).</li>
+  <li><b>Adresse</b> : adresse complète, distance au club, moyen de transport, durée de trajet.</li>
+  <li><b>Scolarité</b> : établissement, distance, classe, niveau scolaire (FAIBLE/MOYEN/BIEN/TRES_BIEN).</li>
+  <li><b>Évolution saisonnière</b> : taille, poids, pointure, tailles de vêtements, postes, points forts/à améliorer.</li>
+  <li><b>Blessures</b> : date, description, durée d'indisponibilité, date de retour.</li>
+</ul>
+<p>Les modules <code>players</code> (Express) et les tables associées du schéma <code>platform</code> implémentent cette fiche complète inspirée des documents réels du club (fiche de renseignement joueur, planning type, fiche d'entraînement, bilan de saison).</p>
+
+<h3>5.6 Gestion des entraînements</h3>
+<p>Le système modélise une séance comme un ensemble de situations structurées :</p>
+<pre><code>Training
+   │
+   ├── Objectifs (training_sheets.objectifs)
+   │
+   ├── Situation 1
+   │     ├── durée (duree_travail : "2*4'")
+   │     ├── récupération (duree_recuperation : "1'30")
+   │     ├── critères de réussite (criteres_reussite : text[])
+   │     └── schéma tactique (tactical_drawings.canvas_data : JSONB)
+   │
+   ├── Situation 2
+   │
+   └── Situation N</code></pre>
+<ul>
+  <li>Création d'entraînement avec date, heure, lieu (contrainte <code>end_time &gt; start_time</code>, unicité team+date+time).</li>
+  <li>Fiche de séance : objectifs + effectif.</li>
+  <li>Situations : titre, description, durées de travail/récupération, critères de réussite.</li>
+  <li>Schémas tactiques : canvas JSONB (joueurs, flèches, formes) — équivalent TacticalPad, réutilisable pour un match.</li>
+  <li>Propositions d'exercices : workflow adjoint → coach (PENDING → VALIDATED/REJECTED).</li>
+  <li>Présences : enregistrement individuel ou en lot (bulk).</li>
+  <li>Planning hebdomadaire : cases jour × moment (MATIN/APRES_MIDI/SOIR) liées aux entraînements réels.</li>
+</ul>
+
+<h3>5.7 Gestion des matchs</h3>
+<p>Le cycle complet d'un match couvre trois phases :</p>
+
+<h4>Pré-match</h4>
+<ul>
+  <li>Création du match (adversaire, date/heure, lieu, domicile/extérieur, formation).</li>
+  <li>Définition de la composition : titulaires / remplaçants / non retenus.</li>
+  <li>Recommandation IA de composition (optionnelle).</li>
+</ul>
+
+<h4>Match live</h4>
+<ul>
+  <li>Saisie des événements en temps réel (GOAL, ASSIST, YELLOW_CARD, RED_CARD, SUBSTITUTION_IN/OUT, INJURY) avec minute, joueur et joueur lié.</li>
+  <li>Diffusion Socket.IO dans les rooms <code>match:ID</code> et <code>user:ID</code>.</li>
+  <li>Timeline triée par minute, visible par tous les membres de l'équipe.</li>
+</ul>
+
+<h4>Post-match</h4>
+<ul>
+  <li>Saisie des statistiques individuelles : minutes jouées, buts, passes, buts encaissés (gardiens), cartons.</li>
+  <li>Évaluations post-match : note 0-10 + commentaire (coach et/ou adjoint).</li>
+  <li>Génération du rapport de match PDF (pdfkit) archivé dans <code>match_reports</code>.</li>
+  <li>Notification REPORT_AVAILABLE aux membres de l'équipe.</li>
+</ul>
+
+<h3>5.8 Suivi des performances</h3>
+<p>Le suivi des performances s'appuie sur plusieurs sources de données :</p>
+<ul>
+  <li><b>Statistiques de match</b> : match_player_stats (minutes, buts, passes, buts encaissés, cartons).</li>
+  <li><b>Évaluations</b> : match_evaluations (note 0-10 + commentaire).</li>
+  <li><b>Présences</b> : taux de présence aux 10 dernières séances (feature IA).</li>
+  <li><b>Bilan de saison</b> : vue PostgreSQL agrégée <code>player_season_bilan</code>.</li>
+</ul>
+<p>La vue reproduit la structure réelle du fichier Excel de bilan utilisé par le club : nombre de matchs joués, temps de jeu, note moyenne, buts, passes, buts encaissés.</p>
+
+<h3>5.9 Service de recommandation IA (Lineup Recommendation Service)</h3>
+<p>Le service <code>lineup-recommendation-service</code> (:8100) constitue une composante centrale du caractère intelligent de FootTech.</p>
+
+<h4>Architecture interne (Clean Architecture)</h4>
+<pre><code>lineup-recommendation-service/
+├── app/
+│   ├── presentation/
+│   │   └── api/v1/lineup_router.py    # POST /api/v1/lineup/recommendations
+│   ├── application/
+│   │   └── dto.py                     # Schémas (camelCase)
+│   ├── domain/
+│   │   ├── entities.py                # PlayerFeatures, RecommendationResult
+│   │   └── services.py               # ScoringService (math pur)
+│   └── infrastructure/
+│       ├── weights_repository.py       # Poids configurables
+│       └── statsbomb/                 # Calibrage offline
+│           ├── client.py
+│           └── vaep_calibrator.py
+├── scripts/
+│   └── calibrate_from_statsbomb.py     # Méthodologie de calibrage
+├── tests/                              # 11 tests
+└── k8s/                                # Manifests Kubernetes</code></pre>
+
+<h4>Algorithme de scoring</h4>
+<pre><code>Presence Score      = presence_rate × 100
+Performance Score   = recent_performance_rating × 10
+Fatigue Score       = f(ACWR, days_since_last_match)
+                        ├── ACWR sweet-spot : 0.8 – 1.3 (Gabbett)
+                        └── Bonus repos : min(days/7, 1) × 20
+
+Final Score = w_presence × presence_score
+            + w_performance × performance_score
+            + w_fatigue × fatigue_score        (poids égaux par défaut = 1/3)
+
+Seuils : ≥ 70 → STARTER
+         ≥ 40 → SUBSTITUTE
+         < 40 → NOT_SELECTED</code></pre>
+
+<h4>Intégration avec Express</h4>
+<ul>
+  <li>Le client <code>lineup.client.ts</code> assemble les features pour chaque joueur (présence 10 séances, performance 5 matchs, ACWR 7j/28j, jours depuis le dernier match).</li>
+  <li>Requête validée par schéma Zod avant envoi.</li>
+  <li>Timeout garanti de 5 secondes → 503 si service indisponible (ou 504 timeout / 502 bad gateway).</li>
+  <li>Les scores (0-100) sont normalisés en (0-1) avant stockage (contrainte NUMERIC(4,3) CHECK 0-1).</li>
+  <li>Les recommandations sont persistées dans <code>ai_lineup_recommendations</code> (UNIQUE match+player).</li>
+</ul>
+
+<h4>Calibrage offline</h4>
+<p>Le script <code>calibrate_from_statsbomb.py</code> utilise les données ouvertes StatsBomb et la méthodologie VAEP pour calibrer les poids des composantes. C'est un outil méthodologique : la calibration sert de référence, elle ne prédit pas les performances des joueurs.</p>
+
+<h3>5.10 Service AI Insights</h3>
+<p>Le service <code>ai-insights-service</code> (:8300) regroupe cinq fonctionnalités d'analyse autonome :</p>
+
+<h4>Architecture interne (Clean Architecture)</h4>
+<pre><code>ai-insights-service/
+├── app/
+│   ├── presentation/
+│   │   └── main.py                    # 5 routers : trend, clustering, tone, transcription, documents
+│   ├── application/
+│   │   ├── dto.py                     # DTOs d'entrée/sortie
+│   │   └── use_cases/                 # detect_trend, cluster_players, analyze_tone,
+│   │                                  #   transcribe_audio, extract_document
+│   ├── domain/
+│   │   ├── trend/                     # régression linéaire
+│   │   ├── clustering/                # KMeans
+│   │   ├── tone/                      # lexique FR/AR
+│   │   ├── transcription/             # faster-whisper
+│   │   └── document_ocr/              # PaddleOCR
+│   └── infrastructure/
+│       ├── sklearn_kmeans_repository   # scikit-learn
+│       ├── paddleocr_client            # PaddleOCR (optionnel)
+│       ├── whisper_client              # faster-whisper (optionnel)
+│       └── field_extractor             # extraction de champs
+└── tests/                              # 27 tests</code></pre>
+
+<h4>1. Détection de tendance</h4>
+<p><code>POST /api/v1/trend/detect</code> — Régression linéaire (moindres carrés) sur une série de points. Retourne la direction (PROGRESSING / STABLE / DECLINING), la pente par mois et le R². Minimum 3 points requis (sinon 422).</p>
+
+<h4>2. Clustering des joueurs</h4>
+<p><code>POST /api/v1/clustering/players</code> — KMeans (scikit-learn) sur les caractéristiques des joueurs (buts/match, passes/match, minutes, taille, poids) avec standardisation automatique. Retourne les assignments, la distance au centroïde et l'inertie. Minimum 4 joueurs requis (sinon 422).</p>
+
+<h4>3. Analyse de ton</h4>
+<p><code>POST /api/v1/tone/analyze</code> — Analyse d'un commentaire d'évaluation (FR/AR) basée sur un lexique. Classifie : TOO_HARSH / TOO_GENERIC / EMPTY / OK. Fonctionnalité RGPD-mindful (les joueurs sont des mineurs), retourne une suggestion d'amélioration.</p>
+
+<h4>4. Transcription vocale</h4>
+<p><code>POST /api/v1/transcription/transcribe</code> — faster-whisper transforme une observation vocale (multipart audio) en texte : texte, langue détectée, confiance, durée. Module lourd optionnel (503 si modèle non chargé).</p>
+
+<h4>5. Extraction de documents (OCR)</h4>
+<p><code>POST /api/v1/documents/extract</code> — PaddleOCR extrait le texte d'un document image, identifie le type (certificat médical, fiche scolaire, fiche tuteur) et extrait les champs clés. Les fichiers temporaires sont supprimés automatiquement. Module optionnel (503 si non chargé).</p>
+
+<figure>
+  <img src="images/12_data_flow.png" alt="Flux AI Insights">
+  <figcaption>Figure 13. Diagramme de flux de données des services IA.</figcaption>
+</figure>
+
+<h3>5.11 Administration (Django + JavaFX)</h3>
+<figure>
+  <img src="images/14_admin_module.png" alt="Module admin Django">
+  <figcaption>Figure 19. Back-office administratif : apps administrateurs, core (miroir) et moderation.</figcaption>
+</figure>
+
+<h4>Backend Django (:8000)</h4>
+<p>L'architecture est séparée du backend principal Express. Elle comprend trois applications :</p>
+<ul>
+  <li><b>administrateurs</b> : modèle dédié d'utilisateurs admin, auth JWT (SimpleJWT), permissions RBAC (SUPER_ADMIN / MODERATEUR / SUPPORT).</li>
+  <li><b>core</b> : miroir en lecture seule des tables Express (<code>managed=False</code>, <code>db_table="platform.*"</code>) : users, teams, players, trainings, matches, notifications, etc.</li>
+  <li><b>moderation</b> : suspensions d'équipes/utilisateurs, journal d'audit, broadcast de notifications (écriture dans <code>platform.notifications</code>).</li>
+</ul>
+
+<p>Endpoints principaux du back-office :</p>
+<ul>
+  <li><code>POST /api/admin/auth/login/</code> — Connexion admin.</li>
+  <li><code>GET /api/admin/dashboard/</code> — KPIs (équipes, utilisateurs par rôle, joueurs en attente d'activation, matchs du mois, entraînements à venir).</li>
+  <li><code>GET /teams/</code>, <code>GET /teams/:id/</code>, <code>GET /teams/:id/players/</code> — Supervision lecture seule.</li>
+  <li><code>POST /teams/:id/suspend/</code>, <code>POST /teams/:id/activate/</code> — Modération.</li>
+  <li><code>GET /users/</code>, <code>POST /users/:id/suspend/</code>, <code>POST /users/:id/activate/</code> — Modération utilisateurs.</li>
+  <li><code>POST /broadcast/</code> — Diffusion globale.</li>
+  <li><code>GET /audit-logs/</code> — Journal d'audit.</li>
+</ul>
+
+<h4>Client Desktop JavaFX</h4>
+<pre><code>foottech_admin_desktop/
+├── pom.xml                  # Maven, JavaFX 21.0.2, Jackson, fat-jar (shade)
+├── src/main/java/com/foottech/admin/
+│   ├── controller/          # Login, Main, Dashboard, Teams, Users, Broadcast, AuditLog
+│   ├── model/               # POJOs (miroir des sérialiseurs Django)
+│   ├── network/             # ApiClient (HTTP + JWT refresh), TokenStore
+│   ├── service/             # Auth, Dashboard, Teams, Users, Broadcast, AuditLog
+│   └── config/, util/
+└── src/main/resources/
+    ├── fxml/                # Écrans FXML
+    └── css/style.css        # Style Navy/Green</code></pre>
+<p>Fonctionnalités : écran de connexion avec splash, dashboard (cartes KPI), liste/recherche/filtre des équipes et utilisateurs, suspension/réactivation, broadcast, visionneuse de logs d'audit. Tokens stockés via <code>java.util.prefs</code>, refresh automatique, tout le réseau en threads d'arrière-plan, mapping Jackson snake_case.</p>
+
+<h3>5.12 Notifications et calendrier</h3>
+
+<h4>Notifications</h4>
+<ul>
+  <li><b>Types</b> : MATCH_CONVOCATION, NEW_TRAINING, REPORT_AVAILABLE, PLANNING_CHANGE, OTHER.</li>
+  <li><b>Émission</b> : coach/adjoint vers les membres de l'équipe ; admin broadcast global.</li>
+  <li><b>Push</b> : Firebase FCM via les push tokens enregistrés (table <code>push_tokens</code>).</li>
+  <li><b>Stockage</b> : table <code>notifications</code> avec index partiel sur les non-lues (<code>WHERE is_read = FALSE</code>).</li>
+  <li><b>Temps réel</b> : Socket.IO room <code>user:ID</code> pour la livraison instantanée dans l'application.</li>
+</ul>
+
+<h4>Calendrier</h4>
+<ul>
+  <li>Calendrier partagé pour toute l'équipe (table <code>calendar_events</code>).</li>
+  <li>Permissions : joueur lecture seule, adjoint création/mise à jour, coach CRUD complet.</li>
+  <li>Événements avec titre, description, dates, lieu, couleur, all-day.</li>
+</ul>
+
+<h3>5.13 Déploiement Docker</h3>
+<figure>
+  <img src="images/09_docker_deployment.png" alt="Déploiement Docker">
+  <figcaption>Figure 20. Vue de déploiement Docker Compose.</figcaption>
+</figure>
+<p>Le <code>docker-compose.yml</code> orchestre 6 services :</p>
+<table>
+  <tr><th>Service</th><th>Image</th><th>Port</th><th>Dépendances</th></tr>
+  <tr><td>postgres</td><td>postgres:16</td><td>5432</td><td>—</td></tr>
+  <tr><td>redis</td><td>redis:7</td><td>6379</td><td>—</td></tr>
+  <tr><td>api</td><td>Express (Dockerfile)</td><td>4000</td><td>postgres, redis</td></tr>
+  <tr><td>admin-api</td><td>Django (Dockerfile)</td><td>8000</td><td>postgres</td></tr>
+  <tr><td>ai-insights</td><td>FastAPI (Dockerfile)</td><td>8300</td><td>—</td></tr>
+  <tr><td>lineup</td><td>FastAPI (Dockerfile)</td><td>8100</td><td>—</td></tr>
+</table>
+<p>Les 6 services démarrent et passent les health checks (docker compose up : 6/6 Up + healthy).</p>
+
+<h3>5.14 Pipeline CI/CD</h3>
+<figure>
+  <img src="images/10_cicd_pipeline.png" alt="Pipeline CI/CD">
+  <figcaption>Figure 21. Pipeline d'intégration et de déploiement continu.</figcaption>
+</figure>
+<p>Deux pipelines équivalents sont maintenus :</p>
+<ul>
+  <li><b>GitHub Actions</b> (<code>.github/workflows/ci.yml</code>) : build sur push à main/develop et PR vers main. Étapes : backend (npm ci → build → vitest), admin (manage.py check --deploy), flutter (analyze → test → build apk), IA (pytest), puis étapes d'intégration et de push des images (GHCR).</li>
+  <li><b>GitLab CI</b> (<code>.gitlab-ci.yml</code>) : stages build → test → docker → deploy avec un job manuel de déploiement en production (SSH + docker compose).</li>
+</ul>
+<p>Par composant :</p>
+<ul>
+  <li><b>Backend</b> : <code>npm ci</code> → <code>npm run build</code> → <code>vitest run</code> → Docker build.</li>
+  <li><b>Admin Backend</b> : pip install → <code>manage.py check --deploy</code> → Docker build.</li>
+  <li><b>Flutter</b> : <code>flutter pub get</code> → <code>flutter analyze</code> → <code>flutter test</code> → <code>flutter build apk --debug</code>.</li>
+  <li><b>Services IA</b> : pytest → Docker build.</li>
+  <li><b>Intégration</b> (branch main) : <code>docker compose up -d --build</code>, health checks sur 4000/8300/8100, run Newman, teardown.</li>
+</ul>
+<!-- ============================ CHAPITRE 6 ============================ -->
+<div class="page-break"></div>
+<h2>Chapitre 6 — Tests et validation</h2>
+
+<h3>6.1 Stratégie de test</h3>
+<p>La validation s'appuie sur plusieurs niveaux complémentaires, réunis dans le dossier <code>tests/</code> :</p>
+<table>
+  <caption>Stratégie de test par type</caption>
+  <tr><th>Niveau</th><th>Outil</th><th>Portée</th></tr>
+  <tr><td>Tests unitaires backend</td><td>Vitest 4</td><td>15 fichiers : auth, isolation d'équipe, dates, migrations, transaction de présence, notifications, matchs, PDF et client lineup.</td></tr>
+  <tr><td>Tests unitaires IA</td><td>pytest 8.3.3</td><td>Services FastAPI : tendances, clustering, ton, transcription, OCR.</td></tr>
+  <tr><td>Tests de contrat API</td><td>Postman + Newman</td><td>Validation des routes, statuts, schémas de réponse (200/201/4xx/5xx).</td></tr>
+  <tr><td>Tests E2E</td><td>Playwright 1.49</td><td>Parcours utilisateur : connexion, effectif, entraînement, match, IA.</td></tr>
+  <tr><td>Tests E2E</td><td>Cypress</td><td>Health checks, login smoke.</td></tr>
+  <tr><td>Tests E2E</td><td>Selenium</td><td>Validation des endpoints API.</td></tr>
+  <tr><td>Tests de charge</td><td>Apache JMeter</td><td>Montée en charge de l'API (10/50/100/500 threads).</td></tr>
+  <tr><td>Tests Flutter</td><td>flutter test</td><td>Widget test (boot onboarding).</td></tr>
+  <tr><td>Analyse statique</td><td>tsc build, flutter analyze, manage.py check</td><td>Détection précoce des erreurs.</td></tr>
+  <tr><td>Sécurité</td><td>npm audit, pip check et tests ciblés</td><td>Dépendances, secrets dans les logs, RBAC et cloisonnement des ressources.</td></tr>
+</table>
+
+<h3>6.2 Tests fonctionnels</h3>
+<table>
+  <caption>Tableau 13. Tests fonctionnels</caption>
+  <tr><th>ID</th><th>Fonctionnalité</th><th>Scénario</th><th>Résultat attendu</th><th>Résultat obtenu</th></tr>
+  <tr><td>T01</td><td>Connexion</td><td>Email + mot de passe valides</td><td>Accès dashboard</td><td style="color:green">✓ Pass</td></tr>
+  <tr><td>T02</td><td>Connexion</td><td>Mot de passe incorrect</td><td>Message d'erreur 401</td><td style="color:green">✓ Pass</td></tr>
+  <tr><td>T03</td><td>Joueur</td><td>Ajouter un joueur</td><td>Joueur créé + OTP envoyé</td><td style="color:green">✓ Pass</td></tr>
+  <tr><td>T04</td><td>Entraînement</td><td>Créer une séance</td><td>Séance créée (SCHEDULED)</td><td style="color:green">✓ Pass</td></tr>
+  <tr><td>T05</td><td>Présence</td><td>Marquer présent (bulk)</td><td>Présence enregistrée</td><td style="color:green">✓ Pass</td></tr>
+  <tr><td>T06</td><td>Match</td><td>Créer un match</td><td>Match créé (SCHEDULED)</td><td style="color:green">✓ Pass</td></tr>
+  <tr><td>T07</td><td>IA</td><td>Générer composition</td><td>Recommandation retournée (scores 0-1)</td><td style="color:green">✓ Pass</td></tr>
+  <tr><td>T08</td><td>Évaluation</td><td>Noter un joueur</td><td>Évaluation enregistrée (0-10)</td><td style="color:green">✓ Pass</td></tr>
+  <tr><td>T09</td><td>Notification</td><td>Envoyer notification broadcast</td><td>Notification reçue (push + DB)</td><td style="color:green">✓ Pass</td></tr>
+  <tr><td>T10</td><td>Administration</td><td>Suspendre une équipe</td><td>Équipe suspendue + log d'audit</td><td style="color:green">✓ Pass</td></tr>
+</table>
+
+<h3>6.3 Tests API (Postman / Newman)</h3>
+<p>La collection Postman (<code>tests/postman/foottech_collection.json</code>, 15 dossiers) couvre : auth, teams, players, seasons, trainings, attendance, matches (CRUD, lineup, AI, events, stats, evaluations, report), notifications, dashboard, calendar et AI Insights. Les corps de requêtes IA ont été alignés sur le contrat OpenAPI. La collection est exécutable via <code>npx newman run</code>.</p>
+<p>Le contrat <code>tests/openapi/foottech_api.yaml</code> contient <b>50 chemins</b> et <b>44 schémas</b>. Le validateur local ne signale aucune référence manquante ni identifiant d'opération dupliqué. Les scénarios d'intégration Docker valident notamment les statuts 200, 400/422, 403 et 503 sur la chaîne Express–Lineup.</p>
+
+<h3>6.4 Tests unitaires backend (Vitest)</h3>
+<p><b>65/65 tests passent dans 15 fichiers de test.</b> La commande a été exécutée sur le dépôt courant après les dernières corrections.</p>
+<ul>
+  <li><strong>lineup.client.test.ts</strong> : mapping des erreurs du service (503 indisponible / 504 timeout / 502 bad gateway / 400 rejet / 404 route manquante), timeout 5 s, validation zod.</li>
+  <li><strong>matches (service + unit)</strong> : scénarios INT-01 à INT-07 (création, statut, lineup, recommandations IA, événements, stats, évaluations).</li>
+  <li><strong>Isolation des ressources</strong> : sélection de l'équipe active, saisons rattachées à l'équipe et propositions d'exercices non accessibles depuis une autre équipe.</li>
+  <li><strong>Présences</strong> : validation du lot et utilisation d'une transaction atomique avec rollback en cas d'échec.</li>
+  <li><strong>Confidentialité</strong> : absence du code OTP et des tokens FCM dans les messages de log ; normalisation des erreurs de base de données.</li>
+  <li><strong>normalizeScore</strong> : clamp 0-1, arrondi à 3 décimales.</li>
+  <li><strong>JWT</strong> : génération, vérification, expiration.</li>
+  <li><strong>PDF</strong> : génération de rapport de match (pdfkit).</li>
+</ul>
+
+<h3>6.5 Tests des microservices IA (pytest)</h3>
+
+<h4>AI Insights Service — 27/27 tests passent</h4>
+<ul>
+  <li><strong>test_api.py</strong> : health check et disponibilité des endpoints.</li>
+  <li><strong>test_trend.py</strong> : régression linéaire, minimum 3 points, cas limites.</li>
+  <li><strong>test_clustering.py</strong> : KMeans, minimum 4 joueurs, standardisation des features.</li>
+  <li><strong>test_tone.py</strong> : classification FR/AR, index du lexique, cas limites.</li>
+  <li><strong>test_transcription.py</strong> : client whisper mocké, transcription avec confiance.</li>
+  <li><strong>test_document_extraction.py</strong> : client PaddleOCR mocké, extraction de champs typés.</li>
+</ul>
+
+<h4>Lineup Recommendation Service — 11/11 tests passent</h4>
+<ul>
+  <li><strong>test_scoring_service</strong> : composantes présence/performance/fatigue, score final, seuils STARTER/SUB/NOT_SELECTED.</li>
+  <li><strong>test_api_lineup</strong> : contrat API (FastAPI), payloads valides/invalides, liste vide → 422.</li>
+</ul>
+
+<h3>6.6 Tests E2E (Playwright / Cypress / Selenium)</h3>
+
+<h4>Playwright</h4>
+<p><b>6/6 scénarios passent</b> sur l'environnement d'intégration Docker réel.</p>
+<ul>
+  <li><strong>ai-recommendations.spec.ts</strong> : COACH/ADJ génèrent → 200 ; PLAYER get → 200 / generate → 403 ; contrat lineup direct ; payload vide → 400/422 ; service arrêté → 503.</li>
+  <li><strong>api-health.spec.ts</strong> : health checks sur l'ensemble des services.</li>
+  <li><strong>business-flow.spec.ts</strong> : parcours métier API entre authentification, équipe et données sportives.</li>
+</ul>
+
+<h4>Cypress</h4>
+<ul>
+  <li><strong>health.cy.ts</strong> : health checks + smoke test de connexion invalide.</li>
+</ul>
+
+<h4>Selenium</h4>
+<ul>
+  <li><strong>test_api_endpoints.py</strong> : <b>7 tests</b> couvrant health, échec d'authentification et protection des endpoints.</li>
+</ul>
+
+<h4>Clients Django, JavaFX et Flutter</h4>
+<ul>
+  <li><b>Django</b> : 2 tests ciblés et vérification de configuration.</li>
+  <li><b>JavaFX</b> : 2 tests Maven sur le stockage et le cycle de vie des tokens.</li>
+  <li><b>Flutter</b> : 1 widget test ; <code>flutter analyze</code> sans erreur.</li>
+</ul>
+
+<h3>6.7 Tests de charge (JMeter)</h3>
+<p>Le fichier <code>tests/jmeter/foottech_load_test.jmx</code> contient 8 scénarios : health, login, teams, players, matches, dashboard, recommandation IA via Express, appel Lineup direct. Paramétrage par <code>-Jthreads</code> (10/50/100/500), extraction du JWT et du matchId, assertions 200.</p>
+<p><b>Interprétation</b> : le plan de charge est prêt pour une campagne reproductible, mais le mémoire ne présente pas de chiffres de performance non mesurés sur une infrastructure de référence. Les seuils de latence, le débit et le taux d'erreur devront être formalisés lors d'un pilote terrain.</p>
+
+<h3>6.8 Tests de sécurité</h3>
+<ul>
+  <li><b>npm audit</b> : 0 vulnérabilité connue sur le backend, Playwright et Cypress au moment de la campagne.</li>
+  <li><b>pip check</b> : dépendances cohérentes pour les deux services IA.</li>
+  <li><b>Django</b> : <code>manage.py check --deploy</code> passe proprement (exit 0).</li>
+  <li><b>RBAC</b> : tests de contrôle d'accès par rôle (COACH vs ADJOINT vs JOUEUR vs Admin).</li>
+  <li><b>Rate limiting</b> : express-rate-limit sur les routes sensibles.</li>
+  <li><b>JWT</b> : token expiré → refresh ; refresh token révoqué → 401.</li>
+  <li><b>Timeout IA</b> : garantie de dégradation gracieuse (503) sans blocage.</li>
+  <li><b>Secrets</b> : tests de non-journalisation du code OTP et des tokens FCM.</li>
+  <li><b>Limite de l'audit</b> : ces contrôles ne remplacent pas un test d'intrusion indépendant avant mise en production.</li>
+</ul>
+
+<h3>6.9 Résultats globaux</h3>
+<table>
+  <caption>Tableau 14. Synthèse des campagnes de test</caption>
+  <tr><th>Campagne</th><th>Cas exécutés</th><th>Résultat</th></tr>
+  <tr><td>Backend unit (Vitest)</td><td>65</td><td style="color:green"><b>65/65 PASS</b></td></tr>
+  <tr><td>AI Insights (pytest)</td><td>27</td><td style="color:green"><b>27/27 PASS</b></td></tr>
+  <tr><td>Lineup Service (pytest)</td><td>11</td><td style="color:green"><b>11/11 PASS</b></td></tr>
+  <tr><td>Django admin</td><td>2 + check</td><td style="color:green"><b>2/2 PASS, check propre</b></td></tr>
+  <tr><td>JavaFX (Maven)</td><td>2</td><td style="color:green"><b>2/2 PASS</b></td></tr>
+  <tr><td>Playwright E2E</td><td>6</td><td style="color:green"><b>6/6 PASS</b></td></tr>
+  <tr><td>Selenium API</td><td>7</td><td style="color:green"><b>7/7 PASS</b></td></tr>
+  <tr><td>Flutter widget test</td><td>1</td><td style="color:green"><b>1/1 PASS + analyse propre</b></td></tr>
+  <tr><td>Docker Compose E2E</td><td>6 services</td><td style="color:green"><b>6/6 Up + healthy</b></td></tr>
+  <tr><td>OpenAPI</td><td>50 chemins / 44 schémas</td><td style="color:green"><b>Références et operationId valides</b></td></tr>
+  <tr><td>Audits de dépendances</td><td>npm + pip</td><td style="color:green"><b>0 vulnérabilité npm ; pip cohérent</b></td></tr>
+</table>
+<p>La campagne confirme la cohérence technique du prototype sur les scénarios automatisés. Elle ne constitue pas encore une validation clinique, physiologique ou sportive des recommandations IA : celle-ci exige un protocole terrain, des données historiques représentatives et l'évaluation de plusieurs entraîneurs.</p>
+<!-- ============================ CHAPITRE 7 ============================ -->
+<div class="page-break"></div>
+<h2>Chapitre 7 — Résultats, limites et perspectives</h2>
+
+<h3>7.1 Résultats obtenus</h3>
+<p>La réalisation de FootTech a permis de mettre en place une plateforme couvrant plusieurs aspects essentiels de la gestion d'une équipe de football :</p>
+<ul>
+  <li>Centralisation des informations relatives aux équipes, aux joueurs (avec fiches complètes) et au staff.</li>
+  <li>Organisation des entraînements (planification, fiches de séance, situations, schémas tactiques, plannings hebdomadaires).</li>
+  <li>Suivi des présences et des événements sportifs en direct.</li>
+  <li>Gestion complète du cycle d'un match : préparation, composition, live, statistiques, évaluations, rapport PDF.</li>
+  <li>Conservation de l'historique des performances et des bilans saisonniers (vue <code>player_season_bilan</code>).</li>
+  <li>Intégration d'une chaîne de tests complète (unitaires, contrat, E2E, charge, sécurité).</li>
+  <li>Déploiement conteneurisé (Docker Compose) et pipelines CI/CD fonctionnels.</li>
+</ul>
+<p>L'intégration de services d'intelligence artificielle constitue une valeur ajoutée importante :</p>
+<ul>
+  <li>La <b>recommandation de composition</b> exploite plusieurs indicateurs (présence, performance, fatigue) pour assister le coach.</li>
+  <li>Le service <b>AI Insights</b> fournit des informations complémentaires : tendances, clustering, analyse de ton, transcription vocale, OCR.</li>
+</ul>
+<p>La séparation entre l'application destinée aux utilisateurs sportifs et la plateforme d'administration permet de répondre à des besoins différents tout en conservant une architecture structurée et maintenable.</p>
+
+<h3>7.2 Apports du projet</h3>
+<ul>
+  <li><b>Sur le plan théorique</b> : mise en pratique des méthodes agiles (Scrum), modélisation UML complète (cas d'utilisation, séquences, activité, classes, données), conception d'architectures distribuées et de microservices.</li>
+  <li><b>Sur le plan technique</b> : développement multiplateforme (Flutter), API REST typée (TypeScript/Express), services IA (Python/FastAPI), back-office (Django + DRF), client desktop (JavaFX), base de données PostgreSQL, intégration cloud (Firebase, Twilio).</li>
+  <li><b>Sur le plan méthodologique</b> : traçabilité complète User Story → cas d'utilisation → conception → code → interface → test → résultat.</li>
+  <li><b>Sur le plan métier</b> : une solution concrète d'aide à la décision à destination des entraîneurs, où l'IA assiste sans remplacer l'expertise humaine.</li>
+</ul>
+
+<h3>7.3 Difficultés rencontrées</h3>
+<ul>
+  <li><b>Cohérence inter-services</b> : aligner les contrats entre Express et les microservices FastAPI (normalisation 0-1, poids, seuils) a exigé un protocole commun et des validations strictes (Zod côté Express, Pydantic côté Python).</li>
+  <li><b>État de fait du code existant</b> : le schéma de données initial utilisait des noms de tables non conformes ; le passage aux noms réels (<code>users</code>, <code>teams</code>, <code>players</code>, <code>team_staff</code>…) a nécessité la mise en cohérence du miroir Django (<code>managed=False</code>).</li>
+  <li><b>Configuration du déploiement</b> : variables d'environnement (JWT, Twilio, Firebase), activation de Redis, firewall et timeouts entre conteneurs.</li>
+  <li><b>Temps réel</b> : la diffusion des événements de match (Socket.IO) et la remontée des notifications push exigent une gestion fine des sessions et des tokens (<code>push_tokens</code>).</li>
+  <li><b>Modules IA lourds</b> : faster-whisper et PaddleOCR sont volumineux ; ils sont optionnels et testés avec des clients simulés.</li>
+</ul>
+
+<h3>7.4 Limites</h3>
+<ul>
+  <li><b>Dépendance à la qualité des données</b> : la pertinence des recommandations et analyses dépend directement de la complétude des données saisies.</li>
+  <li><b>Volume de données disponible pour l'IA</b> : les modèles sont calibrés sur des heuristiques et des données ouvertes (StatsBomb), pas sur les données réelles du club.</li>
+  <li><b>Précision réelle des recommandations</b> : les scores de présence/performance/fatigue sont des approximations ; la validation terrain reste à consolider.</li>
+  <li><b>Dépendance aux services externes</b> : Twilio (SMS), Firebase (push) et les modèles IA lourds requièrent des clés et des ressources.</li>
+  <li><b>Performances à l'échelle</b> : non encore validées pour un grand nombre d'utilisateurs simultanés (tests JMeter à approfondir).</li>
+  <li><b>Couverture des tests</b> : malgré les tests backend, IA, E2E, Django, JavaFX et Flutter, certains parcours complets d'interface et cas de panne nécessitent encore des données de recette maîtrisées.</li>
+  <li><b>Sécurité</b> : durcissement supplémentaire possible (rotation complète des clés, monitoring, audit renforcé).</li>
+  <li><b>Expérience utilisateur</b> : certains parcours (édition tactique, suivi live) gagneraient à être éprouvés sur le terrain.</li>
+  <li><b>Écart avec TacticalPad</b> : absence d'animation tactique 2D/3D avancée, d'export vidéo et de formats de partage riches.</li>
+  <li><b>Écart avec MyCoachSport</b> : bibliothèque communautaire d'exercices et mécanismes de convocation à industrialiser.</li>
+  <li><b>Fonctionnalités avancées absentes</b> : analyse vidéo, xG, charge d'entraînement fine, indicateurs physiologiques et synchronisation hors ligne complète.</li>
+</ul>
+
+<h3>7.5 Perspectives d'amélioration</h3>
+<ul>
+  <li><b>Enrichir les modèles IA</b> avec davantage de données historiques réelles des équipes et joueurs afin d'améliorer la pertinence des recommandations.</li>
+  <li><b>Intégrer davantage d'indicateurs</b> : charge d'entraînement (ACWR affiné), évolution de la condition physique, indicateurs avancés de performance (xG, xA).</li>
+  <li><b>Évoluer vers une architecture orientée événements</b> pour faciliter le traitement en temps réel des informations des matchs.</li>
+  <li><b>Ajouter de la supervision et du monitoring</b> : surveillance automatique de la disponibilité des services, alerting, métriques.</li>
+  <li><b>Expliquer les recommandations de l'IA</b> : système d'explicabilité indiquant les principaux facteurs ayant contribué à la sélection d'un joueur, pour un meilleur contrôle du coach sur la décision finale.</li>
+  <li><b>Enrichir l'éditeur tactique</b> : animations 2D, chronologie des déplacements et exports image/vidéo/PDF inspirés des usages observés sur TacticalPad.</li>
+  <li><b>Créer une bibliothèque communautaire</b> : exercices validés, recherche par catégorie/durée/intensité, notation et partage, dans l'esprit des pratiques publiques de MyCoachSport.</li>
+  <li><b>Améliorer l'usage terrain</b> : mode hors ligne, synchronisation différée, saisie rapide et protocole de test avec des éducateurs.</li>
+  <li><b>Industrialiser le déploiement</b> : passage à Kubernetes (k8s manifests déjà présents), gestion des secrets, scaling horizontal.</li>
+  <li><b>Renforcer les tests</b> : données de test seedées, scénarios de reprise après panne, charge sur les diffusions groupées.</li>
+</ul>
+
+<h3>7.6 Feuille de route issue du benchmark</h3>
+<p>Le benchmark n'est utile que s'il conduit à des décisions concrètes. La feuille de route suivante conserve le cœur différenciateur de FootTech tout en réduisant les écarts identifiés avec les deux références.</p>
+<table class="comparison-table">
+  <caption>Tableau 15. Feuille de route fonctionnelle et industrielle</caption>
+  <tr><th>Horizon</th><th>Priorité</th><th>Livrables</th><th>Critères d'acceptation</th></tr>
+  <tr><td>Court terme</td><td>P0 — Fiabilité terrain</td><td>Jeu de données de recette, parcours Flutter complets, tests de charge mesurés, sauvegarde/restauration, politique de secrets.</td><td>Aucun blocage P0 ; métriques de latence documentées ; restauration testée ; pilote sur une équipe.</td></tr>
+  <tr><td>Court terme</td><td>P0 — Protection des mineurs</td><td>Consentement, minimisation des données, durée de conservation, export/suppression, journal d'accès renforcé.</td><td>Registre de traitements, droits d'accès testés, procédure de suppression vérifiable.</td></tr>
+  <tr><td>Moyen terme</td><td>P1 — Tactique</td><td>Animation 2D, séquences de déplacement, export image/PDF puis vidéo.</td><td>Une séance animée et partageable en moins de cinq minutes par un coach testeur.</td></tr>
+  <tr><td>Moyen terme</td><td>P1 — Contenus</td><td>Catalogue d'exercices, filtres catégorie/durée/intensité, favoris, modération et partage.</td><td>Recherche pertinente, contenu modéré, rattachement strict à l'équipe pour les éléments privés.</td></tr>
+  <tr><td>Moyen terme</td><td>P1 — Mobilité</td><td>Cache hors ligne et synchronisation avec résolution de conflits.</td><td>Présences et événements saisis sans réseau puis synchronisés sans doublon.</td></tr>
+  <tr><td>Long terme</td><td>P2 — IA validée</td><td>Explications de score, apprentissage sur données consenties, analyse vidéo et indicateurs xG/xA.</td><td>Protocole d'évaluation, comparaison à une référence métier, décision finale toujours modifiable par le coach.</td></tr>
+  <tr><td>Long terme</td><td>P2 — Industrialisation</td><td>Observabilité, alertes, autoscaling, SLA, support et modèle économique.</td><td>Tableaux de bord techniques, objectifs de disponibilité et procédure d'incident.</td></tr>
+</table>
+<!-- ============================ CONCLUSION GÉNÉRALE ============================ -->
+<div class="page-break"></div>
+<h2>Conclusion générale</h2>
+<p>Le projet de fin d'études présenté dans ce mémoire avait pour objectif de concevoir et développer FootTech, une plateforme intelligente destinée à la gestion et à l'analyse des activités d'une équipe de football.</p>
+<p>L'analyse des besoins a permis d'identifier les principaux acteurs du système (coach, adjoint, joueur, administrateur) ainsi que leurs besoins respectifs. À partir de ces besoins, un Product Backlog regroupant 15 épopées et 74 User Stories a été établi afin de structurer le développement.</p>
+<p>La conception a conduit à une architecture modulaire composée d'une application cliente Flutter, d'un backend principal Express/TypeScript, d'une base de données centralisée PostgreSQL, de microservices d'intelligence artificielle (FastAPI) et d'une plateforme d'administration (Django + JavaFX).</p>
+<p>La réalisation a permis de couvrir plusieurs processus métier : gestion des équipes et des joueurs, entraînements, présences, matchs, compositions, événements en direct, statistiques, évaluations, calendrier et notifications.</p>
+<p>L'intégration de l'intelligence artificielle représente l'une des principales contributions du projet. Le service de recommandation permet de proposer une composition à partir de plusieurs indicateurs (présence, performance, fatigue), tandis que le service AI Insights apporte des fonctionnalités complémentaires d'analyse des tendances, de clustering, d'analyse de commentaires, de transcription et d'extraction de documents.</p>
+<p>Au-delà de l'aspect technique, FootTech cherche surtout à fournir un outil d'aide à la décision. Les recommandations générées par le système ne remplacent pas l'expertise du coach, mais lui fournissent des informations supplémentaires susceptibles de faciliter son analyse.</p>
+<p>Ce projet nous a ainsi permis de mettre en pratique plusieurs compétences relatives au développement logiciel, à la conception d'architectures distribuées, aux bases de données, aux API, aux applications multiplateformes et à l'intelligence artificielle.</p>
+<p>Des améliorations restent possibles, notamment concernant l'enrichissement des données, la précision des modèles IA, le monitoring, la sécurité et l'analyse avancée des performances. Ces perspectives pourraient permettre à FootTech d'évoluer vers une solution encore plus complète d'aide à la décision sportive.</p>
+<p>L'étude comparative a enfin clarifié le positionnement du produit : FootTech n'a pas vocation à copier TacticalPad ou MyCoachSport, mais à réunir dans une plateforme maîtrisée la gestion opérationnelle, le suivi du match et une IA explicable. Les prochaines versions devront néanmoins atteindre la qualité de création tactique observée chez TacticalPad et la maturité organisationnelle et communautaire mise en avant par MyCoachSport.</p>
+
+<!-- ============================ BIBLIOGRAPHIE ============================ -->
+<div class="page-break"></div>
+<h2>Bibliographie</h2>
+<h3>Ouvrages et articles</h3>
+<ul>
+  <li>Gabbett, T. J. (2016). « The training-injury prevention paradox : should athletes be training smarter and harder ? », <em>British Journal of Sports Medicine</em>, 50(5), 273-280.</li>
+  <li>Decroos, T., Bransen, L., Van Haaren, J., Davis, J. (2019). « Actions Speak Louder than Goals : Valuing Player Actions in Soccer », <em>Proceedings of the 25th ACM SIGKDD</em> (méthodologie VAEP).</li>
+  <li>Radford, A., Kim, J. W., Xu, T., Brockman, G., McLeavey, C., Sutskever, I. (2022). « Robust Speech Recognition via Large-Scale Weak Supervision » (faster-whisper / Whisper).</li>
+  <li>Bishop, C. M. (2006). <em>Pattern Recognition and Machine Learning</em>, Springer (KMeans, régression).</li>
+</ul>
+
+<h3>Documentation technique et outils</h3>
+<ul>
+  <li>Flutter Documentation — https://docs.flutter.dev</li>
+  <li>Riverpod Documentation — https://riverpod.dev</li>
+  <li>Node.js & Express — https://expressjs.com</li>
+  <li>FastAPI Documentation — https://fastapi.tiangolo.com</li>
+  <li>Django Documentation — https://docs.djangoproject.com</li>
+  <li>PostgreSQL Documentation — https://www.postgresql.org/docs</li>
+  <li>scikit-learn — https://scikit-learn.org</li>
+  <li>StatsBomb Open Data — https://github.com/statsbomb/open-data</li>
+  <li>PlantUML — https://plantuml.com</li>
+  <li>OpenAPI Specification — https://spec.openapis.org</li>
+</ul>
+
+<h3>Sources web du benchmark concurrentiel</h3>
+<ul>
+  <li>TacticalPad, « L'app pour dessiner exercices, alignements et tactiques », page officielle française : <a href="https://www.tacticalpad.com/fr/new/index.php">https://www.tacticalpad.com/fr/new/index.php</a>, consultée le 02/09/2026.</li>
+  <li>TacticalPad, « Quick Training / Tutorials » : <a href="https://tacticalpad.com/edu/formation.php">https://tacticalpad.com/edu/formation.php</a>, consultée le 02/09/2026.</li>
+  <li>MyCoachSport Classic, page officielle de connexion : <a href="https://classic.mycoachsport.com/login">https://classic.mycoachsport.com/login</a>, consultée le 02/09/2026.</li>
+  <li>MyCoach Pro, vitrine multisport actuelle : <a href="https://mycoachpro.io/">https://mycoachpro.io/</a>, consultée le 02/09/2026.</li>
+  <li>MyCoach Football, « Fonctionnalités », page publique historique officielle : <a href="https://old.mycoachfootball.com/fr/fonctionnalites">https://old.mycoachfootball.com/fr/fonctionnalites</a>, consultée le 02/09/2026.</li>
+</ul>
+
+<!-- ============================ ANNEXES ============================ -->
+<div class="page-break"></div>
+<h2>Annexes</h2>
+
+<h3>Annexe A — Liste des diagrammes UML livrés</h3>
+<table>
+  <caption>Inventaire des diagrammes (sources PlantUML + rendus PNG)</caption>
+  <tr><th>Fichier</th><th>Diagramme</th><th>Figure</th></tr>
+  <tr><td>01_system_architecture</td><td>Architecture globale</td><td>1 / 14</td></tr>
+  <tr><td>02_backend_class_diagram</td><td>Classes du backend Express</td><td>11</td></tr>
+  <tr><td>03_frontend_component_diagram</td><td>Composants frontend</td><td>18</td></tr>
+  <tr><td>04_er_diagram</td><td>Modèle conceptuel de données</td><td>12</td></tr>
+  <tr><td>05_auth_sequence</td><td>Séquence — authentification</td><td>5</td></tr>
+  <tr><td>06_training_flow</td><td>Séquence — entraînement</td><td>6</td></tr>
+  <tr><td>07_match_management</td><td>Séquence — match</td><td>7</td></tr>
+  <tr><td>08_notification_flow</td><td>Séquence — notifications / OTP</td><td>8</td></tr>
+  <tr><td>09_docker_deployment</td><td>Déploiement Docker</td><td>20</td></tr>
+  <tr><td>10_cicd_pipeline</td><td>Pipeline CI/CD</td><td>21</td></tr>
+  <tr><td>11_use_case_diagram</td><td>Cas d'utilisation global</td><td>2</td></tr>
+  <tr><td>12_data_flow</td><td>Diagramme de flux de données</td><td>13</td></tr>
+  <tr><td>13_microservices_communication</td><td>Communication entre microservices</td><td>17</td></tr>
+  <tr><td>14_admin_module</td><td>Back-office Django</td><td>19</td></tr>
+  <tr><td>15_use_case_encadrement</td><td>Cas d'utilisation encadrement</td><td>3</td></tr>
+  <tr><td>16_use_case_joueur</td><td>Cas d'utilisation joueur</td><td>4</td></tr>
+  <tr><td>17_activity_seance</td><td>Diagramme d'activité — séance</td><td>9</td></tr>
+  <tr><td>18_class_diagram_domaine</td><td>Classes du domaine</td><td>10</td></tr>
+  <tr><td>19_architecture_logicielle</td><td>Architecture logicielle en couches</td><td>15</td></tr>
+  <tr><td>20_riverpod_architecture</td><td>State management Riverpod</td><td>16</td></tr>
+</table>
+
+<h3>Annexe B — Endpoints API complets</h3>
+<table>
+  <caption>Récapitulatif des endpoints (préfixe /api/v1)</caption>
+  <tr><th>Méthode</th><th>Endpoint</th><th>Rôle</th></tr>
+  <tr><td>POST</td><td>/auth/register-coach</td><td>Création d'un compte coach</td></tr>
+  <tr><td>POST</td><td>/auth/login</td><td>Connexion (access + refresh)</td></tr>
+  <tr><td>POST</td><td>/auth/refresh</td><td>Réactivation de session</td></tr>
+  <tr><td>POST</td><td>/auth/player/request-otp</td><td>Demande du code d'activation joueur (SMS)</td></tr>
+  <tr><td>POST</td><td>/auth/player/verify-otp</td><td>Vérification du code et activation</td></tr>
+  <tr><td>GET/POST</td><td>/players, /teams, /seasons</td><td>Gestion de l'effectif et des équipes</td></tr>
+  <tr><td>POST</td><td>/trainings</td><td>Création d'un entraînement</td></tr>
+  <tr><td>PUT</td><td>/trainings/:id/sheet</td><td>Fiche de séance</td></tr>
+  <tr><td>POST</td><td>/attendance/trainings/:id/bulk</td><td>Présences en lot</td></tr>
+  <tr><td>POST</td><td>/matches/:id/ai-recommendations</td><td>Alignement IA</td></tr>
+  <tr><td>PATCH</td><td>/matches/:id/status</td><td>Statut (live / terminé)</td></tr>
+  <tr><td>POST</td><td>/matches/:id/report/generate</td><td>Rapport PDF</td></tr>
+  <tr><td>POST</td><td>/notifications/broadcast</td><td>Diffusion d'un message</td></tr>
+  <tr><td>GET</td><td>/api/v1/notifications</td><td>Liste des notifications</td></tr>
+  <tr><td>POST</td><td>/api/v1/lineup/recommendations</td><td>Recommandation IA (service :8100)</td></tr>
+  <tr><td>POST</td><td>/api/v1/trend/detect</td><td>Tendance (service :8300)</td></tr>
+  <tr><td>POST</td><td>/api/v1/clustering/players</td><td>Clustering (service :8300)</td></tr>
+  <tr><td>POST</td><td>/api/v1/tone/analyze</td><td>Analyse de ton (service :8300)</td></tr>
+  <tr><td>POST</td><td>/api/v1/transcription/transcribe</td><td>Transcription (service :8300)</td></tr>
+  <tr><td>POST</td><td>/api/v1/documents/extract</td><td>Extraction OCR (service :8300)</td></tr>
+</table>
+
+<h3>Annexe C — Tables PostgreSQL (schéma platform)</h3>
+<p class="small">users, roles, user_roles, activation_codes, refresh_tokens, push_tokens, seasons, teams, team_staff, players, player_guardians, player_address, player_school_info, player_season_profile, player_injuries, weekly_plannings, weekly_planning_slots, trainings, training_sheets, training_situations, tactical_drawings, exercise_proposals, attendances, matches, match_lineups, ai_lineup_recommendations (NUMERIC(4,3) CHECK 0-1), match_events, match_player_stats, match_evaluations, match_reports, notifications, calendar_events.</p>
+<p class="small">Vue : player_season_bilan. Types enum : account_status, activation_channel, training_status, planning_moment, proposal_status, attendance_status, match_status, lineup_status, match_event_type, niveau_scolaire, pied_fort, guardian_relation, notification_type.</p>
+
+<h3>Annexe D — Sources Mermaid</h3>
+<p class="small">Les sources Mermaid du dossier <code>diagrammes/mermaid/</code> (architecture.mmd, deploiement-cicd.mmd, ia-lineup-dataflow.mmd, ia-lineup-flow.mmd) complètent les diagrammes PlantUML en vue textuelle ; elles peuvent être rendues avec l'outil mermaid-cli.</p>
+
+<h3>Annexe E — Ressources du projet</h3>
+<table>
+  <caption>Organisation du dépôt monorepo</caption>
+  <tr><th>Dossier</th><th>Contenu</th></tr>
+  <tr><td>back/FoottechBackend-main</td><td>API principale Express + TypeScript</td></tr>
+  <tr><td>front/foottechproject</td><td>Application Flutter (Coach/Adjoint/Joueur)</td></tr>
+  <tr><td>foottech_admin_backend</td><td>Back-office Django + DRF</td></tr>
+  <tr><td>foottech_admin_desktop</td><td>Client desktop JavaFX</td></tr>
+  <tr><td>lineup-recommendation-service</td><td>Microservice FastAPI — recommandation d'alignement</td></tr>
+  <tr><td>ai-insights-service</td><td>Microservice FastAPI — analyses IA</td></tr>
+  <tr><td>tests</td><td>cypress, playwright, selenium, postman, jmeter, jira, openapi</td></tr>
+  <tr><td>diagrammes</td><td>Sources PlantUML + PNG rendus, sources Mermaid</td></tr>
+  <tr><td>rapport</td><td>Présent mémoire (PDF + HTML) et images</td></tr>
+  <tr><td>foottech_v2_schema.sql</td><td>Schéma complet PostgreSQL (32 tables)</td></tr>
+  <tr><td>docker-compose.yml</td><td>Orchestration des 6 services</td></tr>
+  <tr><td>.github/workflows/ci.yml</td><td>Pipeline GitHub Actions</td></tr>
+  <tr><td>.gitlab-ci.yml</td><td>Pipeline GitLab CI</td></tr>
+</table>
+
+</body>
+</html>

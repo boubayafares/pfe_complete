@@ -23,20 +23,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _changeAvatar(int userId) async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery, maxWidth: 800, imageQuality: 85);
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      imageQuality: 85,
+    );
     if (picked == null) return;
 
     setState(() => _uploadingAvatar = true);
     try {
       if (kIsWeb) {
         final bytes = await picked.readAsBytes();
-        await ref.read(profileRepositoryProvider).uploadAvatar(userId, bytes: bytes, fileName: picked.name);
+        await ref
+            .read(profileRepositoryProvider)
+            .uploadAvatar(userId, bytes: bytes, fileName: picked.name);
       } else {
-        await ref.read(profileRepositoryProvider).uploadAvatar(userId, filePath: picked.path);
+        await ref
+            .read(profileRepositoryProvider)
+            .uploadAvatar(userId, filePath: picked.path);
       }
       ref.invalidate(myProfileProvider);
     } on ApiException catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
+      }
     } finally {
       if (mounted) setState(() => _uploadingAvatar = false);
     }
@@ -62,24 +74,45 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: user == null || _uploadingAvatar ? null : () => _changeAvatar(user.id),
+                      onTap: user == null || _uploadingAvatar
+                          ? null
+                          : () => _changeAvatar(user.id),
                       child: Stack(
                         children: [
                           CircleAvatar(
                             radius: 28,
                             backgroundColor: AppColors.navyBorder,
                             backgroundImage: avatarImage,
-                            child: avatarImage == null ? const Icon(Icons.person, color: AppColors.textSecondary) : null,
+                            child: avatarImage == null
+                                ? const Icon(
+                                    Icons.person,
+                                    color: AppColors.textSecondary,
+                                  )
+                                : null,
                           ),
                           Positioned(
                             right: 0,
                             bottom: 0,
                             child: Container(
                               padding: const EdgeInsets.all(3),
-                              decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle),
+                              decoration: const BoxDecoration(
+                                color: AppColors.green,
+                                shape: BoxShape.circle,
+                              ),
                               child: _uploadingAvatar
-                                  ? const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 1.5, color: AppColors.greenTextOnFill))
-                                  : const Icon(Icons.camera_alt, size: 12, color: AppColors.greenTextOnFill),
+                                  ? const SizedBox(
+                                      width: 12,
+                                      height: 12,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 1.5,
+                                        color: AppColors.greenTextOnFill,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.camera_alt,
+                                      size: 12,
+                                      color: AppColors.greenTextOnFill,
+                                    ),
                             ),
                           ),
                         ],
@@ -89,8 +122,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(user?.fullName ?? '', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-                        Text(_roleLabel(context, user?.role), style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                        Text(
+                          user?.fullName ?? '',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                          ),
+                        ),
+                        Text(
+                          _roleLabel(context, user?.role),
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 12,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -102,31 +147,55 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 title: Text(context.l10n.notifications),
                 trailing: unreadCount > 0
                     ? Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(color: AppColors.green, borderRadius: BorderRadius.circular(10)),
-                        child: Text('$unreadCount', style: const TextStyle(color: AppColors.greenTextOnFill, fontSize: 11)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.green,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '$unreadCount',
+                          style: const TextStyle(
+                            color: AppColors.greenTextOnFill,
+                            fontSize: 11,
+                          ),
+                        ),
                       )
-                    : const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                    : const Icon(
+                        Icons.chevron_right,
+                        color: AppColors.textMuted,
+                      ),
                 onTap: () => context.push('/notifications'),
               ),
               if (user?.canManageTeam == true)
                 ListTile(
                   leading: const Icon(Icons.bar_chart_outlined),
                   title: Text(context.l10n.seasonSummary),
-                  trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    color: AppColors.textMuted,
+                  ),
                   onTap: () => context.push('/season-bilan'),
                 ),
               if (user?.canManageTeam == true)
                 ListTile(
                   leading: const Icon(Icons.calendar_month_outlined),
                   title: Text(context.l10n.navSeasons),
-                  trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    color: AppColors.textMuted,
+                  ),
                   onTap: () => context.push('/seasons'),
                 ),
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.logout, color: AppColors.coralDanger),
-                title: Text(context.l10n.logOut, style: const TextStyle(color: AppColors.coralDanger)),
+                title: Text(
+                  context.l10n.logOut,
+                  style: const TextStyle(color: AppColors.coralDanger),
+                ),
                 onTap: () => ref.read(authControllerProvider.notifier).logout(),
               ),
             ],
@@ -137,9 +206,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   String _roleLabel(BuildContext context, String? role) => switch (role) {
-        'COACH' => context.l10n.coachRole,
-        'ADJOINT' => context.l10n.assistantRole,
-        'JOUEUR' => context.l10n.playerRole,
-        _ => '',
-      };
+    'COACH' => context.l10n.coachRole,
+    'ADJOINT' => context.l10n.assistantRole,
+    'JOUEUR' => context.l10n.playerRole,
+    _ => '',
+  };
 }

@@ -1,0 +1,174 @@
+@startuml
+title FootTech - Diagramme de Classes du domaine metier
+caption Classes metier et associations (noms des tables reelles : users, teams, players, trainings, matches, ...)
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #1565C0
+    FontColor #0D47A1
+}
+skinparam classHeaderBackgroundColor #1565C0
+skinparam classHeaderFontColor #FFFFFF
+
+' ============================================================================
+' COMPTES ET IDENTITE
+' ============================================================================
+class "Utilisateur (users)" {
+    - id : bigint PK
+    - nom / prenom / email / telephone
+    - mot_de_passe (hash)
+    - account_status : ACTIVE | PENDING | REJECTED
+    <<roles via user_roles / roles>>
+}
+class "Role (roles)" {
+    - id / name : COACH | ADJOINT | JOUEUR
+}
+class "ActivationCode (activation_codes)" {
+    - code OTP (6 chiffres)
+    - expires_at / used_at
+}
+class "RefreshToken (refresh_tokens)"
+class "PushToken (push_tokens)"
+class "Notification (notifications)" {
+    - type / message / is_read
+    - created_at
+}
+
+Utilisateur "1" o-- "0..*" ActivationCode
+Utilisateur "1" o-- "0..*" RefreshToken
+Utilisateur "1" o-- "0..*" PushToken
+Utilisateur "1" o-- "0..*" Notification
+Utilisateur "*" o-- "roles" Role
+
+' ============================================================================
+' ORGANISATION : SAISON / EQUIPE / EFFECTIF
+' ============================================================================
+class "Saison (seasons)" {
+    - nom / date_debut / date_fin
+    - is_active
+}
+class "Equipe (teams)" {
+    - name / category
+    - coach_id (FK users)
+}
+class "Adjoint (team_staff)" {
+    - adjoint_id (FK users) / team_id
+}
+class "Joueur (players)" {
+    - poste_principal
+    <<PK = users.id (1:1)>>
+}
+class "Tuteur (player_guardians)"
+class "Adresse (player_address)"
+class "Scolarite (player_school_info)"
+class "ProfilSaison (player_season_profile)" {
+    - stats par saison
+}
+class "Blessure (player_injuries)" {
+    - type / gravite / statut
+}
+
+Saison "1" --> "0..*" Equipe
+Equipe "1" --> "0..*" Joueur
+Equipe "1" --> "0..*" Adjoint
+Joueur "1" --> "0..*" Tuteur
+Joueur "1" --> "0..1" Adresse
+Joueur "1" --> "0..1" Scolarite
+Saison "1" --> "0..*" ProfilSaison
+Joueur "1" --> "0..*" ProfilSaison
+Joueur "1" --> "0..*" Blessure
+
+' ============================================================================
+' PLANIFICATION HEBDOMADAIRE
+' ============================================================================
+class "PlanningHebdo (weekly_plannings)" {
+    - semaine / saison
+}
+class "Creneau (weekly_planning_slots)" {
+    - jour / heure / type : SEANCE | MATCH
+}
+
+PlanningHebdo "1" --> "0..*" Creneau
+
+' ============================================================================
+' ENTRAINEMENT ET FICHE
+' ============================================================================
+class "Entrainement (trainings)" {
+    - date / status : SCHEDULED | IN_PROGRESS | DONE
+}
+class "FicheSeance (training_sheets)"
+class "Situation (training_situations)" {
+    - type / duree / consignes
+}
+class "DessinTactique (tactical_drawings)"
+class "PropositionExercice (exercise_proposals)" {
+    - statut : VALIDE | REJETE
+}
+class "Presence (attendances)" {
+    - presence / note
+}
+
+Equipe "1" --> "0..*" Entrainement
+Entrainement "1" --> "0..1" FicheSeance
+Entrainement "1" --> "0..*" Situation
+Situation "1" --> "0..*" DessinTactique
+Entrainement "1" --> "0..*" PropositionExercice
+Joueur "1" --> "0..*" Presence
+Entrainement "1" --> "0..*" Presence
+
+' ============================================================================
+' MATCH
+' ============================================================================
+class "Match (matches)" {
+    - adversaire / date_heure
+    - home_score / away_score
+    - match_status
+}
+class "Composition (match_lineups)"
+class "RecommandationIA (ai_lineup_recommendations)" {
+    - scores NUMERIC(4,3)
+    - weights_version
+}
+class "Evenement (match_events)" {
+    - minute / type : BUT | CARTON_JAUNE | CARTON_ROUGE
+}
+class "StatsJoueur (match_player_stats)" {
+    - minutes / buts / passes D.
+}
+class "Evaluation (match_evaluations)" {
+    - note / commentaire
+}
+class "RapportMatch (match_reports)" {
+    - PDF genere
+}
+
+Equipe "1" --> "0..*" Match
+Match "1" --> "0..*" Composition
+Match "1" --> "0..*" RecommandationIA
+Match "1" --> "0..*" Evenement
+Match "1" --> "0..*" StatsJoueur
+Joueur "1" --> "0..*" StatsJoueur
+Match "1" --> "0..*" Evaluation
+Joueur "1" --> "0..*" Evaluation
+Match "1" --> "0..1" RapportMatch
+Match "1" --> "0..*" Composition
+
+' ============================================================================
+' CALENDRIER / EVENEMENTS
+' ============================================================================
+class "EvenementCalendrier (calendar_events)"
+
+Equipe "1" --> "0..*" EvenementCalendrier
+
+note bottom
+  Toutes ces tables sont creees par le backend Express
+  (foottech_v2_schema.sql, schema platform). L'admin Django
+  (core) ne fait que les lire en miroir (managed=False).
+end note
+
+@enduml

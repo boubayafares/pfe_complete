@@ -8,16 +8,20 @@ final trainingsRepositoryProvider = Provider<TrainingsRepository>((ref) {
   return TrainingsRepository(client: ref.watch(apiClientProvider));
 });
 
-final teamTrainingsProvider = FutureProvider.autoDispose<List<Training>>((ref) async {
+final teamTrainingsProvider = FutureProvider.autoDispose<List<Training>>((
+  ref,
+) async {
   final teamId = ref.watch(authControllerProvider).value?.teamId;
   if (teamId == null) return [];
-  return ref.watch(trainingsRepositoryProvider).list(teamId: teamId);
+  return ref.watch(trainingsRepositoryProvider).list();
 });
 
-final trainingSheetProvider = FutureProvider.autoDispose.family<TrainingSheet?, int>((ref, trainingId) {
-  return ref.watch(trainingsRepositoryProvider).getSheet(trainingId);
-});
+final trainingSheetProvider = FutureProvider.autoDispose
+    .family<TrainingSheet?, int>((ref, trainingId) {
+      return ref.watch(trainingsRepositoryProvider).getSheet(trainingId);
+    });
 
-final trainingSituationsProvider = FutureProvider.autoDispose.family<List<TrainingSituation>, int>((ref, trainingId) {
-  return ref.watch(trainingsRepositoryProvider).listSituations(trainingId);
-});
+final trainingSituationsProvider = FutureProvider.autoDispose
+    .family<List<TrainingSituation>, int>((ref, trainingId) {
+      return ref.watch(trainingsRepositoryProvider).listSituations(trainingId);
+    });

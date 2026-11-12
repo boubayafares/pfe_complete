@@ -28,15 +28,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    final needsActivation = await ref.read(authControllerProvider.notifier).login(
+    final needsActivation = await ref
+        .read(authControllerProvider.notifier)
+        .login(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
     final state = ref.read(authControllerProvider);
     if (state.hasError && mounted) {
       final error = state.error;
-      final message = error is ApiException ? error.message : context.l10n.unableToLogin;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      final message = error is ApiException
+          ? error.message
+          : context.l10n.unableToLogin;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     } else if (needsActivation && mounted) {
       context.go('/coach-verify-otp', extra: _emailController.text.trim());
     }
@@ -62,8 +68,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(labelText: context.l10n.loginEmail),
-                    validator: (value) => (value == null || !value.contains('@')) ? context.l10n.invalidEmail : null,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.loginEmail,
+                    ),
+                    validator: (value) =>
+                        (value == null || !value.contains('@'))
+                        ? context.l10n.invalidEmail
+                        : null,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   TextFormField(
@@ -72,24 +83,39 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     decoration: InputDecoration(
                       labelText: context.l10n.loginPassword,
                       suffixIcon: IconButton(
-                        icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility, size: 18),
+                        icon: Icon(
+                          _obscure ? Icons.visibility_off : Icons.visibility,
+                          size: 18,
+                        ),
                         onPressed: () => setState(() => _obscure = !_obscure),
                       ),
                     ),
-                    validator: (value) => (value == null || value.isEmpty) ? context.l10n.required : null,
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? context.l10n.required
+                        : null,
                   ),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => context.push('/activate-adjoint'),
-                      child: Text(context.l10n.firstTimeAssistant, style: const TextStyle(fontSize: 12)),
+                      child: Text(
+                        context.l10n.firstTimeAssistant,
+                        style: const TextStyle(fontSize: 12),
+                      ),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   ElevatedButton(
                     onPressed: isLoading ? null : _submit,
                     child: isLoading
-                        ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.greenTextOnFill))
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.greenTextOnFill,
+                            ),
+                          )
                         : Text(context.l10n.loginButton),
                   ),
                 ],

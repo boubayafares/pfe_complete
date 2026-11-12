@@ -41,7 +41,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isCheckingSession = authState.isLoading;
       final path = state.matchedLocation;
 
-      final publicPaths = ['/onboarding', '/login', '/register-coach', '/coach-verify-otp', '/activate-adjoint', '/player-login'];
+      final publicPaths = [
+        '/onboarding',
+        '/login',
+        '/register-coach',
+        '/coach-verify-otp',
+        '/activate-adjoint',
+        '/player-login',
+      ];
       final isPublicPath = publicPaths.any((p) => path.startsWith(p));
 
       if (isCheckingSession) return null;
@@ -50,25 +57,81 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-      GoRoute(path: '/register-coach', builder: (context, state) => const RegisterCoachScreen()),
+      GoRoute(
+        path: '/register-coach',
+        builder: (context, state) => const RegisterCoachScreen(),
+      ),
       GoRoute(
         path: '/coach-verify-otp',
-        builder: (context, state) => CoachOtpScreen(email: (state.extra as String?) ?? ''),
+        builder: (context, state) =>
+            CoachOtpScreen(email: (state.extra as String?) ?? ''),
       ),
-      GoRoute(path: '/activate-adjoint', builder: (context, state) => const ActivateAdjointScreen()),
-      GoRoute(path: '/player-login', builder: (context, state) => const PlayerLoginScreen()),
+      GoRoute(
+        path: '/activate-adjoint',
+        builder: (context, state) => const ActivateAdjointScreen(),
+      ),
+      GoRoute(
+        path: '/player-login',
+        builder: (context, state) => const PlayerLoginScreen(),
+      ),
 
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) => AdaptiveShell(navigationShell: navigationShell),
+        builder: (context, state, navigationShell) =>
+            AdaptiveShell(navigationShell: navigationShell),
         branches: [
-          StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (context, state) => const DashboardScreen())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/team', builder: (context, state) => const TeamScreen())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/trainings', builder: (context, state) => const TrainingsListScreen())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/matches', builder: (context, state) => const MatchesListScreen())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/calendar', builder: (context, state) => const CalendarScreen())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen())]),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (context, state) => const DashboardScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/team',
+                builder: (context, state) => const TeamScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/trainings',
+                builder: (context, state) => const TrainingsListScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/matches',
+                builder: (context, state) => const MatchesListScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/calendar',
+                builder: (context, state) => const CalendarScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
         ],
       ),
 
@@ -81,17 +144,23 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/players/:id',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => PlayerProfileScreen(playerId: int.parse(state.pathParameters['id']!)),
+        builder: (context, state) => PlayerProfileScreen(
+          playerId: int.parse(state.pathParameters['id']!),
+        ),
       ),
       GoRoute(
         path: '/trainings/:id',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => TrainingDetailScreen(trainingId: int.parse(state.pathParameters['id']!)),
+        builder: (context, state) => TrainingDetailScreen(
+          trainingId: int.parse(state.pathParameters['id']!),
+        ),
       ),
       GoRoute(
         path: '/trainings/:id/attendance',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => AttendanceScreen(trainingId: int.parse(state.pathParameters['id']!)),
+        builder: (context, state) => AttendanceScreen(
+          trainingId: int.parse(state.pathParameters['id']!),
+        ),
       ),
       GoRoute(
         path: '/trainings/:id/situations/:situationId/drawing',
@@ -104,7 +173,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/matches/:id',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => MatchDetailScreen(matchId: int.parse(state.pathParameters['id']!)),
+        builder: (context, state) =>
+            MatchDetailScreen(matchId: int.parse(state.pathParameters['id']!)),
       ),
       GoRoute(
         path: '/notifications',
@@ -129,7 +199,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/seasons/:id',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => SeasonDetailsScreen(seasonId: int.parse(state.pathParameters['id']!)),
+        builder: (context, state) => SeasonDetailsScreen(
+          seasonId: int.parse(state.pathParameters['id']!),
+        ),
       ),
     ],
   );

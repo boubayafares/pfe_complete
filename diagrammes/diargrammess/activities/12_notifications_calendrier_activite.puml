@@ -1,0 +1,46 @@
+@startuml
+title FootTech — Activité — Épopée 12 : Notifications et calendrier
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam ActivityBackgroundColor #E8F5E9
+skinparam ActivityBorderColor #2E7D32
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityDiamondBorderColor #F57F17
+start
+:Ouvrir le module;
+:Vérifier la session, le rôle et l'équipe active;
+if (Accès autorisé ?) then (oui)
+  :Choisir la User Story;
+  switch (Fonction sélectionnée)
+  case (US-50)
+    :Recevoir des notifications push\nFCM + GET /notifications/mine;
+    :Notification livrée;
+  case (US-51)
+    :Diffuser une notification à l'équipe\nPOST /notifications/broadcast;
+    :Destinataires notifiés;
+  case (US-52)
+    :Marquer une notification comme lue\nPATCH /notifications/:id/read;
+    :Statut lu enregistré;
+  case (US-53)
+    :Consulter le calendrier partagé\nGET /calendar-events;
+    :Événements de l'équipe affichés;
+  case (US-54)
+    :Créer un événement de calendrier\nPOST /calendar-events;
+    :Événement créé;
+  endswitch
+  :Actualiser l'état Riverpod / interface;
+else (non)
+  :Afficher 401 ou 403;
+endif
+if (Erreur métier ou technique ?) then (oui)
+  :Normaliser l'erreur et proposer une reprise;
+else (non)
+  :Confirmer l'opération;
+endif
+stop
+@enduml

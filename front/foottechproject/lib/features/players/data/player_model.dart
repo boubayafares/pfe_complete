@@ -23,7 +23,9 @@ class PlayerProfile {
       phone: json['phone'] as String,
       profileImage: json['profile_image'] as String?,
       accountStatus: json['account_status'] as String,
-      dateNaissance: json['date_naissance'] != null ? DateTime.parse(json['date_naissance'] as String) : null,
+      dateNaissance: json['date_naissance'] != null
+          ? DateTime.parse(json['date_naissance'] as String)
+          : null,
       tailleCm: (json['taille_cm'] as num?)?.toDouble(),
       poidsKg: (json['poids_kg'] as num?)?.toDouble(),
       postePrincipal: json['poste_principal'] as String?,
@@ -51,7 +53,14 @@ class PlayerProfile {
 }
 
 class Guardian {
-  const Guardian({required this.relation, this.nom, this.prenom, this.tel1, this.tel2, this.email});
+  const Guardian({
+    required this.relation,
+    this.nom,
+    this.prenom,
+    this.tel1,
+    this.tel2,
+    this.email,
+  });
 
   factory Guardian.fromJson(Map<String, dynamic> json) {
     return Guardian(
@@ -73,7 +82,12 @@ class Guardian {
 }
 
 class PlayerAddress {
-  const PlayerAddress({this.adresseComplete, this.distanceClubKm, this.moyenTransport, this.dureeTrajetMin});
+  const PlayerAddress({
+    this.adresseComplete,
+    this.distanceClubKm,
+    this.moyenTransport,
+    this.dureeTrajetMin,
+  });
 
   factory PlayerAddress.fromJson(Map<String, dynamic> json) {
     return PlayerAddress(
@@ -153,7 +167,9 @@ class PlayerInjury {
       dateBlessure: DateTime.parse(json['date_blessure'] as String),
       description: json['description'] as String?,
       dureeIndisponibiliteJours: json['duree_indisponibilite_jours'] as int?,
-      dateRetour: json['date_retour'] != null ? DateTime.parse(json['date_retour'] as String) : null,
+      dateRetour: json['date_retour'] != null
+          ? DateTime.parse(json['date_retour'] as String)
+          : null,
     );
   }
 

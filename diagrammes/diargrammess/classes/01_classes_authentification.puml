@@ -1,0 +1,70 @@
+@startuml
+title FootTech — Diagramme de classes — 01 classes authentification
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1565C0
+  FontColor #263238
+  ArrowColor #455A64
+}
+class "Utilisateur\nusers" as User {
+  +id: UUID
+  +email: String
+  +phone: String
+  -passwordHash: String
+  +accountStatus: AccountStatus
+  +login()
+  +logout()
+}
+class "Rôle\nroles" as Role {
+  +name: COACH / ADJOINT / JOUEUR
+}
+class "UserRole\nuser_roles" as UserRole
+class "RefreshToken\nrefresh_tokens" as Refresh {
+  -tokenHash: String
+  +expiresAt: DateTime
+  +revokedAt: DateTime
+}
+class "CodeActivation\nactivation_codes" as OTP {
+  -codeHash: String
+  +expiresAt: DateTime
+  +usedAt: DateTime
+}
+class "PushToken\npush_tokens" as Push {
+  -token: String
+  +platform: String
+}
+class AuthController {
+  +registerCoach()
+  +login()
+  +refresh()
+  +requestOtp()
+  +verifyOtp()
+  +logout()
+}
+class AuthService {
+  +authenticate()
+  +rotateRefreshToken()
+  +activatePlayer()
+  +revokeSession()
+}
+User "1" -- "0..*" UserRole
+Role "1" -- "0..*" UserRole
+User "1" o-- "0..*" Refresh
+User "1" o-- "0..*" OTP
+User "1" o-- "0..*" Push
+AuthController --> AuthService
+AuthService --> User
+AuthService --> Refresh
+AuthService --> OTP
+note bottom of AuthService
+US-01 à US-06, US-60, US-66, US-67 et US-74.
+OTP et tokens FCM ne sont jamais écrits dans les logs.
+end note
+@enduml

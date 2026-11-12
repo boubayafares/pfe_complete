@@ -66,7 +66,8 @@ class WeeklyPlanningSlot {
   final int weeklyPlanningId;
   final DateTime jour;
   final PlanningMoment moment;
-  final int? trainingId; // peut être null si l'entraînement n'est pas encore créé
+  final int?
+  trainingId; // peut être null si l'entraînement n'est pas encore créé
   final String? description;
 }
 
@@ -98,9 +99,12 @@ class WeeklyPlanning {
       intensite: json['intensite'] as String?,
       volume: json['volume'] as String?,
       matchPrevu: json['match_prevu'] as bool,
-      slots: (json['slots'] as List<dynamic>?)
-          ?.map((e) => WeeklyPlanningSlot.fromJson(e as Map<String, dynamic>))
-          .toList() ??
+      slots:
+          (json['slots'] as List<dynamic>?)
+              ?.map(
+                (e) => WeeklyPlanningSlot.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
           const [],
     );
   }

@@ -19,12 +19,14 @@ class AdminLoginView(TokenObtainPairView):
     """POST /api/admin/auth/login/ - obtains an access/refresh token pair."""
 
     serializer_class = AdminTokenObtainPairSerializer
+    throttle_scope = "admin_login"
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         # Track last login IP for basic security auditing.
         if response.status_code == 200:
-            ip = request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR"))
+            # Do not trust a client-supplied X-Forwarded-For header here.
+            ip = request.META.get("REMOTE_ADDR")
             email = request.data.get("email")
             Administrateur.objects.filter(email=email).update(derniere_connexion_ip=ip)
         return response

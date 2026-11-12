@@ -1,0 +1,5 @@
+# Trivy KSV-0125 needs an explicit organization policy: GHCR is the registry
+# used by .github/workflows/ci.yml for FootTech release images.
+ksv0125:
+  trusted_registries:
+    - ghcr.io

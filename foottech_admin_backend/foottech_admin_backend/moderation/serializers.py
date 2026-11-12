@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from core.models import Entrainement, Equipe, Joueur, Match, Utilisateur
-from .models import AuditLog
+from .models import AuditLog, Suspension
 
 
 class UtilisateurSerializer(serializers.ModelSerializer):
@@ -15,7 +15,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
 
 class EquipeSerializer(serializers.ModelSerializer):
     coach = UtilisateurSerializer(source="id_coach", read_only=True)
-    actif = serializers.BooleanField(read_only=True)  # property (suspension locale)
+    actif = serializers.SerializerMethodField()
     nombre_joueurs = serializers.SerializerMethodField()
 
     class Meta:
@@ -25,9 +25,15 @@ class EquipeSerializer(serializers.ModelSerializer):
     def get_nombre_joueurs(self, obj):
         return obj.joueurs.count()
 
+    def get_actif(self, obj):
+        suspended = getattr(obj, "est_suspendue", None)
+        if suspended is None:
+            suspended = Suspension.objects.filter(entite_type="equipe", entite_id=obj.id_equipe).exists()
+        return not suspended
+
 
 class JoueurAdminSerializer(serializers.ModelSerializer):
-    id_joueur = serializers.IntegerField(source="id_utilisateur.id", read_only=True)
+    id_joueur = serializers.IntegerField(source="id_utilisateur.id_utilisateur", read_only=True)
     nom = serializers.CharField(source="id_utilisateur.nom", read_only=True)
     prenom = serializers.CharField(source="id_utilisateur.prenom", read_only=True)
     equipe = serializers.CharField(source="id_equipe.nom_equipe", read_only=True, default=None)

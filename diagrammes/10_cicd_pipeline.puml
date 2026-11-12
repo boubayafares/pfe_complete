@@ -40,13 +40,13 @@ skinparam rectangle<<Deploy>> {
 ' --- 1. BUILD ---
 package "Stage : build" {
     rectangle "backend:build\nnode:22-alpine\nnpm ci + npm run build" as B_BACK <<Build>>
-    rectangle "admin:build\npython:3.12-slim\npip install + manage.py check" as B_ADMIN <<Build>>
+    rectangle "admin:build\npython:3.12-slim\npip install + manage.py check --deploy" as B_ADMIN <<Build>>
     rectangle "flutter:build\ncirruslabs/flutter\npub get + analyze + test\nbuild apk --debug" as B_FLUTTER <<Build>>
 }
 
 ' --- 2. TEST ---
 package "Stage : test" {
-    rectangle "backend:test\nnode:22-alpine\ndeps: postgres:16 + redis:7\n(npm run build)" as T_BACK <<Test>>
+    rectangle "backend:test\nnode:22-alpine\ndeps: postgres:16 + redis:7\nnpm test" as T_BACK <<Test>>
     rectangle "ai-insights:test\npython:3.12-slim\npytest -v" as T_AI <<Test>>
     rectangle "lineup-service:test\npython:3.12-slim\npytest -v" as T_RECO <<Test>>
 }
@@ -72,7 +72,6 @@ T_BACK --> D_API
 T_AI --> D_AI
 T_RECO --> D_RECO
 B_ADMIN --> D_ADMIN
-B_FLUTTER --> D_API : "(app build déployée séparément via store/APK)"
 
 D_API --> DEPLOY
 D_ADMIN --> DEPLOY
@@ -93,5 +92,13 @@ note top of B_BACK : "npm cache key: backend-{ref}"
 note top of T_BACK : "services: postgres:16-alpine, redis:7-alpine"
 note bottom of T_AI : "pytest -v"
 note bottom of T_RECO : "pytest -v (requirements-runtime)"
+note right of B_FLUTTER
+  L'app Flutter n'est ni dockerisée ni poussée au registre :
+  build APK (--debug) livré séparément (store / distribution manuelle).
+end note
+note bottom of DEPLOY
+  Ce pipeline est aussi reproduit sous GitHub Actions
+  (.github/workflows/ci.yml) sur les branches main et develop.
+end note
 
 @enduml

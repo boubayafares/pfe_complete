@@ -11,8 +11,9 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 && rm -rf /var/lib/apt/lists/*
 # libgomp1: requis par scikit-learn (OpenMP) pour KMeans en multi-thread.
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements-runtime.txt .
+RUN python -m pip install --no-cache-dir --upgrade pip==26.2.1 \
+    && python -m pip install --no-cache-dir -r requirements-runtime.txt
 
 COPY app ./app
 

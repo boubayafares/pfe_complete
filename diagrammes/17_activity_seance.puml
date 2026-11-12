@@ -1,0 +1,57 @@
+@startuml
+title FootTech - Diagramme d'Activite : Gestion d'une seance d'entrainement
+caption Du plan hebdomadaire a la cloture : presences, situations, schemas tactiques, fiche de fin
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+skinparam Activity {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    FontColor #0D47A1
+}
+skinparam ActivityDiamond {
+    BackgroundColor #FFF8E1
+    BorderColor #F57F17
+    FontColor #5D4037
+}
+
+start
+
+:Creer l'entrainement\n(POST /trainings, statut SCHEDULED);
+:Affecter la seance au planning hebdomadaire\n(weekly_planning_slots);
+:Marquer les presences joueur par joueur\n(POST /attendance/trainings/:id/bulk);
+
+repeat
+    :Animer la seance\n(periodes techniques / tactiques);
+
+    if (Ajouter des situations d'exercices ?) then (oui)
+        :Ajouter les situations\n(POST /trainings/:id/situations);
+        if (Besoin d'un schema tactique ?) then (oui)
+            :Dessiner le schema dans la fiche\n(POST /trainings/:id/situations/:id/drawing);
+        else (non)
+        endif
+    else (non)
+    endif
+
+    if (Proposer des exercices (IA) ?) then (oui)
+        :Generer les propositions d'exercices\n(exercise_proposals);
+        :Le coach valide ou refuse les propositions;
+    else (non)
+    endif
+
+repeat while (La seance est-elle terminee ?) is (non) not (oui)
+
+:Cloturer la seance\n(PATCH /trainings/:id/status -> DONE);
+:Consulter la fiche de fin de seance\n(agregation : presences + situations + schemas);
+
+if (Un match est prevu par la suite ?) then (oui)
+    :Basculer sur la gestion des matchs\n(voir diagramme de gestion des matchs);
+else (non)
+endif
+
+stop
+
+@enduml

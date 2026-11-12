@@ -22,7 +22,9 @@ class CalendarEvent {
       id: int.parse(json['id'].toString()),
       title: json['title'] as String,
       startTime: DateTime.parse(json['start_time'] as String),
-      endTime: json['end_time'] == null ? null : DateTime.parse(json['end_time'] as String),
+      endTime: json['end_time'] == null
+          ? null
+          : DateTime.parse(json['end_time'] as String),
       allDay: json['all_day'] as bool? ?? false,
       description: json['description'] as String?,
       location: json['location'] as String?,

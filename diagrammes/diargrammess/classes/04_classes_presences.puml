@@ -1,0 +1,54 @@
+@startuml
+title FootTech — Diagramme de classes — 04 classes presences
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1565C0
+  FontColor #263238
+  ArrowColor #455A64
+}
+class "Présence\nattendances" as Attendance {
+  +trainingId: UUID
+  +playerId: UUID
+  +status: PRESENT / ABSENT / LATE
+  +note: String
+}
+class AttendanceItemDTO {
+  +playerId: UUID
+  +status: AttendanceStatus
+}
+class BulkAttendanceDTO {
+  +items: AttendanceItemDTO[]
+}
+class AttendanceController {
+  +markOne()
+  +markBulk()
+  +listByTraining()
+  +historyByPlayer()
+}
+class AttendanceService {
+  +validateTeamScope()
+  +saveOne()
+  +saveBulkAtomic()
+  +getHistory()
+}
+class TransactionManager {
+  +begin()
+  +commit()
+  +rollback()
+}
+AttendanceController --> AttendanceService
+AttendanceService --> Attendance
+AttendanceService --> TransactionManager
+BulkAttendanceDTO "1" o-- "1..*" AttendanceItemDTO
+AttendanceService ..> BulkAttendanceDTO
+note bottom of AttendanceService
+US-27 à US-30. Le lot est atomique : toute erreur provoque un rollback complet.
+end note
+@enduml

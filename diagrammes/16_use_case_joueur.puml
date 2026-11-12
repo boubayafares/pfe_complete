@@ -1,0 +1,72 @@
+@startuml
+!pragma layout smetana
+title FootTech - Diagramme de Cas d'Utilisation cote Joueur
+caption Acces en consultation et notifications : planning, composition, rapports, profil
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+actor "Joueur" as JOUEUR #F57C00
+
+skinparam usecase {
+    BackgroundColor #F5F5F5
+    BorderColor #616161
+    FontColor #212121
+}
+skinparam usecase<<Consult>> {
+    BackgroundColor #E0F7FA
+    BorderColor #006064
+}
+skinparam usecase<<Auth>> {
+    BackgroundColor #FFEBEE
+    BorderColor #B71C1C
+}
+skinparam usecase<<Notif>> {
+    BackgroundColor #FFF3E0
+    BorderColor #BF360C
+}
+skinparam usecase<<Profil>> {
+    BackgroundColor #E8F5E9
+    BorderColor #1B5E20
+}
+
+rectangle "Consultation (lecture seule)" {
+    usecase "Consulter le planning hebdomadaire" as UC1 <<Consult>>
+    usecase "Consulter le calendrier (matchs / seances)" as UC2 <<Consult>>
+    usecase "Suivre le match en direct" as UC3 <<Consult>>
+    usecase "Consulter le rapport de match" as UC4 <<Consult>>
+    usecase "Recevoir les notifications (FCM)" as UC5 <<Notif>>
+    usecase "Acceder au profil personnel" as UC6 <<Profil>>
+    usecase "Consulter ses statistiques" as UC7 <<Profil>>
+}
+
+rectangle "Compte" {
+    usecase "Activer son compte par OTP (SMS)" as UC8 <<Auth>>
+    usecase "S'authentifier (login)" as UC9 <<Auth>>
+    usecase "Reactiver sa session (refresh token)" as UC10 <<Auth>>
+}
+
+JOUEUR -- UC1
+JOUEUR -- UC2
+JOUEUR -- UC3
+JOUEUR -- UC4
+JOUEUR -- UC5
+JOUEUR -- UC6
+JOUEUR -- UC7
+JOUEUR -- UC8
+JOUEUR -- UC9
+JOUEUR -- UC10
+
+UC8 ..> UC9 : <<include>> (creation du compte puis login)
+UC10 ..> UC9 : <<extend>> (reactivation apres expiration)
+
+note bottom of JOUEUR
+  Rôle JOUEUR : aucune ecriture sur les donnees d'equipe ;
+  activation du compte via un code OTP recu par SMS (Twilio),
+  session renouvelee via refresh token. Actions relatives a la
+  consultation et a la reception des notifications.
+end note
+
+@enduml

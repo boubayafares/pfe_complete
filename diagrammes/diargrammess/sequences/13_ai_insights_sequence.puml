@@ -1,0 +1,82 @@
+@startuml
+title FootTech — Séquence — Épopée 13 : AI Insights
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Coach" as ACT
+boundary "Application Flutter" as APP
+control "AI Insights FastAPI" as API
+control "Use Cases IA" as SVC
+database "scikit-learn / Whisper / OCR" as DB
+
+group US-55 — Détecter la tendance d'un joueur
+  ACT -> APP: Détecter la tendance d'un joueur
+  APP -> API: POST /api/v1/trend/detect
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-55)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Tendance et R² calculés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Tendance et R² calculés
+end
+
+group US-56 — Regrouper les joueurs par profils
+  ACT -> APP: Regrouper les joueurs par profils
+  APP -> API: POST /api/v1/clustering/players
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-56)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Clusters calculés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Clusters calculés
+end
+
+group US-57 — Analyser le ton d'un commentaire
+  ACT -> APP: Analyser le ton d'un commentaire
+  APP -> API: POST /api/v1/tone/analyze
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-57)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Classe et suggestion retournées
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Classe et suggestion retournées
+end
+
+group US-58 — Transcrire une observation vocale
+  ACT -> APP: Transcrire une observation vocale
+  APP -> API: POST /api/v1/transcription
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-58)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Texte et confiance retournés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Texte et confiance retournés
+end
+
+group US-59 — Extraire les champs d'un document
+  ACT -> APP: Extraire les champs d'un document
+  APP -> API: POST /api/v1/documents/extract
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-59)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Champs OCR structurés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Champs OCR structurés
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     # (jamais directement par un client Flutter/navigateur), donc pas
     # d'origine publique à autoriser par défaut.
     allowed_origins: list[str] = []
+    service_token: str = ""
 
 
 settings = Settings()

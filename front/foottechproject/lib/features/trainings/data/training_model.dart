@@ -31,7 +31,12 @@ class Training {
 }
 
 class TrainingSheet {
-  const TrainingSheet({required this.id, required this.trainingId, this.objectifs, this.effectif});
+  const TrainingSheet({
+    required this.id,
+    required this.trainingId,
+    this.objectifs,
+    this.effectif,
+  });
 
   factory TrainingSheet.fromJson(Map<String, dynamic> json) {
     return TrainingSheet(
@@ -67,7 +72,9 @@ class TrainingSituation {
       description: json['description'] as String?,
       dureeTravail: json['duree_travail'] as String?,
       dureeRecuperation: json['duree_recuperation'] as String?,
-      criteresReussite: (json['criteres_reussite'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      criteresReussite: (json['criteres_reussite'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
   }
 

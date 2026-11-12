@@ -3,6 +3,9 @@ class DashboardData {
     this.upcomingTrainingId,
     this.upcomingTrainingDate,
     this.upcomingTrainingLocation,
+    this.upcomingTrainingRosterCount = 0,
+    this.upcomingTrainingPresentCount = 0,
+    this.upcomingTrainingMarkedCount = 0,
     this.upcomingMatchId,
     this.upcomingMatchAdversaire,
     this.upcomingMatchDate,
@@ -19,6 +22,9 @@ class DashboardData {
       upcomingTrainingId: training?['id'] as int?,
       upcomingTrainingDate: training?['date'] as String?,
       upcomingTrainingLocation: training?['location'] as String?,
+      upcomingTrainingRosterCount: training?['roster_count'] as int? ?? 0,
+      upcomingTrainingPresentCount: training?['present_count'] as int? ?? 0,
+      upcomingTrainingMarkedCount: training?['marked_count'] as int? ?? 0,
       upcomingMatchId: match?['id'] as int?,
       upcomingMatchAdversaire: match?['adversaire'] as String?,
       upcomingMatchDate: match?['date_heure'] as String?,
@@ -32,6 +38,9 @@ class DashboardData {
   final int? upcomingTrainingId;
   final String? upcomingTrainingDate;
   final String? upcomingTrainingLocation;
+  final int upcomingTrainingRosterCount;
+  final int upcomingTrainingPresentCount;
+  final int upcomingTrainingMarkedCount;
   final int? upcomingMatchId;
   final String? upcomingMatchAdversaire;
   final String? upcomingMatchDate;

@@ -7,6 +7,7 @@ final attendanceRepositoryProvider = Provider<AttendanceRepository>((ref) {
   return AttendanceRepository(client: ref.watch(apiClientProvider));
 });
 
-final attendanceListProvider = FutureProvider.autoDispose.family<List<AttendanceRecord>, int>((ref, trainingId) {
-  return ref.watch(attendanceRepositoryProvider).listByTraining(trainingId);
-});
+final attendanceListProvider = FutureProvider.autoDispose
+    .family<List<AttendanceRecord>, int>((ref, trainingId) {
+      return ref.watch(attendanceRepositoryProvider).listByTraining(trainingId);
+    });

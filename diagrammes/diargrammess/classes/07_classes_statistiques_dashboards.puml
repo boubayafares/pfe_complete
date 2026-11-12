@@ -1,0 +1,55 @@
+@startuml
+title FootTech — Diagramme de classes — 07 classes statistiques dashboards
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1565C0
+  FontColor #263238
+  ArrowColor #455A64
+}
+class "BilanJoueurSaison\nplayer_season_bilan" as SeasonView {
+  +playerId: UUID
+  +seasonId: UUID
+  +matches: Integer
+  +minutes: Integer
+  +goals: Integer
+  +assists: Integer
+  +averageRating: Decimal
+}
+class StatisticsService {
+  +personalStats()
+  +teamStats()
+  +comparePlayers()
+  +playerEvolution()
+}
+class SeasonReportService {
+  +buildBilan()
+  +filter()
+  +exportPdf()
+}
+class DashboardService {
+  +coachDashboard()
+  +playerDashboard()
+  +adminDashboard()
+  +pendingActivations()
+}
+class DashboardDTO {
+  +kpis: Map
+  +upcomingEvents: List
+  +alerts: List
+}
+StatisticsService --> SeasonView
+SeasonReportService --> SeasonView
+DashboardService --> StatisticsService
+DashboardService --> DashboardDTO
+note bottom
+US-43 à US-49 et US-71 à US-74.
+Les agrégats sont filtrés selon l'identité, le rôle et l'équipe.
+end note
+@enduml

@@ -3,7 +3,7 @@ import '../../../core/network/api_client.dart';
 import 'weekly_planing_model.dart'; // suppose que vos modèles sont dans ce fichier
 
 class WeeklyPlanningRepository {
-  WeeklyPlanningRepository({required ApiClient client}) : _client = client;
+  WeeklyPlanningRepository({required this._client});
 
   final ApiClient _client;
 
@@ -11,13 +11,9 @@ class WeeklyPlanningRepository {
   // Planning hebdomadaire
   // --------------------------------------------------------------------------
 
-  /// Récupère la liste des plannings, éventuellement filtrés par équipe ou saison.
-  Future<List<WeeklyPlanning>> list({
-    int? teamId,
-    int? seasonId,
-  }) async {
+  /// Récupère les plannings de l'équipe authentifiée, éventuellement par saison.
+  Future<List<WeeklyPlanning>> list({int? seasonId}) async {
     final queryParams = <String, dynamic>{};
-    if (teamId != null) queryParams['teamId'] = teamId;
     if (seasonId != null) queryParams['seasonId'] = seasonId;
 
     final response = await _client.get(
@@ -37,9 +33,8 @@ class WeeklyPlanningRepository {
   }
 
   /// Crée un nouveau planning.
-  /// Les champs obligatoires : teamId, dateDebut, dateFin, matchPrevu.
+  /// L'équipe est toujours dérivée de la session authentifiée.
   Future<WeeklyPlanning> create({
-    required int teamId,
     required DateTime dateDebut,
     required DateTime dateFin,
     required bool matchPrevu,
@@ -52,7 +47,6 @@ class WeeklyPlanningRepository {
     final response = await _client.post(
       ApiConstants.weeklyPlannings,
       data: {
-        'teamId': teamId,
         'seasonId': seasonId,
         'semaineNumero': semaineNumero,
         'dateDebut': dateDebut.toIso8601String().split('T').first,
@@ -69,7 +63,6 @@ class WeeklyPlanningRepository {
   /// Met à jour un planning existant.
   Future<WeeklyPlanning> update({
     required int id,
-    int? teamId,
     int? seasonId,
     int? semaineNumero,
     DateTime? dateDebut,
@@ -80,7 +73,6 @@ class WeeklyPlanningRepository {
     bool? matchPrevu,
   }) async {
     final body = <String, dynamic>{};
-    if (teamId != null) body['teamId'] = teamId;
     if (seasonId != null) body['seasonId'] = seasonId;
     if (semaineNumero != null) body['semaineNumero'] = semaineNumero;
     if (dateDebut != null) {
@@ -94,7 +86,7 @@ class WeeklyPlanningRepository {
     if (volume != null) body['volume'] = volume;
     if (matchPrevu != null) body['matchPrevu'] = matchPrevu;
 
-    final response = await _client.put(
+    final response = await _client.patch(
       '${ApiConstants.weeklyPlannings}/$id',
       data: body,
     );
@@ -135,10 +127,12 @@ class WeeklyPlanningRepository {
       data: {
         'jour': jour.toIso8601String().split('T').first,
         'moment': moment.jsonValue,
-        if (trainingId != null) 'trainingId': trainingId,
-        if (description != null) 'description': description,
+        'trainingId': ?trainingId,
+        'description': ?description,
       },
     );
-    return WeeklyPlanningSlot.fromJson(response['data'] as Map<String, dynamic>);
+    return WeeklyPlanningSlot.fromJson(
+      response['data'] as Map<String, dynamic>,
+    );
   }
 }

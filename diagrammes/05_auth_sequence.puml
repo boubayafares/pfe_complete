@@ -35,7 +35,7 @@ database "PostgreSQL" as PG #607D8B
 == 1. Enregistrement et connexion (Coach / Adjoint) ==
 
 USER -> FLUTTER : saisit nom, email, mot de passe
-FLUTTER -> AUTH : POST /auth/register
+FLUTTER -> AUTH : POST /auth/register-coach
 AUTH -> PG : créer user (role coach/adjoint)
 AUTH --> FLUTTER : 201 { user, message }
 FLUTTER --> USER : confirmation
@@ -67,15 +67,13 @@ FLUTTER -> AUTH : retry requête initiale avec nouveau access
 ' ============================================================================
 == 3. Activation d'un compte joueur via OTP (Twilio SMS) ==
 
-actor participant ordering
-
 PLAYER -> FLUTTER : saisit son numéro de téléphone
-FLUTTER -> AUTH : POST /auth/otp/request (phone)
+FLUTTER -> AUTH : POST /auth/player/request-otp (phone)
 AUTH -> PG : créer user (status INACTIVE) + activation_code
 AUTH -> TWILIO : envoyer SMS avec code OTP
 TWILIO --> PLAYER : SMS recu (code à 6 chiffres)
 PLAYER -> FLUTTER : saisit le code OTP
-FLUTTER -> AUTH : POST /auth/otp/verify (code)
+FLUTTER -> AUTH : POST /auth/player/verify-otp (code)
 AUTH -> PG : vérifier code + expiration + used
 AUTH --> FLUTTER : 200 { activate, tokens }
 FLUTTER -> TOKEN : stocke les tokens JWT
@@ -90,9 +88,10 @@ PLAYER -> FLUTTER : réouvre l'app (session terminée)
 FLUTTER -> BIO : demander empreinte / FaceID
 BIO --> FLUTTER : succès biométrique
 FLUTTER -> TOKEN : récupère refresh token stocké
-FLUTTER -> AUTH : POST /auth/biometric (refresh)
-AUTH -> PG : valider token + user activé
+FLUTTER -> AUTH : POST /auth/refresh (refresh token)
+AUTH -> PG : vérifier token_hash + non révoqué
 AUTH --> FLUTTER : 200 { new accessToken }
+AUTH -> JWT : signer nouveau access token
 FLUTTER --> PLAYER : session restaurée
 
 ' ============================================================================

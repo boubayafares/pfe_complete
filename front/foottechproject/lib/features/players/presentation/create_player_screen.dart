@@ -24,7 +24,18 @@ class _CreatePlayerScreenState extends ConsumerState<CreatePlayerScreen> {
   String? _piedFort;
   bool _submitting = false;
 
-  static const _postes = ['GB', 'DC', 'DD', 'DG', 'MDC', 'MC', 'MOC', 'AD', 'AG', 'ST'];
+  static const _postes = [
+    'GB',
+    'DC',
+    'DD',
+    'DG',
+    'MDC',
+    'MC',
+    'MOC',
+    'AD',
+    'AG',
+    'ST',
+  ];
 
   @override
   void dispose() {
@@ -41,11 +52,12 @@ class _CreatePlayerScreenState extends ConsumerState<CreatePlayerScreen> {
     if (teamId == null) return;
     setState(() => _submitting = true);
     try {
-      final player = await ref.read(playersRepositoryProvider).create(
+      final player = await ref
+          .read(playersRepositoryProvider)
+          .create(
             firstName: _firstNameController.text.trim(),
             lastName: _lastNameController.text.trim(),
             phone: _phoneController.text.trim(),
-            teamId: teamId,
             posteP: _poste,
             piedFort: _piedFort,
             numeroMaillot: int.tryParse(_numeroController.text.trim()),
@@ -53,7 +65,11 @@ class _CreatePlayerScreenState extends ConsumerState<CreatePlayerScreen> {
       ref.invalidate(teamPlayersProvider);
       if (mounted) context.pushReplacement('/players/${player.id}');
     } on ApiException catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -75,37 +91,62 @@ class _CreatePlayerScreenState extends ConsumerState<CreatePlayerScreen> {
                 children: [
                   TextFormField(
                     controller: _firstNameController,
-                    decoration: InputDecoration(labelText: context.l10n.firstName),
-                    validator: (v) => (v == null || v.isEmpty) ? context.l10n.required : null,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.firstName,
+                    ),
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? context.l10n.required : null,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   TextFormField(
                     controller: _lastNameController,
-                    decoration: InputDecoration(labelText: context.l10n.lastName),
-                    validator: (v) => (v == null || v.isEmpty) ? context.l10n.required : null,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.lastName,
+                    ),
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? context.l10n.required : null,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   TextFormField(
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(labelText: context.l10n.phoneSmsActivation),
-                    validator: (v) => (v == null || v.length < 8) ? context.l10n.invalidNumber : null,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.phoneSmsActivation,
+                    ),
+                    validator: (v) => (v == null || v.length < 8)
+                        ? context.l10n.invalidNumber
+                        : null,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   DropdownButtonFormField<String>(
-                    value: _poste,
-                    decoration: InputDecoration(labelText: context.l10n.primaryPosition),
-                    items: _postes.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
+                    initialValue: _poste,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.primaryPosition,
+                    ),
+                    items: _postes
+                        .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+                        .toList(),
                     onChanged: (value) => setState(() => _poste = value),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   DropdownButtonFormField<String>(
-                    value: _piedFort,
-                    decoration: InputDecoration(labelText: context.l10n.strongFoot),
+                    initialValue: _piedFort,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.strongFoot,
+                    ),
                     items: [
-                      DropdownMenuItem(value: 'DROIT', child: Text(context.l10n.right)),
-                      DropdownMenuItem(value: 'GAUCHE', child: Text(context.l10n.left)),
-                      DropdownMenuItem(value: 'AMBIDEXTRE', child: Text(context.l10n.ambidextrous)),
+                      DropdownMenuItem(
+                        value: 'DROIT',
+                        child: Text(context.l10n.right),
+                      ),
+                      DropdownMenuItem(
+                        value: 'GAUCHE',
+                        child: Text(context.l10n.left),
+                      ),
+                      DropdownMenuItem(
+                        value: 'AMBIDEXTRE',
+                        child: Text(context.l10n.ambidextrous),
+                      ),
                     ],
                     onChanged: (value) => setState(() => _piedFort = value),
                   ),
@@ -113,13 +154,22 @@ class _CreatePlayerScreenState extends ConsumerState<CreatePlayerScreen> {
                   TextFormField(
                     controller: _numeroController,
                     keyboardType: TextInputType.number,
-                    decoration: InputDecoration(labelText: context.l10n.jerseyNumber),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.jerseyNumber,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   ElevatedButton(
                     onPressed: _submitting ? null : _submit,
                     child: _submitting
-                        ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.greenTextOnFill))
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.greenTextOnFill,
+                            ),
+                          )
                         : Text(context.l10n.createPlayer),
                   ),
                 ],

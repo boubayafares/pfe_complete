@@ -162,7 +162,7 @@ package "Module Players" {
 package "Module Seasons" {
     class "SeasonsRoutes" {
         /seasons
-        /seasons/:id/player-profiles
+        /seasons/:id
     }
     class "SeasonsController"
     class "SeasonsService"
@@ -194,7 +194,8 @@ package "Module Matches" {
         /matches/:id/stats
         /matches/:id/evaluations
         /matches/:id/report
-        /matches/:id/ai-recommendation
+        /matches/:id/report/generate
+        /matches/:id/ai-recommendations
     }
     class "MatchesController"
     class "MatchesService"
@@ -286,13 +287,16 @@ package "Module Weekly Plannings" {
     PlanningService --> PlanningRepository
 }
 
-package "Module Intelligence Artificielle" {
-    class "AIModule" {
-        /ai/trends
-        /ai/clustering
-        /ai/tone
-        /ai/transcription
-        /ai/ocr
+package "Services IA externes (FastAPI, hors Express)" {
+    class "ai-insights-service\n(:8300)" {
+        POST /api/v1/trend/detect
+        POST /api/v1/clustering/players
+        POST /api/v1/tone/analyze
+        POST /api/v1/transcription/transcribe
+        POST /api/v1/documents/extract
+    }
+    class "lineup-recommendation-service\n(:8100)" {
+        POST /api/v1/lineup/recommendations
     }
 }
 
@@ -312,6 +316,9 @@ AuthController ..> MID_AUTH : "guard"
 MatchesController ..> SOCKET : "emit live updates"
 DashboardController ..> SOCKET
 NotificationsService ..> SOCKET
+
+' Le module Matches consomme le service d'alignement IA (FastAPI :8100)
+MatchesController ..> "lineup-recommendation-service\n(:8100)" : "HTTP POST (scoring)"
 
 ' Les repositories heritent du Base Repository
 AuthRepository ..|> "Base Repository"

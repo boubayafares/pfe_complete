@@ -149,11 +149,11 @@ CREATE TABLE IF NOT EXISTS user_roles (
     PRIMARY KEY (user_id, role_id)
 );
 
--- Code d'activation envoye par SMS/WhatsApp lors de la creation d'un profil joueur.
+-- HMAC SHA-256 du code d'activation (le code OTP en clair n'est jamais stocke).
 CREATE TABLE IF NOT EXISTS activation_codes (
     id          BIGSERIAL PRIMARY KEY,
     user_id     BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    code        VARCHAR(10) NOT NULL,
+    code        VARCHAR(64) NOT NULL,
     channel     activation_channel_enum NOT NULL DEFAULT 'SMS',
     expires_at  TIMESTAMPTZ NOT NULL,
     used        BOOLEAN NOT NULL DEFAULT FALSE,
@@ -186,7 +186,7 @@ CREATE INDEX IF NOT EXISTS idx_pushtokens_user ON push_tokens(user_id);
 
 CREATE TABLE IF NOT EXISTS seasons (
     id          BIGSERIAL PRIMARY KEY,
-    name        VARCHAR(20) NOT NULL UNIQUE,  -- ex "2024/2025"
+    name        VARCHAR(20) NOT NULL,         -- ex "2024/2025"
     start_date  DATE NOT NULL,
     end_date    DATE NOT NULL,
     is_current  BOOLEAN NOT NULL DEFAULT FALSE,
@@ -203,6 +203,17 @@ CREATE TABLE IF NOT EXISTS teams (
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_teams_coach ON teams(coach_id);
+
+-- Les nouvelles saisons appartiennent a une equipe. La colonne reste nullable
+-- uniquement pour permettre la lecture des anciennes saisons globales.
+ALTER TABLE seasons
+    ADD COLUMN IF NOT EXISTS team_id BIGINT REFERENCES teams(id) ON DELETE CASCADE;
+ALTER TABLE seasons DROP CONSTRAINT IF EXISTS seasons_name_key;
+CREATE INDEX IF NOT EXISTS idx_seasons_team ON seasons(team_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_seasons_team_name
+    ON seasons(team_id, name) WHERE team_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS uq_seasons_current_per_team
+    ON seasons(team_id) WHERE is_current = TRUE AND team_id IS NOT NULL;
 
 -- Adjoints affectes a une equipe par le coach.
 CREATE TABLE IF NOT EXISTS team_staff (
@@ -403,6 +414,21 @@ CREATE TABLE IF NOT EXISTS exercise_proposals (
 );
 CREATE INDEX IF NOT EXISTS idx_exerciseproposals_training ON exercise_proposals(training_id);
 CREATE INDEX IF NOT EXISTS idx_exerciseproposals_status ON exercise_proposals(status);
+ALTER TABLE exercise_proposals
+    ADD COLUMN IF NOT EXISTS team_id BIGINT REFERENCES teams(id) ON DELETE CASCADE;
+ALTER TABLE exercise_proposals
+    ADD COLUMN IF NOT EXISTS category VARCHAR(80),
+    ADD COLUMN IF NOT EXISTS objectif VARCHAR(200),
+    ADD COLUMN IF NOT EXISTS difficulty VARCHAR(30) DEFAULT 'MEDIUM',
+    ADD COLUMN IF NOT EXISTS duration_minutes INTEGER,
+    ADD COLUMN IF NOT EXISTS visibility VARCHAR(30) DEFAULT 'TEAM',
+    ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}',
+    ADD COLUMN IF NOT EXISTS canvas_data JSONB DEFAULT '{}'::jsonb,
+    ADD COLUMN IF NOT EXISTS animation_data JSONB DEFAULT '{}'::jsonb,
+    ADD COLUMN IF NOT EXISTS ai_model JSONB DEFAULT '{}'::jsonb;
+CREATE INDEX IF NOT EXISTS idx_exerciseproposals_team ON exercise_proposals(team_id);
+CREATE INDEX IF NOT EXISTS idx_exerciseproposals_visibility ON exercise_proposals(visibility);
+CREATE INDEX IF NOT EXISTS idx_exerciseproposals_tags ON exercise_proposals USING GIN(tags);
 
 -- ------------------------------------------------------------------------------
 -- MODULE : PRESENCE

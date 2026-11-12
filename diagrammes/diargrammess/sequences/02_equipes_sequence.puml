@@ -1,0 +1,70 @@
+@startuml
+title FootTech — Séquence — Épopée 2 : Gestion des équipes
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Coach" as ACT
+boundary "Application Flutter" as APP
+control "API Express" as API
+control "TeamService" as SVC
+database "PostgreSQL" as DB
+
+group US-07 — Créer une équipe
+  ACT -> APP: Créer une équipe
+  APP -> API: POST /teams
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-07)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Équipe créée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Équipe créée
+end
+
+group US-08 — Lister ses équipes
+  ACT -> APP: Lister ses équipes
+  APP -> API: GET /teams
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-08)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Équipes autorisées affichées
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Équipes autorisées affichées
+end
+
+group US-09 — Ajouter un adjoint à l'équipe
+  ACT -> APP: Ajouter un adjoint à l'équipe
+  APP -> API: POST /teams/:id/staff
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-09)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Adjoint affecté
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Adjoint affecté
+end
+
+group US-10 — Retirer un adjoint de l'équipe
+  ACT -> APP: Retirer un adjoint de l'équipe
+  APP -> API: DELETE /teams/:id/staff/:adjointId
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-10)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Affectation supprimée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Affectation supprimée
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

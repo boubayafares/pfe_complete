@@ -1,0 +1,79 @@
+@startuml
+title FootTech — Diagramme de classes — 02 classes equipes joueurs saisons
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1565C0
+  FontColor #263238
+  ArrowColor #455A64
+}
+class "Équipe\nteams" as Team {
+  +id: UUID
+  +name: String
+  +category: String
+  +coachId: UUID
+  +status: TeamStatus
+}
+class "MembreStaff\nteam_staff" as Staff {
+  +teamId: UUID
+  +adjointId: UUID
+}
+class "Joueur\nplayers" as Player {
+  +id: UUID
+  +teamId: UUID
+  +mainPosition: Position
+}
+class "Tuteur\nplayer_guardians" as Guardian
+class "Adresse\nplayer_address" as Address
+class "Scolarité\nplayer_school_info" as School
+class "Blessure\nplayer_injuries" as Injury {
+  +severity: String
+  +status: String
+}
+class "Saison\nseasons" as Season {
+  +id: UUID
+  +teamId: UUID
+  +startDate: Date
+  +endDate: Date
+  +isCurrent: Boolean
+}
+class "ProfilSaison\nplayer_season_profile" as SeasonProfile
+class TeamService {
+  +create()
+  +listForUser()
+  +addStaff()
+  +removeStaff()
+}
+class PlayerService {
+  +create()
+  +getFullProfile()
+  +update()
+  +addInjury()
+}
+class SeasonService {
+  +createForTeam()
+  +listForTeam()
+  +updateDates()
+}
+Team "1" o-- "0..*" Staff
+Team "1" o-- "0..*" Player
+Team "1" o-- "0..*" Season
+Player "1" o-- "0..*" Guardian
+Player "1" o-- "0..1" Address
+Player "1" o-- "0..1" School
+Player "1" o-- "0..*" Injury
+Player "1" o-- "0..*" SeasonProfile
+Season "1" o-- "0..*" SeasonProfile
+TeamService --> Team
+PlayerService --> Player
+SeasonService --> Season
+note bottom
+US-07 à US-19. Toutes les lectures sont limitées à l'équipe active.
+end note
+@enduml

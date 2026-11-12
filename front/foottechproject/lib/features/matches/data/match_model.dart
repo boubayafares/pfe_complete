@@ -40,7 +40,8 @@ class MatchInfo {
 
   bool get isLive => matchStatus == 'LIVE';
 
-  String get scoreLabel => isHome ? '$homeScore - $awayScore' : '$awayScore - $homeScore';
+  String get scoreLabel =>
+      isHome ? '$homeScore - $awayScore' : '$awayScore - $homeScore';
 }
 
 class LineupEntry {
@@ -104,7 +105,12 @@ class AiRecommendation {
 }
 
 class MatchEvent {
-  const MatchEvent({required this.eventType, required this.minute, this.playerId, this.comment});
+  const MatchEvent({
+    required this.eventType,
+    required this.minute,
+    this.playerId,
+    this.comment,
+  });
 
   factory MatchEvent.fromJson(Map<String, dynamic> json) {
     return MatchEvent(

@@ -12,9 +12,18 @@ class _Destination {
 const _destinations = [
   _Destination(icon: Icons.home_outlined, selectedIcon: Icons.home),
   _Destination(icon: Icons.groups_outlined, selectedIcon: Icons.groups),
-  _Destination(icon: Icons.fitness_center_outlined, selectedIcon: Icons.fitness_center),
-  _Destination(icon: Icons.sports_soccer_outlined, selectedIcon: Icons.sports_soccer),
-  _Destination(icon: Icons.calendar_month_outlined, selectedIcon: Icons.calendar_month),
+  _Destination(
+    icon: Icons.fitness_center_outlined,
+    selectedIcon: Icons.fitness_center,
+  ),
+  _Destination(
+    icon: Icons.sports_soccer_outlined,
+    selectedIcon: Icons.sports_soccer,
+  ),
+  _Destination(
+    icon: Icons.calendar_month_outlined,
+    selectedIcon: Icons.calendar_month,
+  ),
   _Destination(icon: Icons.person_outline, selectedIcon: Icons.person),
 ];
 
@@ -46,7 +55,10 @@ class AdaptiveShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
   void _onTap(int index) {
-    navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex);
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
   }
 
   @override
@@ -62,7 +74,13 @@ class AdaptiveShell extends StatelessWidget {
           items: _destinations
               .asMap()
               .entries
-              .map((e) => BottomNavigationBarItem(icon: Icon(e.value.icon), activeIcon: Icon(e.value.selectedIcon), label: _label(context, e.key)))
+              .map(
+                (e) => BottomNavigationBarItem(
+                  icon: Icon(e.value.icon),
+                  activeIcon: Icon(e.value.selectedIcon),
+                  label: _label(context, e.key),
+                ),
+              )
               .toList(),
         ),
       );
@@ -81,14 +99,27 @@ class AdaptiveShell extends StatelessWidget {
               child: Container(
                 width: 36,
                 height: 36,
-                decoration: BoxDecoration(color: AppColors.green, borderRadius: BorderRadius.circular(10)),
-                child: const Icon(Icons.sports_soccer, color: AppColors.greenTextOnFill, size: 18),
+                decoration: BoxDecoration(
+                  color: AppColors.green,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.sports_soccer,
+                  color: AppColors.greenTextOnFill,
+                  size: 18,
+                ),
               ),
             ),
             destinations: _destinations
                 .asMap()
                 .entries
-                .map((e) => NavigationRailDestination(icon: Icon(e.value.icon), selectedIcon: Icon(e.value.selectedIcon), label: Text(_label(context, e.key))))
+                .map(
+                  (e) => NavigationRailDestination(
+                    icon: Icon(e.value.icon),
+                    selectedIcon: Icon(e.value.selectedIcon),
+                    label: Text(_label(context, e.key)),
+                  ),
+                )
                 .toList(),
           ),
           const VerticalDivider(width: 1),

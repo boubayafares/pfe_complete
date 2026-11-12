@@ -11,12 +11,12 @@ flowchart LR
     end
 
     subgraph Lineup["Lineup Service FastAPI"]
-        P[POST /recommendations]
-        W[ScoreWeights\nequal-defaults si absent]
-        C[calcul score 0-100\npresence 40% / perf 30% / fatigue 30%]
+        P[POST /api/v1/lineup/recommendations]
+        W[ScoreWeights\nequal-defaults si absent\npoids egaux : presence = performance = fatigue = 1/3]
+        C[calcul score 0-100\npresence + performance + fatigue\nseuils : STARTER >= 70, SUB >= 40]
     end
 
-    subgraph Store["Persistance"]
+    subgraph Store["Persistance (via Express)"]
         N[Normalise /100\nclamp 0-1, round 3]
         NB[(ai_lineup_recommendations\nNUMERIC(4,3) CHECK 0-1)]
     end

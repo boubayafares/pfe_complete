@@ -1,0 +1,36 @@
+@startuml
+title FootTech — Cas d'utilisation — Épopée 3 : Gestion des joueurs
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+left to right direction
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+actor "Coach" as COACH #1565C0
+rectangle "FootTech — Gestion des joueurs" {
+  usecase "US-11\nAjouter un joueur avec activation OTP" as US11
+  usecase "US-12\nConsulter la fiche complète d'un joueur" as US12
+  usecase "US-13\nModifier les informations d'un joueur" as US13
+  usecase "US-14\nAjouter les informations scolaires" as US14
+  usecase "US-15\nEnregistrer une blessure" as US15
+  usecase "US-16\nConsulter le profil saisonnier" as US16
+}
+COACH --> US11
+COACH --> US12
+COACH --> US13
+COACH --> US14
+COACH --> US15
+COACH --> US16
+
+note bottom
+  Chaque cas d'utilisation reprend l'identifiant exact du Product Backlog.
+  Les contrôles JWT, rôle et équipe sont appliqués avant l'accès métier.
+end note
+@enduml

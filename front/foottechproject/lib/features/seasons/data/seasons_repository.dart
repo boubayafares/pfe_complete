@@ -25,12 +25,15 @@ class SeasonsRepository {
     required String endDate,
     bool isCurrent = false,
   }) async {
-    final body = await _api.post(ApiConstants.seasons, data: {
-      'name': name,
-      'startDate': startDate,
-      'endDate': endDate,
-      'isCurrent': isCurrent,
-    });
+    final body = await _api.post(
+      ApiConstants.seasons,
+      data: {
+        'name': name,
+        'startDate': startDate,
+        'endDate': endDate,
+        'isCurrent': isCurrent,
+      },
+    );
     return Season.fromJson(body['data'] as Map<String, dynamic>);
   }
 
@@ -41,12 +44,15 @@ class SeasonsRepository {
     String? endDate,
     bool? isCurrent,
   }) async {
-    final body = await _api.patch('${ApiConstants.seasons}/$id', data: {
-      if (name != null) 'name': name,
-      if (startDate != null) 'startDate': startDate,
-      if (endDate != null) 'endDate': endDate,
-      if (isCurrent != null) 'isCurrent': isCurrent,
-    });
+    final body = await _api.patch(
+      '${ApiConstants.seasons}/$id',
+      data: {
+        'name': ?name,
+        'startDate': ?startDate,
+        'endDate': ?endDate,
+        'isCurrent': ?isCurrent,
+      },
+    );
     return Season.fromJson(body['data'] as Map<String, dynamic>);
   }
 

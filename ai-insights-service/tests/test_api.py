@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app.presentation.main import app
+from app.presentation.main import app, create_app
 
 client = TestClient(app)
 
@@ -55,3 +55,16 @@ def test_tone_endpoint():
     body = response.json()
     assert body["flag"] == "TOO_HARSH"
     assert body["suggestion"] is not None
+
+
+def test_service_token_protects_ai_endpoints_but_not_health(monkeypatch):
+    monkeypatch.setenv("AI_INSIGHTS_SERVICE_TOKEN", "test-service-token")
+    secured_client = TestClient(create_app())
+    assert secured_client.get("/health").status_code == 200
+    assert secured_client.post("/api/v1/tone/analyze", json={"comment": "Bien."}).status_code == 401
+    response = secured_client.post(
+        "/api/v1/tone/analyze",
+        json={"comment": "Bien."},
+        headers={"X-Service-Token": "test-service-token"},
+    )
+    assert response.status_code == 200

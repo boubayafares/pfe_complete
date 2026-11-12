@@ -18,19 +18,19 @@ skinparam component {
     StereotypeFontColor #FFFFFF
 }
 
-skinparam component <<Core>> {
+skinparam <<Core>> {
     BackgroundColor #00695C
     BorderColor #004D40
     FontColor #FFFFFF
 }
 
-skinparam component <<Feature>> {
+skinparam <<Feature>> {
     BackgroundColor #43A047
     BorderColor #2E7D32
     FontColor #FFFFFF
 }
 
-skinparam component <<DB>> {
+skinparam <<DB>> {
     BackgroundColor #607D8B
     BorderColor #37474F
     FontColor #FFFFFF

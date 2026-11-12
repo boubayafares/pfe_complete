@@ -5,7 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 /// unmodified across all five targets.
 class TokenStorage {
   TokenStorage({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
 
@@ -17,30 +17,18 @@ class TokenStorage {
     required String accessToken,
     required String refreshToken,
   }) async {
-    await _storage.write(
-      key: _accessTokenKey,
-      value: accessToken,
-    );
-    await _storage.write(
-      key: _refreshTokenKey,
-      value: refreshToken,
-    );
+    await _storage.write(key: _accessTokenKey, value: accessToken);
+    await _storage.write(key: _refreshTokenKey, value: refreshToken);
   }
 
-  Future<String?> get accessToken =>
-      _storage.read(key: _accessTokenKey);
+  Future<String?> get accessToken => _storage.read(key: _accessTokenKey);
 
-  Future<String?> get refreshToken =>
-      _storage.read(key: _refreshTokenKey);
+  Future<String?> get refreshToken => _storage.read(key: _refreshTokenKey);
 
   Future<void> saveUserProfileJson(String json) =>
-      _storage.write(
-        key: _userProfileKey,
-        value: json,
-      );
+      _storage.write(key: _userProfileKey, value: json);
 
-  Future<String?> get userProfileJson =>
-      _storage.read(key: _userProfileKey);
+  Future<String?> get userProfileJson => _storage.read(key: _userProfileKey);
 
   Future<void> clear() async {
     await _storage.delete(key: _accessTokenKey);
@@ -48,6 +36,5 @@ class TokenStorage {
     await _storage.delete(key: _userProfileKey);
   }
 
-  Future<bool> get hasSession async =>
-      (await accessToken) != null;
+  Future<bool> get hasSession async => (await accessToken) != null;
 }

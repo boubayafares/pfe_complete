@@ -1,0 +1,52 @@
+@startuml
+title FootTech — Activité — Épopée 5 : Gestion des entraînements
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam ActivityBackgroundColor #E8F5E9
+skinparam ActivityBorderColor #2E7D32
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityDiamondBorderColor #F57F17
+start
+:Ouvrir le module;
+:Vérifier la session, le rôle et l'équipe active;
+if (Accès autorisé ?) then (oui)
+  :Choisir la User Story;
+  switch (Fonction sélectionnée)
+  case (US-20)
+    :Créer un entraînement\nPOST /trainings;
+    :Séance planifiée;
+  case (US-21)
+    :Remplir la fiche de séance\nPUT /trainings/:id/sheet;
+    :Objectifs et effectif enregistrés;
+  case (US-22)
+    :Ajouter des situations d'exercices\nPOST /trainings/:id/situations;
+    :Situations ajoutées;
+  case (US-23)
+    :Dessiner un schéma tactique\nPOST /trainings/:id/situations/:sid/drawing;
+    :Dessin JSONB sauvegardé;
+  case (US-24)
+    :Proposer un exercice au coach\nPOST /exercise-proposals;
+    :Proposition en attente;
+  case (US-25)
+    :Valider ou rejeter une proposition\nPATCH /exercise-proposals/:id/review;
+    :Décision historisée;
+  case (US-26)
+    :Lister les entraînements de l'équipe\nGET /trainings;
+    :Séances autorisées affichées;
+  endswitch
+  :Actualiser l'état Riverpod / interface;
+else (non)
+  :Afficher 401 ou 403;
+endif
+if (Erreur métier ou technique ?) then (oui)
+  :Normaliser l'erreur et proposer une reprise;
+else (non)
+  :Confirmer l'opération;
+endif
+stop
+@enduml

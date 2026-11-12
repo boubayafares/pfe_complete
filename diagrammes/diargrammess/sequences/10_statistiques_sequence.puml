@@ -1,0 +1,70 @@
+@startuml
+title FootTech — Séquence — Épopée 10 : Statistiques et performances
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Utilisateur / Coach" as ACT
+boundary "Application Flutter" as APP
+control "API Express" as API
+control "StatisticsService" as SVC
+database "Vue PostgreSQL" as DB
+
+group US-43 — Consulter ses statistiques personnelles
+  ACT -> APP: Consulter ses statistiques personnelles
+  APP -> API: GET /dashboard/me
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-43)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Indicateurs personnels affichés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Indicateurs personnels affichés
+end
+
+group US-44 — Consulter les statistiques de l'équipe
+  ACT -> APP: Consulter les statistiques de l'équipe
+  APP -> API: GET /dashboard/season-bilan
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-44)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Agrégats d'équipe affichés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Agrégats d'équipe affichés
+end
+
+group US-45 — Comparer les performances des joueurs
+  ACT -> APP: Comparer les performances des joueurs
+  APP -> API: GET /dashboard/season-bilan?players=...
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-45)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Comparaison affichée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Comparaison affichée
+end
+
+group US-46 — Consulter l'évolution saisonnière d'un joueur
+  ACT -> APP: Consulter l'évolution saisonnière d'un joueur
+  APP -> API: GET /players/:id/season-profile
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-46)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Courbe d'évolution affichée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Courbe d'évolution affichée
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

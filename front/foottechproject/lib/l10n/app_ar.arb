@@ -37,6 +37,12 @@
   "activateButton": "تفعيل حسابي",
   "codeExpired": "الرمز منتهي أو لم يُستلم؟ اطلب من مدربك إعادة إضافتك إلى الفريق لاستلام رمز جديد.",
   "accountActivatedLogin": "تم تفعيل الحساب — يمكنك الآن تسجيل الدخول",
+  "aiTrendTitle": "اتجاه الأداء بالذكاء الاصطناعي",
+  "aiTrendProgressing": "في تحسن",
+  "aiTrendStable": "مستقر",
+  "aiTrendDeclining": "يحتاج إلى متابعة",
+  "aiTrendUnavailable": "يلزم توفر ثلاثة تقييمات على الأقل لحساب الاتجاه.",
+  "aiTrendBasedOn": "استنادًا إلى {count} تقييمات حديثة",
 
   "playerLoginTitle": "دخول اللاعب",
   "codeSentToPhone": "تم إرسال رمز إلى {phone}. أدخله أدناه.",

@@ -28,7 +28,9 @@ class AdministrateurSerializer(serializers.ModelSerializer):
     class Meta:
         model = Administrateur
         fields = ["id", "nom", "prenom", "email", "role", "is_active", "date_creation"]
-        read_only_fields = ["id", "date_creation"]
+        # A user may edit their name/email through /me, never their own role
+        # or active flag (which would be a direct privilege escalation).
+        read_only_fields = ["id", "role", "is_active", "date_creation"]
 
 
 class CreateAdministrateurSerializer(serializers.ModelSerializer):

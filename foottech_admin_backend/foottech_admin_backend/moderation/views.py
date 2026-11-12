@@ -23,6 +23,7 @@ from .serializers import (
     SuspendSerializer,
     UtilisateurSerializer,
 )
+from administrateurs.permissions import CanModerate
 
 
 def _suspended_qs(model_field, entite_type):
@@ -123,13 +124,17 @@ class EquipeListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = EquipeFilter
     search_fields = ["nom_equipe", "id_coach__nom", "id_coach__prenom", "id_coach__email"]
-    queryset = Equipe.objects.select_related("id_coach").all().order_by("nom_equipe")
+    queryset = Equipe.objects.select_related("id_coach").annotate(
+        est_suspendue=_suspended_qs("id_equipe", "equipe")
+    ).order_by("nom_equipe")
 
 
 class EquipeDetailView(generics.RetrieveAPIView):
     serializer_class = EquipeSerializer
     permission_classes = [IsAuthenticated]
-    queryset = Equipe.objects.select_related("id_coach").all()
+    queryset = Equipe.objects.select_related("id_coach").annotate(
+        est_suspendue=_suspended_qs("id_equipe", "equipe")
+    )
     lookup_url_kwarg = "id_equipe"
     lookup_field = "id_equipe"
 
@@ -153,23 +158,41 @@ class SuspendMixin:
     def _apply(self, request, entite_id, actif, serializer):
         entite = self._get_entite(entite_id)
         cible_type, entite_type_name = self.ENTITE_TYPE
-        if actif:
-            Suspension.objects.filter(entite_type=entite_type_name, entite_id=entite_id).delete()
-            action = self.ACTION_ACTIVER
-        else:
-            Suspension.objects.update_or_create(
-                entite_type=entite_type_name,
-                entite_id=entite_id,
-                defaults={"raison": serializer.validated_data.get("raison", ""), "administrateur": request.user},
+        with transaction.atomic():
+            suspension = Suspension.objects.filter(
+                entite_type=entite_type_name, entite_id=entite_id
+            ).first()
+            if actif:
+                if entite_type_name == "utilisateur":
+                    restore_status = (suspension.previous_account_status if suspension else None) or "INACTIVE"
+                    Utilisateur.objects.filter(id_utilisateur=entite_id).update(account_status=restore_status)
+                if suspension:
+                    suspension.delete()
+                action = self.ACTION_ACTIVER
+            else:
+                previous_status = entite.account_status if entite_type_name == "utilisateur" else None
+                if suspension:
+                    suspension.raison = serializer.validated_data.get("raison", "")
+                    suspension.administrateur = request.user
+                    suspension.save(update_fields=["raison", "administrateur"])
+                else:
+                    Suspension.objects.create(
+                        entite_type=entite_type_name,
+                        entite_id=entite_id,
+                        raison=serializer.validated_data.get("raison", ""),
+                        administrateur=request.user,
+                        previous_account_status=previous_status,
+                    )
+                if entite_type_name == "utilisateur":
+                    Utilisateur.objects.filter(id_utilisateur=entite_id).update(account_status="BLOCKED")
+                action = self.ACTION_SUSPENDRE
+            _log_action(
+                request,
+                action,
+                cible_type,
+                entite_id,
+                {"raison": serializer.validated_data.get("raison", "")},
             )
-            action = self.ACTION_SUSPENDRE
-        _log_action(
-            request,
-            action,
-            cible_type,
-            entite_id,
-            {"raison": serializer.validated_data.get("raison", "")},
-        )
         return entite
 
 
@@ -180,7 +203,7 @@ class EquipeSuspendView(SuspendMixin, APIView):
     ACTION_SUSPENDRE = AuditLog.Action.SUSPEND_TEAM
     ACTION_ACTIVER = AuditLog.Action.ACTIVATE_TEAM
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CanModerate]
 
     def _get_entite(self, entite_id):
         return generics.get_object_or_404(Equipe, id_equipe=entite_id)
@@ -210,7 +233,7 @@ class UtilisateurSuspendView(SuspendMixin, APIView):
     ACTION_SUSPENDRE = AuditLog.Action.SUSPEND_USER
     ACTION_ACTIVER = AuditLog.Action.ACTIVATE_USER
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CanModerate]
 
     def _get_entite(self, entite_id):
         return generics.get_object_or_404(Utilisateur, id_utilisateur=entite_id)
@@ -249,7 +272,7 @@ class BroadcastNotificationView(APIView):
     `notifications` table (same one the Express backend reads from).
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CanModerate]
 
     def post(self, request):
         serializer = BroadcastSerializer(data=request.data)
@@ -285,7 +308,7 @@ class AuditLogListView(generics.ListAPIView):
     """GET /api/admin/audit-logs/ - moderation history."""
 
     serializer_class = AuditLogSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CanModerate]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["action", "cible_type", "administrateur"]
     queryset = AuditLog.objects.select_related("administrateur").all()

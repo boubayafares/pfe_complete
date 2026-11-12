@@ -1,0 +1,117 @@
+﻿@startuml
+!pragma layout smetana
+title FootTech - Architecture de state management Flutter (Riverpod)
+caption Providers, repositories et sources de donnees (miroir de l'architecture Redux du rapport)
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #90A4AE
+    FontColor #263238
+}
+skinparam package<<UI>> {
+    BackgroundColor #E8F5E9
+    BorderColor #2E7D32
+}
+skinparam package<<Providers>> {
+    BackgroundColor #E3F2FD
+    BorderColor #1565C0
+}
+skinparam package<<Repositories>> {
+    BackgroundColor #F3E5F5
+    BorderColor #6A1B9A
+}
+skinparam package<<Data>> {
+    BackgroundColor #FFF3E0
+    BorderColor #E65100
+}
+
+component "Riverpod ProviderScope\n(racine de l'application)" as SCOPE
+
+' ============================================================================
+' COUCHE UI
+' ============================================================================
+package "UI (Ecrans & Widgets)" as UI <<UI>> {
+    component "Screens par feature\n(auth, dashboard, teams, players,\nmatches, trainings, attendance,\nnotifications, calendar, profile,\nseasons, weekly-plannings,\nexercise-proposals)" as SCREENS
+}
+
+' ============================================================================
+' COUCHE PROVIDERS
+' ============================================================================
+package "Providers (Riverpod)" as PROV <<Providers>> {
+    component "authProvider (StateNotifier<AuthState>)" as PR_AUTH
+    component "dashboardProvider (FutureProvider)" as PR_DASH
+    component "teamProvider / playerProvider" as PR_TEAM
+    component "matchProvider (StateNotifier<MatchState>)" as PR_MATCH
+    component "trainingProvider / attendanceProvider" as PR_TRAIN
+    component "notificationProvider / calendarProvider" as PR_NOTIF
+}
+
+' ============================================================================
+' COUCHE REPOSITORIES
+' ============================================================================
+package "Repositories (abstraction)" as REPO <<Repositories>> {
+    component "authRepository" as R_AUTH
+    component "teamRepository / playerRepository" as R_TEAM
+    component "matchRepository" as R_MATCH
+    component "trainingRepository / attendanceRepository" as R_TRAIN
+    component "notificationRepository / planningRepository" as R_NOTIF
+}
+
+' ============================================================================
+' COUCHE DATA
+' ============================================================================
+package "Sources de donnees" as DATA <<Data>> {
+    component "ApiClient (DIO + interceptor JWT\naccess/refresh + retry)" as C_API
+    component "SocketClient (events live match\n/Socket.IO)" as C_SOCK
+    component "SecureStorage (tokens)\n+ SharedPreferences (preferences)" as C_LOCAL
+    component "FCM (Firebase Cloud Messaging)" as C_FCM
+}
+
+' ============================================================================
+' LIENS
+' ============================================================================
+SCOPE ..> PR_AUTH
+SCOPE ..> PR_DASH
+SCOPE ..> PR_TEAM
+SCOPE ..> PR_MATCH
+SCOPE ..> PR_TRAIN
+SCOPE ..> PR_NOTIF
+
+SCREENS ..> PR_AUTH
+SCREENS ..> PR_DASH
+SCREENS ..> PR_TEAM
+SCREENS ..> PR_MATCH
+SCREENS ..> PR_TRAIN
+SCREENS ..> PR_NOTIF
+
+PR_AUTH ..> R_AUTH
+PR_TEAM ..> R_TEAM
+PR_MATCH ..> R_MATCH
+PR_TRAIN ..> R_TRAIN
+PR_NOTIF ..> R_NOTIF
+
+R_AUTH ..> C_API
+R_AUTH ..> C_LOCAL
+R_TEAM ..> C_API
+R_MATCH ..> C_API
+R_MATCH ..> C_SOCK
+R_TRAIN ..> C_API
+R_NOTIF ..> C_API
+R_NOTIF ..> C_FCM
+C_API ..> "API Express :4000"
+C_SOCK ..> "Socket.IO Express"
+C_FCM ..> "Firebase"
+
+note bottom
+  Chaque feature est autonome : un dossier par domaine
+  contenant ecrans, providers et repository. Les tokens
+  JWT sont stockes dans SecureStorage et injetes par
+  l'interceptor DIO.
+end note
+
+@enduml

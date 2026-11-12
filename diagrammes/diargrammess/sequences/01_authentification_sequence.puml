@@ -1,0 +1,94 @@
+@startuml
+title FootTech — Séquence — Épopée 1 : Authentification
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Coach / Adjoint / Utilisateur / Joueur" as ACT
+boundary "Application Flutter" as APP
+control "API Express" as API
+control "AuthService" as SVC
+database "PostgreSQL / Twilio" as DB
+
+group US-01 — S'inscrire avec email et mot de passe
+  ACT -> APP: S'inscrire avec email et mot de passe
+  APP -> API: POST /auth/register-coach
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-01)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Compte coach créé
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Compte coach créé
+end
+
+group US-02 — Se connecter avec email et mot de passe
+  ACT -> APP: Se connecter avec email et mot de passe
+  APP -> API: POST /auth/login
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-02)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Tokens JWT délivrés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Tokens JWT délivrés
+end
+
+group US-03 — Renouveler automatiquement la session
+  ACT -> APP: Renouveler automatiquement la session
+  APP -> API: POST /auth/refresh
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-03)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Nouveaux tokens délivrés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Nouveaux tokens délivrés
+end
+
+group US-04 — Activer un joueur par code OTP
+  ACT -> APP: Activer un joueur par code OTP
+  APP -> API: POST /players puis /auth/player/request-otp
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-04)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: OTP envoyé sans être journalisé
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: OTP envoyé sans être journalisé
+end
+
+group US-05 — Se connecter par téléphone et OTP
+  ACT -> APP: Se connecter par téléphone et OTP
+  APP -> API: POST /auth/player/verify-otp
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-05)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Compte activé et session ouverte
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Compte activé et session ouverte
+end
+
+group US-06 — Se déconnecter
+  ACT -> APP: Se déconnecter
+  APP -> API: POST /auth/logout
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-06)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Refresh token révoqué
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Refresh token révoqué
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

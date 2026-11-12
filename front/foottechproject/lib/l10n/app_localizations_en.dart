@@ -108,6 +108,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountActivatedLogin => 'Account activated — you can now log in';
 
   @override
+  String get aiTrendTitle => 'AI performance trend';
+
+  @override
+  String get aiTrendProgressing => 'Progressing';
+
+  @override
+  String get aiTrendStable => 'Stable';
+
+  @override
+  String get aiTrendDeclining => 'Needs attention';
+
+  @override
+  String get aiTrendUnavailable =>
+      'At least three evaluations are needed for an AI trend.';
+
+  @override
+  String aiTrendBasedOn(Object count) {
+    return 'Based on $count recent evaluations';
+  }
+
+  @override
   String get playerLoginTitle => 'Player Login';
 
   @override

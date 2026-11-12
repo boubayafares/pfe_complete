@@ -31,25 +31,34 @@ class _CoachOtpScreenState extends ConsumerState<CoachOtpScreen> {
   Future<void> _sendCode() async {
     setState(() => _sendingCode = true);
     try {
-      await ref.read(authControllerProvider.notifier).requestCoachOtp(email: widget.email);
+      await ref
+          .read(authControllerProvider.notifier)
+          .requestCoachOtp(email: widget.email);
       if (mounted) setState(() => _codeSent = true);
     } on ApiException catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
+      }
     } finally {
       if (mounted) setState(() => _sendingCode = false);
     }
   }
 
   Future<void> _verifyCode() async {
-    await ref.read(authControllerProvider.notifier).verifyCoachOtp(
-          email: widget.email,
-          code: _codeController.text.trim(),
-        );
+    await ref
+        .read(authControllerProvider.notifier)
+        .verifyCoachOtp(email: widget.email, code: _codeController.text.trim());
     final state = ref.read(authControllerProvider);
     if (state.hasError && mounted) {
       final error = state.error;
-      final message = error is ApiException ? error.message : context.l10n.invalidCode;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      final message = error is ApiException
+          ? error.message
+          : context.l10n.invalidCode;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     } else if (mounted && state.value != null) {
       context.go('/home');
     }
@@ -90,13 +99,27 @@ class _CoachOtpScreenState extends ConsumerState<CoachOtpScreen> {
                       ? (isVerifying ? null : _verifyCode)
                       : (_sendingCode ? null : _sendCode),
                   child: (_sendingCode || isVerifying)
-                      ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.greenTextOnFill))
-                      : Text(_codeSent ? context.l10n.verifyAndActivate : context.l10n.receiveNewCode),
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.greenTextOnFill,
+                          ),
+                        )
+                      : Text(
+                          _codeSent
+                              ? context.l10n.verifyAndActivate
+                              : context.l10n.receiveNewCode,
+                        ),
                 ),
                 if (_codeSent)
                   TextButton(
                     onPressed: () => setState(() => _codeSent = false),
-                    child: Text(context.l10n.receiveNewCode, style: const TextStyle(fontSize: 12)),
+                    child: Text(
+                      context.l10n.receiveNewCode,
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ),
               ],
             ),

@@ -26,11 +26,27 @@ class _CreateMatchScreenState extends ConsumerState<CreateMatchScreen> {
     if (teamId == null || _adversaireController.text.trim().isEmpty) return;
     setState(() => _submitting = true);
     try {
-      final dateHeure = DateTime(_date.year, _date.month, _date.day, _time.hour, _time.minute);
-      await ref.read(matchesRepositoryProvider).create(teamId: teamId, adversaire: _adversaireController.text.trim(), dateHeure: dateHeure, isHome: _isHome);
+      final dateHeure = DateTime(
+        _date.year,
+        _date.month,
+        _date.day,
+        _time.hour,
+        _time.minute,
+      );
+      await ref
+          .read(matchesRepositoryProvider)
+          .create(
+            adversaire: _adversaireController.text.trim(),
+            dateHeure: dateHeure,
+            isHome: _isHome,
+          );
       if (mounted) Navigator.of(context).pop(true);
     } on ApiException catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -48,13 +64,23 @@ class _CreateMatchScreenState extends ConsumerState<CreateMatchScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextField(controller: _adversaireController, decoration: InputDecoration(labelText: context.l10n.opponent)),
+                TextField(
+                  controller: _adversaireController,
+                  decoration: InputDecoration(labelText: context.l10n.opponent),
+                ),
                 const SizedBox(height: AppSpacing.md),
                 ListTile(
                   title: Text(context.l10n.date),
-                  subtitle: Text(DateFormat('EEEE d MMMM yyyy', 'en_US').format(_date)),
+                  subtitle: Text(
+                    DateFormat('EEEE d MMMM yyyy', 'en_US').format(_date),
+                  ),
                   onTap: () async {
-                    final picked = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _date,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
                     if (picked != null) setState(() => _date = picked);
                   },
                 ),
@@ -62,7 +88,10 @@ class _CreateMatchScreenState extends ConsumerState<CreateMatchScreen> {
                   title: Text(context.l10n.time),
                   subtitle: Text(_time.format(context)),
                   onTap: () async {
-                    final picked = await showTimePicker(context: context, initialTime: _time);
+                    final picked = await showTimePicker(
+                      context: context,
+                      initialTime: _time,
+                    );
                     if (picked != null) setState(() => _time = picked);
                   },
                 ),
@@ -75,7 +104,14 @@ class _CreateMatchScreenState extends ConsumerState<CreateMatchScreen> {
                 ElevatedButton(
                   onPressed: _submitting ? null : _submit,
                   child: _submitting
-                      ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.greenTextOnFill))
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.greenTextOnFill,
+                          ),
+                        )
                       : Text(context.l10n.create),
                 ),
               ],

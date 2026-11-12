@@ -106,6 +106,7 @@ entity "push_tokens" as PUSH_TOKENS <<Auth>> {
 entity "seasons" as SEASONS <<Team>> {
     * id : BIGSERIAL <<PK>>
     --
+    team_id : BIGINT <<FK, nullable legacy>>
     name : VARCHAR (ex: 2024/2025)
     start_date : DATE
     end_date : DATE
@@ -144,7 +145,7 @@ entity "players" as PLAYERS <<Player>> {
     numero_maillot : INT
 }
 
-entity "guardians" as GUARDIANS <<Player>> {
+entity "player_guardians" as GUARDIANS <<Player>> {
     * id : BIGSERIAL <<PK>>
     --
     player_id : BIGINT <<FK>>
@@ -156,7 +157,7 @@ entity "guardians" as GUARDIANS <<Player>> {
     email : VARCHAR
 }
 
-entity "player_addresses" as PLAYER_ADDR <<Player>> {
+entity "player_address" as PLAYER_ADDR <<Player>> {
     * player_id : BIGINT <<PK,FK>>
     --
     adresse_complete : TEXT
@@ -165,7 +166,7 @@ entity "player_addresses" as PLAYER_ADDR <<Player>> {
     duree_trajet_min : INT
 }
 
-entity "school_info" as PLAYER_SCHOOL <<Player>> {
+entity "player_school_info" as PLAYER_SCHOOL <<Player>> {
     * player_id : BIGINT <<PK,FK>>
     --
     etablissement : VARCHAR
@@ -173,18 +174,21 @@ entity "school_info" as PLAYER_SCHOOL <<Player>> {
     niveau_scolaire : enum
 }
 
-entity "player_season_profiles" as PLAYER_SEASON <<Player>> {
+entity "player_season_profile" as PLAYER_SEASON <<Player>> {
     * id : BIGSERIAL <<PK>>
     --
     player_id : BIGINT <<FK>>
     season : VARCHAR
     club_niveau : VARCHAR
-    poids_kg / taille_cm : NUMERIC
-    poste1 / poste2 : VARCHAR
-    points_forts / a_ameliorer : TEXT
+    poids_kg : NUMERIC
+    taille_cm : NUMERIC
+    poste1 : VARCHAR
+    poste2 : VARCHAR
+    points_forts : TEXT
+    a_ameliorer : TEXT
 }
 
-entity "injuries" as INJURIES <<Player>> {
+entity "player_injuries" as INJURIES <<Player>> {
     * id : BIGSERIAL <<PK>>
     --
     player_id : BIGINT <<FK>>
@@ -202,9 +206,11 @@ entity "weekly_plannings" as PLANNINGS <<Planning>> {
     --
     team_id : BIGINT <<FK>>
     season_id : BIGINT <<FK>>
-    date_debut / date_fin : DATE
+    date_debut : DATE
+    date_fin : DATE
     nombre_seances : INT
-    intensite / volume : VARCHAR
+    intensite : VARCHAR
+    volume : VARCHAR
     match_prevu : BOOLEAN
 }
 
@@ -225,7 +231,8 @@ entity "trainings" as TRAININGS <<Training>> {
     --
     team_id : BIGINT <<FK>>
     date : DATE
-    start_time / end_time : TIME
+    start_time : TIME
+    end_time : TIME
     location : VARCHAR
     status : enum[SCHEDULED,COMPLETED,CANCELLED]
     created_by : BIGINT <<FK>>
@@ -247,11 +254,12 @@ entity "training_situations" as TRAINING_SITUATIONS <<Training>> {
     ordre : INT
     titre : VARCHAR
     description : TEXT
-    duree_travail / recuperation : VARCHAR
+    duree_travail : VARCHAR
+    recuperation : VARCHAR
     criteres_reussite : TEXT[]
 }
 
-entity "situation_drawings" as TACTICAL_DRAWINGS <<Training>> {
+entity "tactical_drawings" as TACTICAL_DRAWINGS <<Training>> {
     * id : BIGSERIAL <<PK>>
     --
     training_situation_id : BIGINT <<FK>>
@@ -263,6 +271,7 @@ entity "situation_drawings" as TACTICAL_DRAWINGS <<Training>> {
 entity "exercise_proposals" as EXERCISE_PROPOSALS <<Training>> {
     * id : BIGSERIAL <<PK>>
     --
+    team_id : BIGINT <<FK, nullable legacy>>
     training_id : BIGINT <<FK>>
     proposed_by : BIGINT <<FK>>
     titre : VARCHAR
@@ -270,7 +279,7 @@ entity "exercise_proposals" as EXERCISE_PROPOSALS <<Training>> {
     reviewed_by : BIGINT
 }
 
-entity "attendance" as ATTENDANCES <<Training>> {
+entity "attendances" as ATTENDANCES <<Training>> {
     * id : BIGSERIAL <<PK>>
     --
     training_id : BIGINT <<FK>>
@@ -291,7 +300,8 @@ entity "matches" as MATCHES <<Match>> {
     date_heure : TIMESTAMPTZ
     is_home : BOOLEAN
     formation : VARCHAR
-    home_score / away_score : INT
+    home_score : INT
+    away_score : INT
     match_status : enum[SCHEDULED,LIVE,FINISHED,...]
 }
 
@@ -314,14 +324,16 @@ entity "match_events" as MATCH_EVENTS <<Match>> {
     related_player_id : BIGINT
 }
 
-entity "match_stats" as MATCH_STATS <<Match>> {
+entity "match_player_stats" as MATCH_STATS <<Match>> {
     * id : BIGSERIAL <<PK>>
     --
     match_id : BIGINT <<FK>>
     player_id : BIGINT <<FK>>
     minutes_played : INT
-    goals / assists : INT
-    yellow / red_cards : INT
+    goals : INT
+    assists : INT
+    yellow_cards : INT
+    red_cards : INT
 }
 
 entity "match_evaluations" as MATCH_EVALS <<Match>> {
@@ -346,8 +358,10 @@ entity "ai_lineup_recommendations" as AI_LINEUP <<Match>> {
     --
     match_id : BIGINT <<FK>>
     player_id : BIGINT <<FK>>
-    presence_score / performance_score : NUMERIC
-    fatigue_score / final_score : NUMERIC
+    presence_score : NUMERIC
+    performance_score : NUMERIC
+    fatigue_score : NUMERIC
+    final_score : NUMERIC
     recommended_status : enum
 }
 
@@ -359,8 +373,10 @@ entity "notifications" as NOTIFICATIONS <<Notification>> {
     --
     user_id : BIGINT <<FK>>
     type : enum[MATCH_CONVOCATION,NEW_TRAINING,...]
-    title / message : VARCHAR/TEXT
-    related_entity_type / id : VARCHAR/BIGINT
+    title : VARCHAR
+    message : TEXT
+    related_entity_type : VARCHAR
+    related_entity_id : BIGINT
     is_read : BOOLEAN
 }
 
@@ -369,9 +385,11 @@ entity "calendar_events" as CALENDAR_EVENTS <<Calendar>> {
     --
     team_id : BIGINT <<FK>>
     title : VARCHAR
-    start_time / end_time : TIMESTAMPTZ
+    start_time : TIMESTAMPTZ
+    end_time : TIMESTAMPTZ
     all_day : BOOLEAN
-    location / color : VARCHAR
+    location : VARCHAR
+    color : VARCHAR
     created_by : BIGINT
 }
 
@@ -391,7 +409,7 @@ USERS ||--o{ TEAMS : "coach de"
 USERS ||--o{ TEAM_STAFF : "adjoint"
 TEAMS ||--o{ TEAM_STAFF
 TEAMS ||--o{ PLAYERS : "compose"
-SEASONS ||..o{ TEAMS
+TEAMS ||--o{ SEASONS : "possede"
 
 ' Players
 USERS ||--|| PLAYERS : "profil joueur"

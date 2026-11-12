@@ -80,6 +80,8 @@ class Role(models.Model):
 class RoleJointure(models.Model):
     """Join rows of `user_roles` (many-to-many user <-> role)."""
 
+    pk = models.CompositePrimaryKey("user", "role")
+
     user = models.ForeignKey(
         Utilisateur, db_column="user_id", on_delete=models.DO_NOTHING, related_name="role_joints"
     )
@@ -145,7 +147,7 @@ class Joueur(models.Model):
 class Adjoint(models.Model):
     """Mirror of `team_staff` (one row per adjoint attribution to a team)."""
 
-    id_adjoint = models.BigAutoField(primary_key=True)
+    id_adjoint = models.BigAutoField(db_column="id", primary_key=True)
     id_equipe = models.ForeignKey(
         Equipe, db_column="team_id", on_delete=models.DO_NOTHING, related_name="adjoints"
     )

@@ -10,7 +10,8 @@ class RegisterCoachScreen extends ConsumerStatefulWidget {
   const RegisterCoachScreen({super.key});
 
   @override
-  ConsumerState<RegisterCoachScreen> createState() => _RegisterCoachScreenState();
+  ConsumerState<RegisterCoachScreen> createState() =>
+      _RegisterCoachScreenState();
 }
 
 class _RegisterCoachScreenState extends ConsumerState<RegisterCoachScreen> {
@@ -37,7 +38,9 @@ class _RegisterCoachScreenState extends ConsumerState<RegisterCoachScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    await ref.read(authControllerProvider.notifier).registerCoach(
+    await ref
+        .read(authControllerProvider.notifier)
+        .registerCoach(
           firstName: _firstNameController.text.trim(),
           lastName: _lastNameController.text.trim(),
           phone: _phoneController.text.trim(),
@@ -47,8 +50,12 @@ class _RegisterCoachScreenState extends ConsumerState<RegisterCoachScreen> {
     final state = ref.read(authControllerProvider);
     if (state.hasError && mounted) {
       final error = state.error;
-      final message = error is ApiException ? error.message : context.l10n.unableToRegister;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      final message = error is ApiException
+          ? error.message
+          : context.l10n.unableToRegister;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     } else if (!state.hasError && mounted) {
       context.go('/coach-verify-otp', extra: _emailController.text.trim());
     }
@@ -72,28 +79,40 @@ class _RegisterCoachScreenState extends ConsumerState<RegisterCoachScreen> {
                 children: [
                   TextFormField(
                     controller: _firstNameController,
-                    decoration: InputDecoration(labelText: context.l10n.firstName),
-                    validator: (v) => (v == null || v.isEmpty) ? context.l10n.required : null,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.firstName,
+                    ),
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? context.l10n.required : null,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   TextFormField(
                     controller: _lastNameController,
-                    decoration: InputDecoration(labelText: context.l10n.lastName),
-                    validator: (v) => (v == null || v.isEmpty) ? context.l10n.required : null,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.lastName,
+                    ),
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? context.l10n.required : null,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   TextFormField(
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(labelText: context.l10n.phone),
-                    validator: (v) => (v == null || v.length < 8) ? context.l10n.invalidNumber : null,
+                    validator: (v) => (v == null || v.length < 8)
+                        ? context.l10n.invalidNumber
+                        : null,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(labelText: context.l10n.loginEmail),
-                    validator: (v) => (v == null || !v.contains('@')) ? context.l10n.invalidEmail : null,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.loginEmail,
+                    ),
+                    validator: (v) => (v == null || !v.contains('@'))
+                        ? context.l10n.invalidEmail
+                        : null,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   TextFormField(
@@ -102,11 +121,20 @@ class _RegisterCoachScreenState extends ConsumerState<RegisterCoachScreen> {
                     decoration: InputDecoration(
                       labelText: context.l10n.loginPassword,
                       suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, size: 18),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          size: 18,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                     ),
-                    validator: (v) => (v == null || v.length < 8) ? context.l10n.min8Chars : null,
+                    validator: (v) => (v == null || v.length < 8)
+                        ? context.l10n.min8Chars
+                        : null,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   TextFormField(
@@ -115,18 +143,34 @@ class _RegisterCoachScreenState extends ConsumerState<RegisterCoachScreen> {
                     decoration: InputDecoration(
                       labelText: context.l10n.confirmPassword,
                       suffixIcon: IconButton(
-                        icon: Icon(_obscureConfirm ? Icons.visibility_off : Icons.visibility, size: 18),
-                        onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                        icon: Icon(
+                          _obscureConfirm
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          size: 18,
+                        ),
+                        onPressed: () =>
+                            setState(() => _obscureConfirm = !_obscureConfirm),
                       ),
                     ),
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? context.l10n.required : (v != _passwordController.text ? context.l10n.passwordsDontMatch : null),
+                    validator: (v) => (v == null || v.isEmpty)
+                        ? context.l10n.required
+                        : (v != _passwordController.text
+                              ? context.l10n.passwordsDontMatch
+                              : null),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   ElevatedButton(
                     onPressed: isLoading ? null : _submit,
                     child: isLoading
-                        ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.greenTextOnFill))
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.greenTextOnFill,
+                            ),
+                          )
                         : Text(context.l10n.createAccount),
                   ),
                 ],

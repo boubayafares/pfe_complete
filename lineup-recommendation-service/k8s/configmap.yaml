@@ -1,5 +1,5 @@
 # Généré/mis à jour via:
-#   kubectl create configmap lineup-weights-config \
+#   kubectl -n foottech create configmap lineup-weights-config \
 #     --from-file=weights.json=app/infrastructure/persistence/weights.json \
 #     --dry-run=client -o yaml | kubectl apply -f -
 #
@@ -9,6 +9,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: lineup-weights-config
+  namespace: foottech
 data:
   weights.json: |
     {

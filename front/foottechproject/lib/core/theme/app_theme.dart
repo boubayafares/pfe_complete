@@ -81,9 +81,15 @@ ThemeData buildFootTechTheme() {
       foregroundColor: AppColors.textPrimary,
     ),
     textTheme: base.textTheme
-        .apply(bodyColor: AppColors.textPrimary, displayColor: AppColors.textPrimary)
+        .apply(
+          bodyColor: AppColors.textPrimary,
+          displayColor: AppColors.textPrimary,
+        )
         .copyWith(
-          bodySmall: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+          bodySmall: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 12,
+          ),
           labelSmall: const TextStyle(color: AppColors.textMuted, fontSize: 11),
         ),
     cardTheme: CardThemeData(
@@ -115,10 +121,22 @@ ThemeData buildFootTechTheme() {
       filled: true,
       fillColor: AppColors.navyCard,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.navyBorder)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.navyBorder)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.green, width: 1.5)),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.coralDanger)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: AppColors.navyBorder),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: AppColors.navyBorder),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: AppColors.green, width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: AppColors.coralDanger),
+      ),
       hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
     ),
     navigationRailTheme: const NavigationRailThemeData(
@@ -126,7 +144,10 @@ ThemeData buildFootTechTheme() {
       selectedIconTheme: IconThemeData(color: AppColors.green),
       unselectedIconTheme: IconThemeData(color: AppColors.textMuted),
       selectedLabelTextStyle: TextStyle(color: AppColors.green, fontSize: 12),
-      unselectedLabelTextStyle: TextStyle(color: AppColors.textMuted, fontSize: 12),
+      unselectedLabelTextStyle: TextStyle(
+        color: AppColors.textMuted,
+        fontSize: 12,
+      ),
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: AppColors.navyBgAlt,
@@ -134,7 +155,10 @@ ThemeData buildFootTechTheme() {
       unselectedItemColor: AppColors.textMuted,
       type: BottomNavigationBarType.fixed,
     ),
-    dividerTheme: const DividerThemeData(color: AppColors.navyBorder, thickness: 0.5),
+    dividerTheme: const DividerThemeData(
+      color: AppColors.navyBorder,
+      thickness: 0.5,
+    ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: AppColors.navyCard,
       contentTextStyle: const TextStyle(color: AppColors.textPrimary),

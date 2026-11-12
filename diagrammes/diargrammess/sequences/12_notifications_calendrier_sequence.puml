@@ -1,0 +1,82 @@
+@startuml
+title FootTech — Séquence — Épopée 12 : Notifications et calendrier
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Utilisateur / Coach" as ACT
+boundary "Application Flutter" as APP
+control "API Express / Socket.IO" as API
+control "NotificationCalendarService" as SVC
+database "PostgreSQL / Firebase FCM" as DB
+
+group US-50 — Recevoir des notifications push
+  ACT -> APP: Recevoir des notifications push
+  APP -> API: FCM + GET /notifications/mine
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-50)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Notification livrée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Notification livrée
+end
+
+group US-51 — Diffuser une notification à l'équipe
+  ACT -> APP: Diffuser une notification à l'équipe
+  APP -> API: POST /notifications/broadcast
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-51)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Destinataires notifiés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Destinataires notifiés
+end
+
+group US-52 — Marquer une notification comme lue
+  ACT -> APP: Marquer une notification comme lue
+  APP -> API: PATCH /notifications/:id/read
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-52)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Statut lu enregistré
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Statut lu enregistré
+end
+
+group US-53 — Consulter le calendrier partagé
+  ACT -> APP: Consulter le calendrier partagé
+  APP -> API: GET /calendar-events
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-53)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Événements de l'équipe affichés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Événements de l'équipe affichés
+end
+
+group US-54 — Créer un événement de calendrier
+  ACT -> APP: Créer un événement de calendrier
+  APP -> API: POST /calendar-events
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-54)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Événement créé
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Événement créé
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

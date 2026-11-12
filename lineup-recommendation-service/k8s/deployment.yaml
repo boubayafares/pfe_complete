@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: lineup-recommendation-service
+  namespace: foottech
   labels:
     app: lineup-recommendation-service
     tier: ai-microservice
@@ -16,14 +17,33 @@ spec:
         app: lineup-recommendation-service
         tier: ai-microservice
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: lineup-recommendation-service
-          image: foottech/lineup-recommendation-service:latest
+          # Le pipeline de déploiement remplace ce tag par sha-<commit>.
+          image: ghcr.io/boubayafares/pfe_complete/lineup-service:sha-REPLACE_WITH_COMMIT_SHA
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           ports:
             - containerPort: 8100
           env:
             - name: LINEUP_SVC_LOG_LEVEL
               value: "info"
+            - name: LINEUP_SVC_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: foottech-service-auth
+                  key: token
           resources:
             requests:
               cpu: "100m"
@@ -47,8 +67,13 @@ spec:
             - name: calibrated-weights
               mountPath: /app/app/infrastructure/persistence
               readOnly: true
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: calibrated-weights
           configMap:
             name: lineup-weights-config
             optional: true # absent tant qu'aucune calibration n'a été committée -> fallback ScoreWeights.default()
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi

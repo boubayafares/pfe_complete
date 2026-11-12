@@ -1,7 +1,7 @@
 @startuml
 !pragma layout smetana
-title FootTech - Communication entre Microservices
-caption Séquence de communication : Express → AI Insights / Lineup Service, avec Redis en cache intermédiaire
+title FootTech - Communication entre services (Express, AI Insights, Lineup)
+caption Flux réels : Express orchestre, lineup-recommendation-service calcule, ai-insights-service est appelé directement par le front
 
 skinparam backgroundColor #FFFFFF
 skinparam defaultFontName "Segoe UI"
@@ -14,73 +14,78 @@ skinparam ArrowColor #333333
 actor "Coach" as COACH <<HUMAIN>>
 participant "Flutter App" as FLUTTER #2E8B57
 participant "Express API\n:4000" as EXPRESS #1E88E5
-participant "Redis\n(cache)" as REDIS #E53935
-participant "AI Insights\n:8300" as AI #F57C00
-participant "Lineup Service\n:8100" as RECO #FB8C00
-participant "Firebase /Twilio\n(notifications)" as NOTIF #B71C1C
+participant "AI Insights\n(FastAPI) :8300" as AI #F57C00
+participant "Lineup Service\n(FastAPI) :8100" as RECO #FB8C00
+participant "Firebase / Twilio\n(notifications)" as NOTIF #B71C1C
 database "PostgreSQL" as PG #607D8B
 
 ' ============================================================================
-' SCÉNARIO 1 : ANALYSE IA (insights)
+' SCÉNARIO 1 : ANALYSE IA (insights) — SERVICE AUTONOME
 ' ============================================================================
-== Scénario 1 : Requête d'analyse IA (AI Insights) ==
+== Scénario 1 : Analyse IA (ai-insights-service, autonome) ==
 
-COACH -> FLUTTER : demande les tendances / analyses
-FLUTTER -> EXPRESS : GET /ai/trends?team=:id&season=:id
-EXPRESS -> REDIS : existe-t-il un cache ? (GET key)
-alt cache hit (résultat frais)
-    REDIS --> EXPRESS : résultat en cache
-else cache miss
-    EXPRESS -> AI : POST /analyze (payload texte/stats)
-    AI -> PG : lit données brutes si nécessaire
-    PG --> AI : données
-    AI --> EXPRESS : 200 { insights }
-    EXPRESS -> REDIS : stocke le résultat (TTL)
-end
-EXPRESS --> FLUTTER : 200 { insights }
-FLUTTER --> COACH : affichage des insights + clustering / tone
+COACH -> FLUTTER : ouvre le tableau de bord
+FLUTTER -> AI : POST /api/v1/trend/detect (stats de la saison)
+AI -> AI : détection des tendances (baisses / régressions)
+AI --> FLUTTER : 200 { trend }
+FLUTTER -> AI : POST /api/v1/clustering/players (perfs)
+AI --> FLUTTER : 200 { clusters }
+FLUTTER -> AI : POST /api/v1/tone/analyze (message entraîneur)
+AI --> FLUTTER : 200 { tone }
+FLUTTER --> COACH : visualisation tendances / clusters / ton
+
+note over AI
+  Service FastAPI **indépendant** et sans état.
+  Appelé **directement** par l'application Flutter : Express n'expose
+  aucun proxy vers lui (AI_INSIGHTS_SERVICE_URL défini mais inutilisé).
+end note
 
 ' ============================================================================
 ' SCÉNARIO 2 : RECOMMANDATION D'ALIGNEMENT (Lineup Service)
 ' ============================================================================
-== Scénario 2 : Recommandation d'alignement (Lineup Service) ==
+== Scénario 2 : Recommandation d'alignement (orchestrée par Express) ==
 
 COACH -> FLUTTER : demande l'alignement recommandé
-FLUTTER -> EXPRESS : POST /matches/:id/ai-recommendation
-EXPRESS -> REDIS : GET cached lineup
-alt cache hit
-    REDIS --> EXPRESS : scores en cache
-else cache miss
-    EXPRESS -> RECO : POST /recommend (match_id, players)
-    RECO -> REDIS : GET données fréquentes (présence, perf)
-    REDIS --> RECO : données
-    RECO -> PG : GET stats joueurs (minutes, buts)
-    PG --> RECO : statistiques
-    RECO -> RECO : calcule presence / perf / fatigue scores
-    RECO --> EXPRESS : 201 { scores finaux }
-    EXPRESS -> REDIS : SET résultat du calcul
-end
+FLUTTER -> EXPRESS : POST /matches/:id/ai-recommendations
+EXPRESS -> PG : joueurs + statistiques (players, match_player_stats)
+PG --> EXPRESS : données
+EXPRESS -> RECO : POST /api/v1/lineup/recommendations (payload : joueurs + poids)
+RECO -> RECO : calcul **pur** : présence / performance / fatigue
+RECO -> RECO : top XI (seuil STARTER 70) + remplaçants (seuil SUB 40)
+RECO --> EXPRESS : 201 { lineup + scores }
 EXPRESS -> PG : persiste ai_lineup_recommendations
 EXPRESS --> FLUTTER : 200 { top XI + subs }
-FLUTTER --> COACH : alignement affiché
+FLUTTER --> COACH : composition affichée
+
+note over RECO
+  Service sans état : **aucune** base de données ni cache.
+  Express lui envoie toutes les données nécessaires dans la requête.
+  Poids par défaut identiques : présence = performance = fatigue = 1/3.
+end note
 
 ' ============================================================================
-' SCÉNARIO 3 : INVALIDATION DE CACHE
+' SCÉNARIO 3 : MISE À JOUR DES STATS DE MATCH
 ' ============================================================================
-== Scénario 3 : Invalidation du cache (après mise à jour de données) ==
+== Scénario 3 : Mise à jour des statistiques de match ==
 
-COACH -> FLUTTER : met à jour les stats joueurs
-FLUTTER -> EXPRESS : PATCH /matches/:id/stats
+COACH -> FLUTTER : saisit les stats (minute, buts...)
+FLUTTER -> EXPRESS : PUT /matches/:id/stats
 EXPRESS -> PG : update match_player_stats
-EXPRESS -> REDIS : DEL clé du cache concernée
 EXPRESS --> FLUTTER : 200 { stats }
-EXPRESS -> NOTIF : (optionnel) notifie
+EXPRESS -> NOTIF : (optionnel) diffusion aux joueurs
 
 ' ============================================================================
 ' NOTES
 ' ============================================================================
-note over REDIS : Le cache Redis suit une stratégie TTL (time-to-live)\navec éviction LRU (maxmemory 256mb).\nLes résultats IA sont invalidés dès qu'une donnée source change.
+note over EXPRESS
+  Express est la seule brique qui dialogue avec PostgreSQL et le
+  lineup-recommendation-service. Une infra Redis est initialisée au
+  démarrage (initRedis) mais aucun cache n'est réellement utilisé.
+end note
 
-note over AI, RECO : Les deux services sont des API FastAPI indépendantes.\nIls communiquent avec Express via HTTP(REST),\net utilisent PostgreSQL pour les données persistantes\net Redis pour le cache haute performance.
+note over PG
+  Tables consommées : users, players, teams, matches, trainings,
+  match_player_stats, ai_lineup_recommendations, notifications...
+end note
 
 @enduml

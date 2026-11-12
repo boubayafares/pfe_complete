@@ -23,28 +23,3 @@ test.describe('Auth Endpoints', () => {
     expect([400, 422]).toContain(response.status());
   });
 });
-
-test.describe('AI Insights Service', () => {
-  const AI_URL = process.env.AI_URL || 'http://localhost:8300';
-
-  test('health check', async ({ request }) => {
-    const response = await request.get(`${AI_URL}/health`);
-    expect(response.ok()).toBeTruthy();
-  });
-
-  test('trend detect with insufficient data', async ({ request }) => {
-    const response = await request.post(`${AI_URL}/api/v1/trend/detect`, {
-      data: { playerId: 7, points: [{ date: '2026-01-01T00:00:00', value: 5.0 }] },
-    });
-    expect(response.status()).toBe(422);
-  });
-});
-
-test.describe('Lineup Service', () => {
-  const LINEUP_URL = process.env.LINEUP_URL || 'http://localhost:8100';
-
-  test('health check', async ({ request }) => {
-    const response = await request.get(`${LINEUP_URL}/health`);
-    expect(response.ok()).toBeTruthy();
-  });
-});

@@ -13,18 +13,27 @@ class ProfileRepository {
     return UserProfile.fromJson(body['data'] as Map<String, dynamic>);
   }
 
-  Future<UserProfile> updateProfile(int userId, {String? firstName, String? lastName, String? email}) async {
-    final body = await _api.patch('${ApiConstants.users}/$userId', data: {
-      if (firstName != null) 'firstName': firstName,
-      if (lastName != null) 'lastName': lastName,
-      if (email != null) 'email': email,
-    });
+  Future<UserProfile> updateProfile(
+    int userId, {
+    String? firstName,
+    String? lastName,
+    String? email,
+  }) async {
+    final body = await _api.patch(
+      '${ApiConstants.users}/$userId',
+      data: {'firstName': ?firstName, 'lastName': ?lastName, 'email': ?email},
+    );
     return UserProfile.fromJson(body['data'] as Map<String, dynamic>);
   }
 
   /// Uploads the avatar as multipart with field "avatar" (matches the backend
   /// multer route). [filePath] is used on mobile/desktop; on Web pass [bytes].
-  Future<UserProfile> uploadAvatar(int userId, {String? filePath, List<int>? bytes, String? fileName}) async {
+  Future<UserProfile> uploadAvatar(
+    int userId, {
+    String? filePath,
+    List<int>? bytes,
+    String? fileName,
+  }) async {
     final body = await _api.uploadFile(
       '${ApiConstants.users}/$userId/avatar',
       fieldName: 'avatar',

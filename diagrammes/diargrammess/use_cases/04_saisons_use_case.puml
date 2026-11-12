@@ -1,0 +1,32 @@
+@startuml
+title FootTech — Cas d'utilisation — Épopée 4 : Gestion des saisons
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+left to right direction
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+actor "Utilisateur" as USER #546E7A
+actor "Coach" as COACH #1565C0
+COACH -|> USER
+rectangle "FootTech — Gestion des saisons" {
+  usecase "US-17\nCréer une saison" as US17
+  usecase "US-18\nLister les saisons disponibles" as US18
+  usecase "US-19\nModifier les dates d'une saison" as US19
+}
+COACH --> US17
+USER --> US18
+COACH --> US19
+
+note bottom
+  Chaque cas d'utilisation reprend l'identifiant exact du Product Backlog.
+  Les contrôles JWT, rôle et équipe sont appliqués avant l'accès métier.
+end note
+@enduml

@@ -1,7 +1,7 @@
 flowchart TB
     subgraph Clients
         F[Flutter App\nPortable / Tablette]
-        W[Admin Web\nDjango templates]
+        D[JavaFX Desktop\nfoottech_admin_desktop]
     end
 
     subgraph Backend["Backend - REST + JWT"]
@@ -13,19 +13,19 @@ flowchart TB
     end
 
     subgraph IA["Services IA"]
-        LINEUP[Lineup Recommendation Service\nFastAPI :8100\nweights + features]
-        INSIGHTS[AI Insights Service\nFastAPI :8300\ntrends / detect]
+        LINEUP[Lineup Recommendation Service\nFastAPI :8100\ncalcul sans etat, donnees dans la requete]
+        INSIGHTS[AI Insights Service\nFastAPI :8300\ntrend/detect, clustering/players,\ntone/analyze, transcription,\ndocuments/extract]
     end
 
     subgraph Data["Donnees"]
-        PG[(PostgreSQL 16\nschema platform)]
-        RD[(Redis 7\nsessions, rate-limit, cache)]
+        PG[(PostgreSQL 16\nsearch_path public,platform)]
+        RD[(Redis 7\ninit au demarrage (initRedis)\ncache non utilisee)]
     end
 
     F -->|HTTPS| API
-    W -->|HTTPS| ADM
-    API --> RD
+    F -->|HTTPS direct, hors Express| INSIGHTS
+    D -->|HTTPS REST + JWT| ADM
+    API -->|init, aucun cache reel| RD
     API --> PG
     ADM --> PG
     API -->|LINEUP_SERVICE_URL\ntimeout 5s| LINEUP
-    API -->|AI_INSIGHTS_SERVICE_URL\ntimeout 5s| INSIGHTS

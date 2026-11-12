@@ -1,0 +1,46 @@
+@startuml
+title FootTech — Cas d'utilisation — Épopée 14 : Administration de la plateforme
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+left to right direction
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+actor "Administrateur" as ADMIN #6A1B9A
+rectangle "FootTech — Administration de la plateforme" {
+  usecase "US-60\nSe connecter au back-office" as US60
+  usecase "US-61\nConsulter les KPI" as US61
+  usecase "US-62\nLister et filtrer les équipes" as US62
+  usecase "US-63\nSuspendre une équipe" as US63
+  usecase "US-64\nRéactiver une équipe" as US64
+  usecase "US-65\nLister les utilisateurs" as US65
+  usecase "US-66\nSuspendre un utilisateur" as US66
+  usecase "US-67\nRéactiver un utilisateur" as US67
+  usecase "US-68\nDiffuser une notification globale" as US68
+  usecase "US-69\nConsulter les journaux d'audit" as US69
+  usecase "US-70\nGérer les comptes administrateurs" as US70
+}
+ADMIN --> US60
+ADMIN --> US61
+ADMIN --> US62
+ADMIN --> US63
+ADMIN --> US64
+ADMIN --> US65
+ADMIN --> US66
+ADMIN --> US67
+ADMIN --> US68
+ADMIN --> US69
+ADMIN --> US70
+
+note bottom
+  Chaque cas d'utilisation reprend l'identifiant exact du Product Backlog.
+  Les contrôles JWT, rôle et équipe sont appliqués avant l'accès métier.
+end note
+@enduml

@@ -1,0 +1,26 @@
+@startuml
+title FootTech — Diagramme d'états / actions — 01 etats actions compte
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam state {
+  BackgroundColor #FFF8E1
+  BorderColor #F57F17
+  FontColor #4E342E
+}
+[*] --> PENDING : US-01 / création compte
+PENDING --> OTP_SENT : US-04 / envoyer OTP
+OTP_SENT --> ACTIVE : US-05 / OTP valide
+OTP_SENT --> PENDING : OTP expiré
+ACTIVE --> AUTHENTICATED : US-02, US-60 / login
+AUTHENTICATED --> AUTHENTICATED : US-03 / rotation refresh token
+AUTHENTICATED --> ACTIVE : US-06 / logout
+ACTIVE --> SUSPENDED : US-66 / suspension admin
+SUSPENDED --> ACTIVE : US-67 / réactivation admin
+PENDING --> ACTIVE : US-74 / activation contrôlée
+ACTIVE --> [*] : suppression conforme à la politique de rétention
+@enduml

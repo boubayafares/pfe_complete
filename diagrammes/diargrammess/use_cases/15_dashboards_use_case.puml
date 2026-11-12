@@ -1,0 +1,34 @@
+@startuml
+title FootTech — Cas d'utilisation — Épopée 15 : Tableaux de bord
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+left to right direction
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+actor "Coach" as COACH #1565C0
+actor "Joueur" as JOUEUR #EF6C00
+actor "Administrateur" as ADMIN #6A1B9A
+rectangle "FootTech — Tableaux de bord" {
+  usecase "US-71\nConsulter le dashboard coach" as US71
+  usecase "US-72\nConsulter le dashboard joueur" as US72
+  usecase "US-73\nConsulter le dashboard de supervision" as US73
+  usecase "US-74\nVoir les joueurs en attente d'activation" as US74
+}
+COACH --> US71
+JOUEUR --> US72
+ADMIN --> US73
+ADMIN --> US74
+
+note bottom
+  Chaque cas d'utilisation reprend l'identifiant exact du Product Backlog.
+  Les contrôles JWT, rôle et équipe sont appliqués avant l'accès métier.
+end note
+@enduml

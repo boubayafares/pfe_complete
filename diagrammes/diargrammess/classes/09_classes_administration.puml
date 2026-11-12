@@ -1,0 +1,64 @@
+@startuml
+title FootTech — Diagramme de classes — 09 classes administration
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1565C0
+  FontColor #263238
+  ArrowColor #455A64
+}
+class Administrator {
+  +id: UUID
+  +email: String
+  +role: SUPER_ADMIN / MODERATOR / SUPPORT
+  +isActive: Boolean
+}
+class AdminAuthService {
+  +login()
+  +refresh()
+  +checkPermission()
+}
+class AdminDashboardService {
+  +getKpis()
+  +pendingPlayers()
+}
+class ModerationService {
+  +suspendTeam()
+  +activateTeam()
+  +suspendUser()
+  +activateUser()
+  +broadcast()
+}
+class AuditLog {
+  +actorId: UUID
+  +action: String
+  +targetType: String
+  +targetId: UUID
+  +timestamp: DateTime
+}
+class JavaFxApiClient {
+  +get()
+  +post()
+  +refreshToken()
+}
+class TokenStore {
+  +save()
+  +load()
+  +clear()
+}
+JavaFxApiClient --> AdminAuthService
+JavaFxApiClient --> ModerationService
+JavaFxApiClient --> AdminDashboardService
+JavaFxApiClient --> TokenStore
+ModerationService --> AuditLog
+Administrator "1" --> "0..*" AuditLog
+note bottom
+US-60 à US-70 et US-73 à US-74. Toute action de modération produit un audit.
+end note
+@enduml

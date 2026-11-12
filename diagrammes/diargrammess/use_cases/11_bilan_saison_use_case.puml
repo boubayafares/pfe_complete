@@ -1,0 +1,30 @@
+@startuml
+title FootTech — Cas d'utilisation — Épopée 11 : Bilan de saison
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+left to right direction
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+actor "Coach" as COACH #1565C0
+rectangle "FootTech — Bilan de saison" {
+  usecase "US-47\nConsulter le bilan de saison" as US47
+  usecase "US-48\nExporter le bilan en PDF" as US48
+  usecase "US-49\nFiltrer le bilan par joueur ou poste" as US49
+}
+COACH --> US47
+COACH --> US48
+COACH --> US49
+
+note bottom
+  Chaque cas d'utilisation reprend l'identifiant exact du Product Backlog.
+  Les contrôles JWT, rôle et équipe sont appliqués avant l'accès métier.
+end note
+@enduml

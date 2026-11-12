@@ -6,9 +6,13 @@ describe('API Health Checks', () => {
     });
   });
 
-  it('AI Insights Service is healthy', () => {
-    cy.request(`${Cypress.env('AI_URL')}/health`).then((response) => {
-      expect(response.status).to.eq(200);
+  it('AI insights remain private behind the authenticated Express proxy', () => {
+    cy.request({
+      method: 'GET',
+      url: `${Cypress.env('API_URL')}/api/v1/ai-insights/clusters?nClusters=2`,
+      failOnStatusCode: false,
+    }).then((response) => {
+      expect(response.status).to.eq(401);
     });
   });
 });

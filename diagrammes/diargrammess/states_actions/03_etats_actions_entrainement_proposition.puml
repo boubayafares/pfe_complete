@@ -1,0 +1,32 @@
+@startuml
+title FootTech — Diagramme d'états / actions — 03 etats actions entrainement proposition
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam state {
+  BackgroundColor #FFF8E1
+  BorderColor #F57F17
+  FontColor #4E342E
+}
+state Entrainement {
+  [*] --> SCHEDULED : US-20 / créer
+  SCHEDULED --> PREPARED : US-21, US-22, US-23
+  PREPARED --> IN_PROGRESS : début séance
+  IN_PROGRESS --> COMPLETED : clôturer
+}
+state PropositionExercice {
+  [*] --> PENDING : US-24 / proposer
+  PENDING --> APPROVED : US-25 / valider
+  PENDING --> REJECTED : US-25 / rejeter
+}
+state FeuillePresence {
+  [*] --> DRAFT : US-27
+  DRAFT --> VALIDATED : US-28 / transaction commit
+  DRAFT --> ROLLED_BACK : erreur / transaction rollback
+  VALIDATED --> CONSULTED : US-29, US-30
+}
+@enduml

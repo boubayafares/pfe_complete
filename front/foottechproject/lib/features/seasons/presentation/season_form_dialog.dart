@@ -67,7 +67,9 @@ class _SeasonFormDialogState extends ConsumerState<SeasonFormDialog> {
     if (!_formKey.currentState!.validate()) return;
     if (startDate == null || endDate == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.required)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.required)));
       }
       return;
     }
@@ -93,7 +95,11 @@ class _SeasonFormDialogState extends ConsumerState<SeasonFormDialog> {
       }
       if (mounted) Navigator.of(context).pop(true);
     } on ApiException catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -119,7 +125,8 @@ class _SeasonFormDialogState extends ConsumerState<SeasonFormDialog> {
                   controller: _nameController,
                   decoration: InputDecoration(labelText: l10n.seasonName),
                   textCapitalization: TextCapitalization.sentences,
-                  validator: (v) => (v == null || v.trim().length < 4) ? l10n.required : null,
+                  validator: (v) =>
+                      (v == null || v.trim().length < 4) ? l10n.required : null,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 _DateField(
@@ -138,7 +145,10 @@ class _SeasonFormDialogState extends ConsumerState<SeasonFormDialog> {
                 const SizedBox(height: AppSpacing.md),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.current, style: const TextStyle(fontSize: 13)),
+                  title: Text(
+                    l10n.current,
+                    style: const TextStyle(fontSize: 13),
+                  ),
                   value: _isCurrent,
                   onChanged: (value) => setState(() => _isCurrent = value),
                 ),
@@ -149,13 +159,22 @@ class _SeasonFormDialogState extends ConsumerState<SeasonFormDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: _submitting ? null : () => Navigator.of(context).pop(false),
+          onPressed: _submitting
+              ? null
+              : () => Navigator.of(context).pop(false),
           child: Text(l10n.cancel),
         ),
         ElevatedButton(
           onPressed: _submitting ? null : _submit,
           child: _submitting
-              ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.greenTextOnFill))
+              ? const SizedBox(
+                  height: 18,
+                  width: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.greenTextOnFill,
+                  ),
+                )
               : Text(_isEdit ? l10n.save : l10n.createSeason),
         ),
       ],
@@ -164,7 +183,12 @@ class _SeasonFormDialogState extends ConsumerState<SeasonFormDialog> {
 }
 
 class _DateField extends StatelessWidget {
-  const _DateField({required this.label, required this.value, required this.formatter, required this.onTap});
+  const _DateField({
+    required this.label,
+    required this.value,
+    required this.formatter,
+    required this.onTap,
+  });
 
   final String label;
   final DateTime? value;
@@ -180,7 +204,11 @@ class _DateField extends StatelessWidget {
         decoration: InputDecoration(labelText: label),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.textMuted),
+            const Icon(
+              Icons.calendar_today_outlined,
+              size: 16,
+              color: AppColors.textMuted,
+            ),
             const SizedBox(width: AppSpacing.sm),
             Text(
               value == null ? context.l10n.required : formatter.format(value!),

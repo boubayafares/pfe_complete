@@ -8,17 +8,30 @@ class TeamsRepository {
 
   final ApiClient _api;
 
+  Future<List<Team>> listMine() async {
+    final body = await _api.get(
+      ApiConstants.teams,
+      queryParameters: const {'limit': 100},
+    );
+    return (body['data'] as List<dynamic>)
+        .map((row) => Team.fromJson(row as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<Team?> getMyTeam(int teamId) async {
     final body = await _api.get('${ApiConstants.teams}/$teamId');
     return Team.fromJson(body['data'] as Map<String, dynamic>);
   }
 
-  Future<Team> create({required String name, String? category, String? description}) async {
-    final body = await _api.post(ApiConstants.teams, data: {
-      'name': name,
-      if (category != null) 'category': category,
-      if (description != null) 'description': description,
-    });
+  Future<Team> create({
+    required String name,
+    String? category,
+    String? description,
+  }) async {
+    final body = await _api.post(
+      ApiConstants.teams,
+      data: {'name': name, 'category': ?category, 'description': ?description},
+    );
     return Team.fromJson(body['data'] as Map<String, dynamic>);
   }
 
@@ -48,12 +61,15 @@ class TeamsRepository {
     required String phone,
     required String email,
   }) async {
-    final body = await _api.post('${ApiConstants.teams}/$teamId/staff', data: {
-      'firstName': firstName,
-      'lastName': lastName,
-      'phone': phone,
-      'email': email,
-    });
+    final body = await _api.post(
+      '${ApiConstants.teams}/$teamId/staff',
+      data: {
+        'firstName': firstName,
+        'lastName': lastName,
+        'phone': phone,
+        'email': email,
+      },
+    );
     return TeamStaffMember.fromJson(body['data'] as Map<String, dynamic>);
   }
 

@@ -1,0 +1,43 @@
+@startuml
+title FootTech — Activité — Épopée 15 : Tableaux de bord
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam ActivityBackgroundColor #E8F5E9
+skinparam ActivityBorderColor #2E7D32
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityDiamondBorderColor #F57F17
+start
+:Ouvrir le module;
+:Vérifier la session, le rôle et l'équipe active;
+if (Accès autorisé ?) then (oui)
+  :Choisir la User Story;
+  switch (Fonction sélectionnée)
+  case (US-71)
+    :Consulter le dashboard coach\nGET /dashboard/me;
+    :Synthèse coach affichée;
+  case (US-72)
+    :Consulter le dashboard joueur\nGET /dashboard/me;
+    :Synthèse personnelle affichée;
+  case (US-73)
+    :Consulter le dashboard de supervision\nGET /api/admin/dashboard/;
+    :Indicateurs plateforme affichés;
+  case (US-74)
+    :Voir les joueurs en attente d'activation\nGET /api/admin/dashboard/;
+    :Compteur et liste affichés;
+  endswitch
+  :Actualiser l'état Riverpod / interface;
+else (non)
+  :Afficher 401 ou 403;
+endif
+if (Erreur métier ou technique ?) then (oui)
+  :Normaliser l'erreur et proposer une reprise;
+else (non)
+  :Confirmer l'opération;
+endif
+stop
+@enduml

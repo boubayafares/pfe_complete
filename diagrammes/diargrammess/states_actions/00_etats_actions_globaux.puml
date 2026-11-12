@@ -1,0 +1,27 @@
+@startuml
+title FootTech — Diagramme d'états / actions — 00 etats actions globaux
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam state {
+  BackgroundColor #FFF8E1
+  BorderColor #F57F17
+  FontColor #4E342E
+}
+[*] --> IDENTIFICATION : US-01..06
+IDENTIFICATION --> ORGANISATION : équipe active
+ORGANISATION --> PREPARATION : US-07..30
+PREPARATION --> MATCH_READY : US-31..37
+MATCH_READY --> MATCH_LIVE : US-33
+MATCH_LIVE --> POST_MATCH : US-38..42
+POST_MATCH --> ANALYSIS : US-43..59
+ANALYSIS --> DASHBOARDS : US-71..74
+DASHBOARDS --> ORGANISATION : nouvelle séance ou nouveau match
+ORGANISATION --> SUSPENDED : US-63 ou US-66
+SUSPENDED --> ORGANISATION : US-64 ou US-67
+DASHBOARDS --> [*] : clôture de saison
+@enduml

@@ -1,0 +1,58 @@
+@startuml
+title FootTech — Séquence — Épopée 7 : Gestion des matchs
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Coach" as ACT
+boundary "Application Flutter" as APP
+control "API Express" as API
+control "MatchService" as SVC
+database "PostgreSQL" as DB
+
+group US-31 — Créer un match
+  ACT -> APP: Créer un match
+  APP -> API: POST /matches
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-31)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Match planifié
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Match planifié
+end
+
+group US-32 — Définir titulaires et remplaçants
+  ACT -> APP: Définir titulaires et remplaçants
+  APP -> API: PUT /matches/:id/lineup
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-32)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Composition enregistrée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Composition enregistrée
+end
+
+group US-33 — Modifier le statut du match
+  ACT -> APP: Modifier le statut du match
+  APP -> API: PATCH /matches/:id/status
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-33)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Transition de statut validée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Transition de statut validée
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

@@ -1,5 +1,11 @@
 class Team {
-  const Team({required this.id, required this.name, this.category, this.logo, this.description});
+  const Team({
+    required this.id,
+    required this.name,
+    this.category,
+    this.logo,
+    this.description,
+  });
 
   factory Team.fromJson(Map<String, dynamic> json) {
     return Team(

@@ -14,13 +14,18 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "insecure-dev-key-change-me")
 DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",")
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
+
+if not DEBUG:
+    if len(SECRET_KEY) < 50 or SECRET_KEY == "insecure-dev-key-change-me":
+        raise RuntimeError("DJANGO_SECRET_KEY must be a strong secret of at least 50 characters")
+    if not ALLOWED_HOSTS or "*" in ALLOWED_HOSTS:
+        raise RuntimeError("DJANGO_ALLOWED_HOSTS must be explicit in production")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -109,6 +114,16 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.ScopedRateThrottle",
+    ),
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "100/hour",
+        "user": "2000/hour",
+        "admin_login": "5/minute",
+    },
 }
 
 SIMPLE_JWT = {
@@ -124,6 +139,23 @@ SIMPLE_JWT = {
 # --- CORS ---------------------------------------------------------------
 CORS_ALLOWED_ORIGINS = [o for o in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",") if o]
 CORS_ALLOW_ALL_ORIGINS = DEBUG and not CORS_ALLOWED_ORIGINS
+
+# Production transport/cookie policy. TLS may terminate at a reverse proxy;
+# SECURE_PROXY_SSL_HEADER is opt-in so untrusted headers are never honored by
+# accident in local deployments.
+SECURE_SSL_REDIRECT = not DEBUG and os.environ.get("DJANGO_SECURE_SSL_REDIRECT", "true").lower() == "true"
+# Docker probes connect directly over the private container network. Exempt only
+# this exact readiness route; all user-facing routes still require HTTPS.
+SECURE_REDIRECT_EXEMPT = [r"^health/$"]
+SECURE_COOKIES = not DEBUG and os.environ.get("DJANGO_SECURE_COOKIES", "true").lower() == "true"
+SESSION_COOKIE_SECURE = SECURE_COOKIES
+CSRF_COOKIE_SECURE = SECURE_COOKIES
+SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_SECURE_HSTS_SECONDS", "31536000")) if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
+SECURE_CONTENT_TYPE_NOSNIFF = True
+if os.environ.get("DJANGO_TRUST_PROXY_SSL_HEADER", "false").lower() == "true":
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 LANGUAGE_CODE = "fr-fr"
 TIME_ZONE = "UTC"

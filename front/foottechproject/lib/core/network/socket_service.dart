@@ -6,11 +6,13 @@ import '../storage/token_storage.dart';
 /// notification features. socket_io_client picks the right transport per
 /// platform automatically (WebSocket everywhere, including Web/Windows/macOS).
 class SocketService {
-  SocketService({required TokenStorage tokenStorage}) : _tokenStorage = tokenStorage;
+  SocketService({required this._tokenStorage});
 
   final TokenStorage _tokenStorage;
   io.Socket? _socket;
   Future<io.Socket>? _connecting;
+  final Set<int> _joinedMatchIds = <int>{};
+  final Set<int> _joinedTrainingIds = <int>{};
 
   Future<io.Socket> connect() async {
     if (_socket != null && _socket!.connected) return _socket!;
@@ -37,7 +39,17 @@ class SocketService {
     // sans que rien ne le signale à l'utilisateur. On désactive la
     // reconnexion automatique du client et on la pilote nous-mêmes avec un
     // token frais à chaque tentative.
-    _socket = io.io(
+    final existing = _socket;
+    if (existing != null) {
+      // Reuse the same Socket instance so feature listeners survive a network
+      // interruption. Updating auth before connect sends the freshest JWT in
+      // the next Socket.IO handshake.
+      existing.auth = {'token': token};
+      existing.connect();
+      return existing;
+    }
+
+    final socket = io.io(
       ApiConstants.socketUrl,
       io.OptionBuilder()
           .setTransports(['websocket'])
@@ -46,12 +58,23 @@ class SocketService {
           .setAuth({'token': token})
           .build(),
     );
+    _socket = socket;
 
-    _socket!.onConnectError((data) => _scheduleReconnect());
-    _socket!.onDisconnect((_) => _scheduleReconnect());
+    socket.onConnectError((data) => _scheduleReconnect());
+    socket.onDisconnect((_) => _scheduleReconnect());
+    socket.onConnect((_) {
+      // Socket.IO rooms are connection-scoped. Rejoin every match that is
+      // still being watched after a successful reconnect.
+      for (final matchId in _joinedMatchIds) {
+        socket.emit('match:join', matchId);
+      }
+      for (final trainingId in _joinedTrainingIds) {
+        socket.emit('attendance:join', trainingId);
+      }
+    });
 
-    _socket!.connect();
-    return _socket!;
+    socket.connect();
+    return socket;
   }
 
   bool _reconnectScheduled = false;
@@ -61,22 +84,50 @@ class SocketService {
     _reconnectScheduled = true;
     Future.delayed(const Duration(seconds: 3), () async {
       _reconnectScheduled = false;
-      if (_socket == null) return; // disconnect() was called meanwhile — don't resurrect it
-      _socket?.dispose();
-      _socket = null;
+      if (_socket == null) {
+        return; // disconnect() was called meanwhile — don't resurrect it
+      }
       await connect();
     });
   }
 
   io.Socket? get socket => _socket;
 
-  void joinMatch(int matchId) => _socket?.emit('match:join', matchId);
-  void leaveMatch(int matchId) => _socket?.emit('match:leave', matchId);
+  void joinMatch(int matchId) {
+    _joinedMatchIds.add(matchId);
+    if (_socket?.connected == true) {
+      _socket!.emit('match:join', matchId);
+    }
+  }
+
+  void leaveMatch(int matchId) {
+    _joinedMatchIds.remove(matchId);
+    if (_socket?.connected == true) {
+      _socket!.emit('match:leave', matchId);
+    }
+  }
+
+  void joinTrainingAttendance(int trainingId) {
+    _joinedTrainingIds.add(trainingId);
+    if (_socket?.connected == true) {
+      _socket!.emit('attendance:join', trainingId);
+    }
+  }
+
+  void leaveTrainingAttendance(int trainingId) {
+    _joinedTrainingIds.remove(trainingId);
+    if (_socket?.connected == true) {
+      _socket!.emit('attendance:leave', trainingId);
+    }
+  }
 
   void disconnect() {
-    _reconnectScheduled = false; // an in-flight _scheduleReconnect must not resurrect the socket after an explicit disconnect
-    _socket?.disconnect();
-    _socket?.dispose();
+    _reconnectScheduled =
+        false; // an in-flight _scheduleReconnect must not resurrect the socket after an explicit disconnect
+    _joinedMatchIds.clear();
+    _joinedTrainingIds.clear();
+    final socket = _socket;
     _socket = null;
+    socket?.dispose();
   }
 }

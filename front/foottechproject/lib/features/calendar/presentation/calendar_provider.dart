@@ -9,7 +9,9 @@ final calendarRepositoryProvider = Provider<CalendarEventsRepository>((ref) {
 });
 
 /// Évènements du calendrier partagé de l'équipe de l'utilisateur connecté.
-final calendarEventsProvider = FutureProvider.autoDispose<List<CalendarEvent>>((ref) {
+final calendarEventsProvider = FutureProvider.autoDispose<List<CalendarEvent>>((
+  ref,
+) {
   // Attend que la session soit restaurée (teamId résolu côté serveur).
   ref.watch(authControllerProvider);
   return ref.watch(calendarRepositoryProvider).list();

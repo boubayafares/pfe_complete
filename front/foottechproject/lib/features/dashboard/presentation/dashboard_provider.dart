@@ -12,8 +12,10 @@ final dashboardProvider = FutureProvider.autoDispose<DashboardData>((ref) {
   return ref.watch(dashboardRepositoryProvider).getMyDashboard();
 });
 
-final seasonBilanProvider = FutureProvider.autoDispose<List<SeasonBilanEntry>>((ref) {
+final seasonBilanProvider = FutureProvider.autoDispose<List<SeasonBilanEntry>>((
+  ref,
+) {
   final teamId = ref.watch(authControllerProvider).value?.teamId;
   if (teamId == null) return Future.value(<SeasonBilanEntry>[]);
-  return ref.watch(dashboardRepositoryProvider).getSeasonBilan(teamId: teamId);
+  return ref.watch(dashboardRepositoryProvider).getSeasonBilan();
 });

@@ -1,10 +1,10 @@
 flowchart TB
     subgraph Dev["Developpement"]
-        GH[GitHub / GitLab\nCI]
+        GH[GitHub Actions + GitLab CI\nstages build / test / docker / deploy]
     end
 
     GH --> BUILD[Build images\napi / admin-api / ai-insights / lineup]
-    BUILD --> TEST[Tests\nvitest 26 / pytest lineup 10\npytest ai-insights / postman]
+    BUILD --> TEST[Tests\nbackend npm test / lineup pytest\nai-insights pytest / flutter analyze + test]
 
     subgraph Prod["Production (Docker Compose)"]
         PG[(postgres:16)]
@@ -13,14 +13,14 @@ flowchart TB
         ADM2[admin-api :8000\nmigrate au demarrage]
         LI2[lineup :8100]
         AI2[ai-insights :8300]
-        NG[Reverse proxy / CORS]
     end
 
     TEST -->|docker compose up| Prod
     API2 --> PG
     ADM2 -->|migrate| PG
     API2 --> RD
-    API2 -->|LINEUP_SERVICE_URL| LI2
-    API2 -->|AI_INSIGHTS_SERVICE_URL| AI2
-    NG --> API2
-    NG --> ADM2
+    API2 -->|LINEUP_SERVICE_URL\ntimeout 5s| LI2
+
+    FLUTTER[Flutter app] -->|HTTPS| API2
+    FLUTTER -->|HTTPS direct| AI2
+    DESK[JavaFX desktop] -->|HTTPS| ADM2

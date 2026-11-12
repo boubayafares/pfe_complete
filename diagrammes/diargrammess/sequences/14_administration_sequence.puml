@@ -1,0 +1,154 @@
+@startuml
+title FootTech — Séquence — Épopée 14 : Administration de la plateforme
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Admin" as ACT
+boundary "Client JavaFX" as APP
+control "API Django REST" as API
+control "AdminModerationService" as SVC
+database "PostgreSQL / AuditLog" as DB
+
+group US-60 — Se connecter au back-office
+  ACT -> APP: Se connecter au back-office
+  APP -> API: POST /api/admin/auth/login/
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-60)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Session administrateur ouverte
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Session administrateur ouverte
+end
+
+group US-61 — Consulter les KPI
+  ACT -> APP: Consulter les KPI
+  APP -> API: GET /api/admin/dashboard/
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-61)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: KPI affichés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: KPI affichés
+end
+
+group US-62 — Lister et filtrer les équipes
+  ACT -> APP: Lister et filtrer les équipes
+  APP -> API: GET /api/admin/teams/
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-62)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Équipes paginées
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Équipes paginées
+end
+
+group US-63 — Suspendre une équipe
+  ACT -> APP: Suspendre une équipe
+  APP -> API: POST /api/admin/teams/:id/suspend/
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-63)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Équipe suspendue et auditée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Équipe suspendue et auditée
+end
+
+group US-64 — Réactiver une équipe
+  ACT -> APP: Réactiver une équipe
+  APP -> API: POST /api/admin/teams/:id/activate/
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-64)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Équipe réactivée et auditée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Équipe réactivée et auditée
+end
+
+group US-65 — Lister les utilisateurs
+  ACT -> APP: Lister les utilisateurs
+  APP -> API: GET /api/admin/users/
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-65)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Utilisateurs paginés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Utilisateurs paginés
+end
+
+group US-66 — Suspendre un utilisateur
+  ACT -> APP: Suspendre un utilisateur
+  APP -> API: POST /api/admin/users/:id/suspend/
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-66)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Utilisateur suspendu
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Utilisateur suspendu
+end
+
+group US-67 — Réactiver un utilisateur
+  ACT -> APP: Réactiver un utilisateur
+  APP -> API: POST /api/admin/users/:id/activate/
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-67)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Utilisateur réactivé
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Utilisateur réactivé
+end
+
+group US-68 — Diffuser une notification globale
+  ACT -> APP: Diffuser une notification globale
+  APP -> API: POST /api/admin/broadcast/
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-68)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Diffusion auditée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Diffusion auditée
+end
+
+group US-69 — Consulter les journaux d'audit
+  ACT -> APP: Consulter les journaux d'audit
+  APP -> API: GET /api/admin/audit-logs/
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-69)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Actions sensibles affichées
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Actions sensibles affichées
+end
+
+group US-70 — Gérer les comptes administrateurs
+  ACT -> APP: Gérer les comptes administrateurs
+  APP -> API: CRUD /api/admin/administrators/
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-70)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Compte et rôle administrateur gérés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Compte et rôle administrateur gérés
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

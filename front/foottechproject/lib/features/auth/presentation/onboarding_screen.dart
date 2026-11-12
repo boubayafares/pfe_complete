@@ -21,14 +21,27 @@ class OnboardingScreen extends StatelessWidget {
                   Container(
                     width: 64,
                     height: 64,
-                    decoration: BoxDecoration(color: AppColors.green, borderRadius: BorderRadius.circular(18)),
-                    child: const Icon(Icons.sports_soccer, color: AppColors.greenTextOnFill, size: 32),
+                    decoration: BoxDecoration(
+                      color: AppColors.green,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: const Icon(
+                      Icons.sports_soccer,
+                      color: AppColors.greenTextOnFill,
+                      size: 32,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  Text('FootTech', style: Theme.of(context).textTheme.headlineMedium),
+                  Text(
+                    'FootTech',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
                   const SizedBox(height: 4),
-                  Text(context.l10n.onboardingSubtitle,
-                      textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
+                  Text(
+                    context.l10n.onboardingSubtitle,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: AppColors.textSecondary),
+                  ),
                   const SizedBox(height: AppSpacing.xxl),
                   SizedBox(
                     width: double.infinity,
@@ -48,7 +61,10 @@ class OnboardingScreen extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xl),
                   TextButton(
                     onPressed: () => context.push('/register-coach'),
-                    child: Text(context.l10n.onboardingCreateCoach, style: const TextStyle(fontSize: 12)),
+                    child: Text(
+                      context.l10n.onboardingCreateCoach,
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ),
                 ],
               ),

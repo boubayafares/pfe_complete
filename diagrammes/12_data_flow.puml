@@ -74,9 +74,9 @@ component "Twilio\n(SMS/OTP)" as TWILIO <<External>>
 ' ============================================================================
 ' STOCKAGE
 ' ============================================================================
-database "Redis\n(cache)" as REDIS
+database "Redis\n(initialise, inutilise)" as REDIS
 database "PostgreSQL\n(platform)" as PG
-database "SQLite\n(local)" as LOCALDB
+database "Stockage local\n(SharedPrefs / secure)" as LOCALDB
 
 ' ============================================================================
 ' FLUX DE DONNÉES
@@ -89,55 +89,52 @@ USERS -> FLUTTER : "requêtes"
 ' 2) Frontend -> API
 FLUTTER -> EXPRESS : "REST + JWT (Dio)"
 FLUTTER -> SOCKET : "WebSocket (live events)"
+FLUTTER -> AI : "appel direct hors Express\n(tendances / clustering / ton)"
 
-' 3) API -> données
-EXPRESS -> PG : "CRUD / requêtes SQL"
-EXPRESS -> REDIS : "cache (lecture/écriture)"
+' 3) API -> donnees
+EXPRESS -> PG : "CRUD / requetes SQL"
 
-' 4) API -> services IA (données enrichies)
-EXPRESS -> AI : "texte / stats pour analyse"
-EXPRESS -> RECO : "stats joueurs pour scoring"
+' 4) Orchestration du scoring d'alignement
+EXPRESS -> RECO : "POST /api/v1/lineup/recommendations\n(donnees + poids dans la requete)"
 
-' 5) Services IA -> cache/stockage
-AI -> REDIS : "résultats analysés (cache)"
-RECO -> REDIS : "scores (cache)"
-AI -> PG : "persiste insights"
-RECO -> PG : "persiste ai_lineup_recommendations"
-RECO -> PG : "lit stats joueurs"
+' 5) Persistance
+EXPRESS -> PG : "persiste ai_lineup_recommendations"
 
 ' 6) Notifications
 EXPRESS -> FCM : "push payload (tokens)"
 EXPRESS -> TWILIO : "SMS OTP"
-SOCKET -> FLUTTER : "événements temps réel"
+EXPRESS -> SOCKET : "diffusion temps reel"
+SOCKET -> FLUTTER : "evenements temps reel"
 FCM -> FLUTTER : "push notification"
-TWILIO -> USERS : "SMS reçu"
-SOCKET -> EXPRESS : "événements entrants réinjectés"
+TWILIO -> USERS : "SMS recu"
 
-' 7) Données locales device
-FLUTTER -> LOCALDB : "cache SQLite hors-ligne"
+' 7) Donnees locales device
+FLUTTER -> LOCALDB : "JWT + preferences (persistance locale)"
 
 ' 8) Admin desktop + back-office
 ADMIN -> JAVAFX : "actions admin"
 JAVAFX -> DJANGO : "REST + JWT"
-DJANGO -> PG : "CRUD administré (modération, audit)"
+DJANGO -> PG : "CRUD administre (moderation, audit)"
 
 ' ============================================================================
 ' INVERSES / TELECHARGEMENT
 ' ============================================================================
-EXPRESS --> FLUTTER : "réponses (JSON) + erreurs"
+EXPRESS --> FLUTTER : "reponses (JSON) + erreurs"
 FLUTTER --> USERS : "affichage / feedback"
-PG --> EXPRESS : "résultats de requêtes"
+PG --> EXPRESS : "resultats de requetes"
 
 ' ============================================================================
 ' NOTE SUR LE FLUX TYPE
 ' ============================================================================
 note right of EXPRESS
   Flux type d'un match live :\n
-  1. Adjoint saisit un événement\n
-  2. Express valide + écrit dans PostgreSQL\n
-  3. Socket.io diffuse à toute l'équipe\n
-  4. L'IA consomme les stats pour recommandations\n
-  5. Les résultats IA sont mis en cache Redis
+  1. Adjoint saisit un evenement\n
+  2. Express valide + ecrit dans PostgreSQL\n
+  3. Socket.io diffuse a toute l'equipe\n
+  4. Express demande l'alignement au Lineup Service\n
+     (calcul pur, donnees passees dans la requete)\n
+  5. Aucun cache Redis n'est reellement utilise ;
+     ai-insights-service est appele directement par l'app.
 end note
 
 @enduml

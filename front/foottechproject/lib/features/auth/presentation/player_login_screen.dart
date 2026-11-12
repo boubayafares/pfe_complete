@@ -30,25 +30,37 @@ class _PlayerLoginScreenState extends ConsumerState<PlayerLoginScreen> {
     if (_phoneController.text.trim().length < 8) return;
     setState(() => _sendingCode = true);
     try {
-      await ref.read(authControllerProvider.notifier).requestPlayerOtp(phone: _phoneController.text.trim());
+      await ref
+          .read(authControllerProvider.notifier)
+          .requestPlayerOtp(phone: _phoneController.text.trim());
       if (mounted) setState(() => _codeSent = true);
     } on ApiException catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
+      }
     } finally {
       if (mounted) setState(() => _sendingCode = false);
     }
   }
 
   Future<void> _verifyCode() async {
-    await ref.read(authControllerProvider.notifier).verifyPlayerOtp(
+    await ref
+        .read(authControllerProvider.notifier)
+        .verifyPlayerOtp(
           phone: _phoneController.text.trim(),
           code: _codeController.text.trim(),
         );
     final state = ref.read(authControllerProvider);
     if (state.hasError && mounted) {
       final error = state.error;
-      final message = error is ApiException ? error.message : context.l10n.invalidCode;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      final message = error is ApiException
+          ? error.message
+          : context.l10n.invalidCode;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     } else if (mounted && state.value != null) {
       context.go('/home');
     }
@@ -97,13 +109,27 @@ class _PlayerLoginScreenState extends ConsumerState<PlayerLoginScreen> {
                       ? (isVerifying ? null : _verifyCode)
                       : (_sendingCode ? null : _sendCode),
                   child: (_sendingCode || isVerifying)
-                      ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.greenTextOnFill))
-                      : Text(_codeSent ? context.l10n.validate : context.l10n.receiveCode),
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.greenTextOnFill,
+                          ),
+                        )
+                      : Text(
+                          _codeSent
+                              ? context.l10n.validate
+                              : context.l10n.receiveCode,
+                        ),
                 ),
                 if (_codeSent)
                   TextButton(
                     onPressed: () => setState(() => _codeSent = false),
-                    child: Text(context.l10n.changeNumber, style: const TextStyle(fontSize: 12)),
+                    child: Text(
+                      context.l10n.changeNumber,
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ),
               ],
             ),

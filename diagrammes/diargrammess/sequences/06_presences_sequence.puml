@@ -1,0 +1,70 @@
+@startuml
+title FootTech — Séquence — Épopée 6 : Gestion des présences
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Adjoint / Utilisateur" as ACT
+boundary "Application Flutter" as APP
+control "API Express" as API
+control "AttendanceService" as SVC
+database "Transaction PostgreSQL" as DB
+
+group US-27 — Marquer la présence d'un joueur
+  ACT -> APP: Marquer la présence d'un joueur
+  APP -> API: POST /attendance/trainings/:id
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-27)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Présence enregistrée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Présence enregistrée
+end
+
+group US-28 — Marquer les présences en lot
+  ACT -> APP: Marquer les présences en lot
+  APP -> API: POST /attendance/trainings/:id/bulk
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-28)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Lot validé atomiquement
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Lot validé atomiquement
+end
+
+group US-29 — Consulter les présences d'un entraînement
+  ACT -> APP: Consulter les présences d'un entraînement
+  APP -> API: GET /attendance/trainings/:id
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-29)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Feuille de présence affichée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Feuille de présence affichée
+end
+
+group US-30 — Consulter l'historique d'un joueur
+  ACT -> APP: Consulter l'historique d'un joueur
+  APP -> API: GET /attendance/players/:id
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-30)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Historique filtré affiché
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Historique filtré affiché
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

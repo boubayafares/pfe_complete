@@ -1,6 +1,7 @@
 stages:
   - build
   - test
+  - integration
   - docker
   - deploy
 
@@ -16,6 +17,7 @@ backend:build:
   script:
     - cd back/FoottechBackend-main
     - npm ci
+    - npm audit --omit=dev --audit-level=high
     - npm run build
   cache:
     key: backend-${CI_COMMIT_REF_SLUG}
@@ -57,7 +59,8 @@ admin:build:
   script:
     - cd foottech_admin_backend/foottech_admin_backend
     - pip install -r requirements.txt
-    - python manage.py check --deploy
+    - DJANGO_DEBUG=true DATABASE_URL=sqlite:///test.db python manage.py test
+    - DJANGO_DEBUG=false DJANGO_SECRET_KEY=ci-only-django-secret-key-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1 DATABASE_URL=sqlite:///test.db python manage.py check --deploy
   cache:
     key: admin-${CI_COMMIT_REF_SLUG}
     paths:
@@ -104,6 +107,52 @@ lineup-service:test:
     paths:
       - lineup-recommendation-service/.venv/
 
+# ─── Full-stack business journey ────────────────────────────
+integration:e2e:
+  stage: integration
+  image: docker:27-cli
+  services:
+    - name: docker:27-dind
+      command: ["--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DB_PASSWORD: ci-postgres-password
+    JWT_ACCESS_SECRET: ci-access-secret-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    JWT_REFRESH_SECRET: ci-refresh-secret-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    AI_SERVICE_TOKEN: ci-service-token-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    DJANGO_SECRET_KEY: ci-django-secret-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghij
+    DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,admin-api
+    API_BIND_ADDRESS: 0.0.0.0
+    ADMIN_BIND_ADDRESS: 0.0.0.0
+    E2E_EMAIL: ci.e2e@foottech.local
+    E2E_PASSWORD: CI-E2E-Strong-Password-2026!
+    BASE_URL: http://docker:4000
+  before_script:
+    - apk add --no-cache curl nodejs npm
+    - docker info
+    - docker compose version
+  script:
+    - docker compose up -d --build --wait --wait-timeout 180
+    - curl --fail --show-error --silent http://docker:4000/health
+    - curl --fail --show-error --silent http://docker:8000/health/
+    - npx --yes newman run tests/postman/foottech_collection.json --environment tests/postman/foottech_environment.json --env-var baseUrl=http://docker:4000 --env-var adminUrl=http://docker:8000 --folder "Health Check"
+    - >-
+      curl --fail-with-body --silent --show-error
+      -X POST http://docker:4000/api/v1/auth/register-coach
+      -H 'Content-Type: application/json'
+      --data "{\"firstName\":\"CI\",\"lastName\":\"Coach\",\"phone\":\"+33698000001\",\"email\":\"$E2E_EMAIL\",\"password\":\"$E2E_PASSWORD\"}"
+    - >-
+      docker compose exec -T postgres psql -U postgres -d foottech -v ON_ERROR_STOP=1
+      -c "UPDATE platform.users SET account_status='ACTIVE' WHERE email='$E2E_EMAIL'"
+    - cd tests/playwright
+    - npm ci
+    - npm test
+  after_script:
+    - docker compose down -v --remove-orphans
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+
 # ─── Docker Builds ──────────────────────────────────────────
 docker:api:
   stage: docker
@@ -111,7 +160,7 @@ docker:api:
   services:
     - docker:24-dind
   before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
   script:
     - docker build -t $CI_REGISTRY_IMAGE/api:$CI_COMMIT_SHA back/FoottechBackend-main
     - docker push $CI_REGISTRY_IMAGE/api:$CI_COMMIT_SHA
@@ -125,7 +174,7 @@ docker:admin:
   services:
     - docker:24-dind
   before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
   script:
     - docker build -t $CI_REGISTRY_IMAGE/admin-api:$CI_COMMIT_SHA foottech_admin_backend/foottech_admin_backend
     - docker push $CI_REGISTRY_IMAGE/admin-api:$CI_COMMIT_SHA
@@ -139,7 +188,7 @@ docker:ai-insights:
   services:
     - docker:24-dind
   before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
   script:
     - docker build -t $CI_REGISTRY_IMAGE/ai-insights:$CI_COMMIT_SHA ai-insights-service
     - docker push $CI_REGISTRY_IMAGE/ai-insights:$CI_COMMIT_SHA
@@ -152,7 +201,7 @@ docker:lineup:
   services:
     - docker:24-dind
   before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
   script:
     - docker build -t $CI_REGISTRY_IMAGE/lineup-service:$CI_COMMIT_SHA lineup-recommendation-service
     - docker push $CI_REGISTRY_IMAGE/lineup-service:$CI_COMMIT_SHA
@@ -167,8 +216,11 @@ deploy:production:
     - apk add --no-cache openssh-client
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | ssh-add -
+    - install -d -m 700 ~/.ssh
+    - printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 600 ~/.ssh/known_hosts
   script:
-    - ssh $DEPLOY_USER@$DEPLOY_HOST "cd /opt/foottech && docker compose pull && docker compose up -d --remove-orphans"
+    - ssh -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" "cd /opt/foottech && docker compose pull && docker compose up -d --remove-orphans"
   only:
     - main
   when: manual

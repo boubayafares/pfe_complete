@@ -14,7 +14,10 @@ class SeasonsList extends StatelessWidget {
   Widget build(BuildContext context) {
     if (seasons.isEmpty) {
       return Center(
-        child: Text(context.l10n.noSeasons, style: const TextStyle(color: AppColors.textSecondary)),
+        child: Text(
+          context.l10n.noSeasons,
+          style: const TextStyle(color: AppColors.textSecondary),
+        ),
       );
     }
 
@@ -30,7 +33,9 @@ class SeasonsList extends StatelessWidget {
           child: ListTile(
             onTap: onTap == null ? null : () => onTap!(season),
             leading: Icon(
-              season.isCurrent ? Icons.calendar_month : Icons.calendar_today_outlined,
+              season.isCurrent
+                  ? Icons.calendar_month
+                  : Icons.calendar_today_outlined,
               color: season.isCurrent ? AppColors.green : AppColors.textMuted,
             ),
             title: Row(
@@ -38,26 +43,45 @@ class SeasonsList extends StatelessWidget {
                 Flexible(
                   child: Text(
                     season.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 if (season.isCurrent) ...[
                   const SizedBox(width: AppSpacing.sm),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(color: AppColors.greenBgSoft, borderRadius: BorderRadius.circular(AppRadii.pill)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.greenBgSoft,
+                      borderRadius: BorderRadius.circular(AppRadii.pill),
+                    ),
                     child: Text(
                       context.l10n.current,
-                      style: const TextStyle(color: AppColors.greenSoftText, fontSize: 10, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        color: AppColors.greenSoftText,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
               ],
             ),
             subtitle: Text(
-              context.l10n.fromTo(dateFormat.format(season.startDate), dateFormat.format(season.endDate)),
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+              context.l10n.fromTo(
+                dateFormat.format(season.startDate),
+                dateFormat.format(season.endDate),
+              ),
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 11,
+              ),
             ),
           ),
         );

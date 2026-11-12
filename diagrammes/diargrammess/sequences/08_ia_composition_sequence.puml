@@ -1,0 +1,70 @@
+@startuml
+title FootTech — Séquence — Épopée 8 : IA de composition
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Coach" as ACT
+boundary "Application Flutter" as APP
+control "API Express" as API
+control "Lineup Recommendation Service" as SVC
+database "PostgreSQL / FastAPI" as DB
+
+group US-34 — Obtenir une recommandation IA
+  ACT -> APP: Obtenir une recommandation IA
+  APP -> API: POST /matches/:id/ai-recommendations
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-34)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Scores et rôles proposés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Scores et rôles proposés
+end
+
+group US-35 — Consulter les scores IA du match
+  ACT -> APP: Consulter les scores IA du match
+  APP -> API: GET /matches/:id/ai-recommendations
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-35)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Scores expliqués affichés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Scores expliqués affichés
+end
+
+group US-36 — Valider ou modifier la composition IA
+  ACT -> APP: Valider ou modifier la composition IA
+  APP -> API: PUT /matches/:id/lineup
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-36)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Décision humaine conservée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Décision humaine conservée
+end
+
+group US-37 — Recalculer la recommandation
+  ACT -> APP: Recalculer la recommandation
+  APP -> API: POST /matches/:id/ai-recommendations
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-37)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Nouvelle version persistée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Nouvelle version persistée
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+title FootTech — Diagramme d'états / actions — 05 etats actions analyse notification
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam state {
+  BackgroundColor #FFF8E1
+  BorderColor #F57F17
+  FontColor #4E342E
+}
+state Analyse {
+  [*] --> REQUESTED : US-43 à US-49, US-55 à US-59
+  REQUESTED --> VALIDATED : données suffisantes
+  REQUESTED --> REJECTED : données invalides / insuffisantes
+  VALIDATED --> COMPUTED : calcul statistique ou IA
+  COMPUTED --> DISPLAYED : dashboard / résultat
+  DISPLAYED --> EXPORTED : US-48
+}
+state Notification {
+  [*] --> CREATED : US-51
+  CREATED --> PERSISTED : transaction DB
+  PERSISTED --> DELIVERED : US-50 / FCM ou Socket.IO
+  DELIVERED --> READ : US-52
+}
+state Dashboard {
+  [*] --> LOADING : US-71 à US-74
+  LOADING --> READY : agrégats autorisés
+  LOADING --> ERROR : service indisponible
+  ERROR --> LOADING : réessayer
+}
+@enduml

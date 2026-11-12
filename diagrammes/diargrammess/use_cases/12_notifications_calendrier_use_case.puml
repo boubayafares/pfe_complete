@@ -1,0 +1,36 @@
+@startuml
+title FootTech — Cas d'utilisation — Épopée 12 : Notifications et calendrier
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+left to right direction
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+actor "Utilisateur" as USER #546E7A
+actor "Coach" as COACH #1565C0
+COACH -|> USER
+rectangle "FootTech — Notifications et calendrier" {
+  usecase "US-50\nRecevoir des notifications push" as US50
+  usecase "US-51\nDiffuser une notification à l'équipe" as US51
+  usecase "US-52\nMarquer une notification comme lue" as US52
+  usecase "US-53\nConsulter le calendrier partagé" as US53
+  usecase "US-54\nCréer un événement de calendrier" as US54
+}
+USER --> US50
+COACH --> US51
+USER --> US52
+USER --> US53
+COACH --> US54
+
+note bottom
+  Chaque cas d'utilisation reprend l'identifiant exact du Product Backlog.
+  Les contrôles JWT, rôle et équipe sont appliqués avant l'accès métier.
+end note
+@enduml

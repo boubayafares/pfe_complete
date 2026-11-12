@@ -1,0 +1,60 @@
+@startuml
+title FootTech — Cas d'utilisation global — 74 User Stories
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+left to right direction
+actor "Coach" as COACH #1565C0
+actor "Adjoint" as ADJOINT #2E7D32
+actor "Joueur" as JOUEUR #EF6C00
+actor "Administrateur" as ADMIN #6A1B9A
+rectangle "Plateforme FootTech" {
+  usecase "Épopée 1 — Authentification\nUS-01 à US-06" as E1
+  usecase "Épopée 2 — Gestion des équipes\nUS-07 à US-10" as E2
+  usecase "Épopée 3 — Gestion des joueurs\nUS-11 à US-16" as E3
+  usecase "Épopée 4 — Gestion des saisons\nUS-17 à US-19" as E4
+  usecase "Épopée 5 — Gestion des entraînements\nUS-20 à US-26" as E5
+  usecase "Épopée 6 — Gestion des présences\nUS-27 à US-30" as E6
+  usecase "Épopée 7 — Gestion des matchs\nUS-31 à US-33" as E7
+  usecase "Épopée 8 — IA de composition\nUS-34 à US-37" as E8
+  usecase "Épopée 9 — Match en direct et après-match\nUS-38 à US-42" as E9
+  usecase "Épopée 10 — Statistiques et performances\nUS-43 à US-46" as E10
+  usecase "Épopée 11 — Bilan de saison\nUS-47 à US-49" as E11
+  usecase "Épopée 12 — Notifications et calendrier\nUS-50 à US-54" as E12
+  usecase "Épopée 13 — AI Insights\nUS-55 à US-59" as E13
+  usecase "Épopée 14 — Administration de la plateforme\nUS-60 à US-70" as E14
+  usecase "Épopée 15 — Tableaux de bord\nUS-71 à US-74" as E15
+}
+COACH --> E1
+COACH --> E2
+COACH --> E3
+COACH --> E4
+COACH --> E5
+COACH --> E7
+COACH --> E8
+COACH --> E9
+COACH --> E10
+COACH --> E11
+COACH --> E12
+COACH --> E13
+COACH --> E15
+ADJOINT --> E1
+ADJOINT --> E5
+ADJOINT --> E6
+ADJOINT --> E9
+ADJOINT --> E12
+JOUEUR --> E1
+JOUEUR --> E4
+JOUEUR --> E5
+JOUEUR --> E6
+JOUEUR --> E9
+JOUEUR --> E10
+JOUEUR --> E12
+JOUEUR --> E15
+ADMIN --> E14
+ADMIN --> E15
+@enduml

@@ -1,0 +1,70 @@
+@startuml
+title FootTech — Séquence — Épopée 15 : Tableaux de bord
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Coach / Joueur / Admin" as ACT
+boundary "Flutter / JavaFX" as APP
+control "Express / Django REST" as API
+control "DashboardService" as SVC
+database "PostgreSQL" as DB
+
+group US-71 — Consulter le dashboard coach
+  ACT -> APP: Consulter le dashboard coach
+  APP -> API: GET /dashboard/me
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-71)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Synthèse coach affichée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Synthèse coach affichée
+end
+
+group US-72 — Consulter le dashboard joueur
+  ACT -> APP: Consulter le dashboard joueur
+  APP -> API: GET /dashboard/me
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-72)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Synthèse personnelle affichée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Synthèse personnelle affichée
+end
+
+group US-73 — Consulter le dashboard de supervision
+  ACT -> APP: Consulter le dashboard de supervision
+  APP -> API: GET /api/admin/dashboard/
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-73)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Indicateurs plateforme affichés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Indicateurs plateforme affichés
+end
+
+group US-74 — Voir les joueurs en attente d'activation
+  ACT -> APP: Voir les joueurs en attente d'activation
+  APP -> API: GET /api/admin/dashboard/
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-74)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Compteur et liste affichés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Compteur et liste affichés
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

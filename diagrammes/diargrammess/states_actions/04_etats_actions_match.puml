@@ -1,0 +1,28 @@
+@startuml
+title FootTech — Diagramme d'états / actions — 04 etats actions match
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam state {
+  BackgroundColor #FFF8E1
+  BorderColor #F57F17
+  FontColor #4E342E
+}
+[*] --> SCHEDULED : US-31 / créer match
+SCHEDULED --> LINEUP_DRAFT : US-32 / composition manuelle
+SCHEDULED --> AI_RECOMMENDED : US-34 / calcul IA
+AI_RECOMMENDED --> AI_RECOMMENDED : US-37 / recalculer
+AI_RECOMMENDED --> LINEUP_CONFIRMED : US-35, US-36 / contrôler et valider
+LINEUP_DRAFT --> LINEUP_CONFIRMED : US-32 / confirmer
+LINEUP_CONFIRMED --> LIVE : US-33 / démarrer
+LIVE --> LIVE : US-38, US-39 / événement et diffusion
+LIVE --> FINISHED : US-33 / terminer
+FINISHED --> STATS_COMPLETED : US-40
+STATS_COMPLETED --> EVALUATED : US-41
+EVALUATED --> REPORTED : US-42 / PDF
+REPORTED --> [*]
+@enduml

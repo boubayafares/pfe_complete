@@ -1,0 +1,34 @@
+@startuml
+title FootTech — Cas d'utilisation — Épopée 6 : Gestion des présences
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+left to right direction
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+actor "Utilisateur" as USER #546E7A
+actor "Adjoint" as ADJOINT #2E7D32
+ADJOINT -|> USER
+rectangle "FootTech — Gestion des présences" {
+  usecase "US-27\nMarquer la présence d'un joueur" as US27
+  usecase "US-28\nMarquer les présences en lot" as US28
+  usecase "US-29\nConsulter les présences d'un entraînement" as US29
+  usecase "US-30\nConsulter l'historique d'un joueur" as US30
+}
+ADJOINT --> US27
+ADJOINT --> US28
+USER --> US29
+USER --> US30
+
+note bottom
+  Chaque cas d'utilisation reprend l'identifiant exact du Product Backlog.
+  Les contrôles JWT, rôle et équipe sont appliqués avant l'accès métier.
+end note
+@enduml

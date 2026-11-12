@@ -1,0 +1,31 @@
+@startuml
+title FootTech — Activité globale — Cycle sportif et administratif
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+start
+:Authentification et sélection de l'équipe (US-01..06);
+:Configurer équipe, joueurs et saison (US-07..19);
+fork
+  :Préparer entraînements et exercices (US-20..26);
+  :Saisir les présences (US-27..30);
+fork again
+  :Planifier le match et la composition (US-31..37);
+  :Suivre le match puis évaluer (US-38..42);
+fork again
+  :Notifier et tenir le calendrier (US-50..54);
+end fork
+:Calculer statistiques et bilan (US-43..49);
+:Produire les analyses IA (US-55..59);
+fork
+  :Consulter les dashboards métier (US-71..72);
+fork again
+  :Superviser et modérer (US-60..70, US-73..74);
+end fork
+:Archiver les résultats de la saison;
+stop
+@enduml

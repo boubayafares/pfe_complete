@@ -1,0 +1,40 @@
+@startuml
+title FootTech — Séquence globale — Parcours de saison
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Coach" as C
+actor "Adjoint" as A
+actor "Joueur" as J
+boundary "Flutter" as F
+control "API Express" as API
+control "Lineup FastAPI" as L
+control "AI Insights" as AI
+database "PostgreSQL" as DB
+C -> F: US-01/02 S'inscrire et se connecter
+F -> API: JWT
+C -> F: US-07..19 Équipe, joueurs et saison
+F -> API: CRUD métier limité à l'équipe
+API -> DB: persister organisation
+C -> F: US-20..26 Préparer une séance
+A -> F: US-27/28 Saisir les présences
+F -> API: lot de présences
+API -> DB: transaction atomique
+C -> F: US-31..37 Préparer le match et demander l'IA
+F -> API: générer recommandation
+API -> L: features présence/performance/fatigue
+L --> API: scores et rôles
+C -> F: valider la composition
+A -> F: US-38 événements live
+F -> API: Socket.IO / événements
+API --> J: US-39 timeline temps réel
+C -> F: US-40..49 statistiques, rapport et bilan
+C -> AI: US-55..59 analyses IA
+AI --> C: tendances, clusters, ton, transcription, OCR
+@enduml

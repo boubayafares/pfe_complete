@@ -50,7 +50,8 @@ class FootTechApp extends ConsumerWidget {
         }
         return const Locale('en');
       },
-      builder: (context, child) => BiometricLockGate(child: child ?? const SizedBox.shrink()),
+      builder: (context, child) =>
+          BiometricLockGate(child: child ?? const SizedBox.shrink()),
     );
   }
 }

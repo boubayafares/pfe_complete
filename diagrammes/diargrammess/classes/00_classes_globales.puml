@@ -1,0 +1,40 @@
+@startuml
+title FootTech — Diagramme de classes — 00 classes globales
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1565C0
+  FontColor #263238
+  ArrowColor #455A64
+}
+class FlutterApplication
+class ExpressAPI
+class DjangoAdminAPI
+class JavaFxAdminClient
+class PostgreSQL
+class Redis
+class LineupRecommendationService
+class AIInsightsService
+class FirebaseFCM
+class TwilioSMS
+FlutterApplication --> ExpressAPI : REST + JWT
+FlutterApplication --> ExpressAPI : Socket.IO
+FlutterApplication --> AIInsightsService : analyses
+ExpressAPI --> PostgreSQL : transactions
+ExpressAPI --> Redis : cache
+ExpressAPI --> LineupRecommendationService : recommandation
+ExpressAPI --> FirebaseFCM : push
+ExpressAPI --> TwilioSMS : OTP
+JavaFxAdminClient --> DjangoAdminAPI : REST + JWT
+DjangoAdminAPI --> PostgreSQL : miroir + modération
+note bottom
+Vue globale des composants responsables des US-01 à US-74.
+Les diagrammes de classes détaillés se trouvent dans le même dossier.
+end note
+@enduml

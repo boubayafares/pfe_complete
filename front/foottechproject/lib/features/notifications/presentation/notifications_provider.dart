@@ -3,10 +3,13 @@ import '../../../core/providers.dart';
 import '../data/notification_model.dart';
 import '../data/notifications_repository.dart';
 
-final notificationsRepositoryProvider = Provider<NotificationsRepository>((ref) {
+final notificationsRepositoryProvider = Provider<NotificationsRepository>((
+  ref,
+) {
   return NotificationsRepository(client: ref.watch(apiClientProvider));
 });
 
-final notificationsListProvider = FutureProvider.autoDispose<List<AppNotification>>((ref) {
-  return ref.watch(notificationsRepositoryProvider).listMine();
-});
+final notificationsListProvider =
+    FutureProvider.autoDispose<List<AppNotification>>((ref) {
+      return ref.watch(notificationsRepositoryProvider).listMine();
+    });

@@ -1,0 +1,34 @@
+@startuml
+title FootTech — Cas d'utilisation — Épopée 13 : AI Insights
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+left to right direction
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+actor "Coach" as COACH #1565C0
+rectangle "FootTech — AI Insights" {
+  usecase "US-55\nDétecter la tendance d'un joueur" as US55
+  usecase "US-56\nRegrouper les joueurs par profils" as US56
+  usecase "US-57\nAnalyser le ton d'un commentaire" as US57
+  usecase "US-58\nTranscrire une observation vocale" as US58
+  usecase "US-59\nExtraire les champs d'un document" as US59
+}
+COACH --> US55
+COACH --> US56
+COACH --> US57
+COACH --> US58
+COACH --> US59
+
+note bottom
+  Chaque cas d'utilisation reprend l'identifiant exact du Product Backlog.
+  Les contrôles JWT, rôle et équipe sont appliqués avant l'accès métier.
+end note
+@enduml

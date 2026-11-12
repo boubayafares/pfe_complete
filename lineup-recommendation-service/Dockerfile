@@ -9,7 +9,8 @@ FROM python:3.12-slim AS runtime
 WORKDIR /app
 
 COPY requirements-runtime.txt .
-RUN pip install --no-cache-dir -r requirements-runtime.txt
+RUN python -m pip install --no-cache-dir --upgrade pip==26.2.1 \
+    && python -m pip install --no-cache-dir -r requirements-runtime.txt
 
 COPY app ./app
 
@@ -18,8 +19,9 @@ COPY app ./app
 # monté en volume/ConfigMap en production (voir k8s/configmap.yaml).
 COPY app/infrastructure/persistence/weights.jso[n] ./app/infrastructure/persistence/
 
-RUN useradd --no-create-home --shell /usr/sbin/nologin appuser
-USER appuser
+RUN groupadd --gid 10001 appgroup \
+    && useradd --uid 10001 --gid appgroup --no-create-home --shell /usr/sbin/nologin appuser
+USER 10001:10001
 
 EXPOSE 8100
 

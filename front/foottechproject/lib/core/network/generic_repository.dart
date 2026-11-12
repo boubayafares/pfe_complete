@@ -6,10 +6,11 @@ import '../utils/pagination.dart';
 /// weekly-plannings, exercise-proposals) and as a base pattern the richer
 /// modules' hand-written repositories follow.
 class GenericRepository<T> {
-  GenericRepository({required ApiClient client, required String basePath, required T Function(Map<String, dynamic> json) fromJson})
-      : _client = client,
-        _basePath = basePath,
-        _fromJson = fromJson;
+  GenericRepository({
+    required this._client,
+    required this._basePath,
+    required this._fromJson,
+  });
 
   final ApiClient _client;
   final String _basePath;
@@ -22,16 +23,18 @@ class GenericRepository<T> {
     return data.map((row) => _fromJson(row as Map<String, dynamic>)).toList();
   }
 
-
   Future<Paginated<T>> listPaginated({Map<String, dynamic>? filters}) async {
     final response = await _client.get(_basePath, queryParameters: filters);
     final data = response['data'];
-    final items = data is List ? data.map((row) => _fromJson(row as Map<String, dynamic>)).toList() : <T>[];
+    final items = data is List
+        ? data.map((row) => _fromJson(row as Map<String, dynamic>)).toList()
+        : <T>[];
     final paginationJson = response['pagination'];
-    final meta = paginationJson is Map<String, dynamic> ? PaginationMeta.fromJson(paginationJson) : null;
+    final meta = paginationJson is Map<String, dynamic>
+        ? PaginationMeta.fromJson(paginationJson)
+        : null;
     return Paginated(items: items, meta: meta);
   }
-
 
   Future<T> getById(int id) async {
     final response = await _client.get('$_basePath/$id');

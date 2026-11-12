@@ -12,27 +12,33 @@ class PlayerToken {
   double y; // 0..1 relative to pitch height
 
   factory PlayerToken.fromJson(Map<String, dynamic> json) => PlayerToken(
-        id: json['id'] as int,
-        x: (json['x'] as num).toDouble(),
-        y: (json['y'] as num).toDouble(),
-      );
+    id: json['id'] as int,
+    x: (json['x'] as num).toDouble(),
+    y: (json['y'] as num).toDouble(),
+  );
 
   Map<String, dynamic> toJson() => {'id': id, 'x': x, 'y': y};
 }
 
 class TacticalDrawingScreen extends ConsumerStatefulWidget {
-  const TacticalDrawingScreen({super.key, required this.trainingId, required this.situationId});
+  const TacticalDrawingScreen({
+    super.key,
+    required this.trainingId,
+    required this.situationId,
+  });
 
   final int trainingId;
   final int situationId;
 
   @override
-  ConsumerState<TacticalDrawingScreen> createState() => _TacticalDrawingScreenState();
+  ConsumerState<TacticalDrawingScreen> createState() =>
+      _TacticalDrawingScreenState();
 }
 
 class _TacticalDrawingScreenState extends ConsumerState<TacticalDrawingScreen> {
   List<PlayerToken> _tokens = [];
   bool _loading = true;
+  bool _loadFailed = false;
   bool _saving = false;
 
   @override
@@ -42,18 +48,31 @@ class _TacticalDrawingScreenState extends ConsumerState<TacticalDrawingScreen> {
   }
 
   Future<void> _load() async {
-    try {
-      final data = await ref.read(trainingsRepositoryProvider).getDrawing(widget.trainingId, widget.situationId);
-      final playersJson = data?['players'] as List<dynamic>?;
+    if (mounted) {
       setState(() {
-        _tokens = playersJson?.map((p) => PlayerToken.fromJson(p as Map<String, dynamic>)).toList() ??
+        _loading = true;
+        _loadFailed = false;
+      });
+    }
+    try {
+      final data = await ref
+          .read(trainingsRepositoryProvider)
+          .getDrawing(widget.trainingId, widget.situationId);
+      final playersJson = data?['players'] as List<dynamic>?;
+      if (!mounted) return;
+      setState(() {
+        _tokens =
+            playersJson
+                ?.map((p) => PlayerToken.fromJson(p as Map<String, dynamic>))
+                .toList() ??
             _defaultFormation();
         _loading = false;
       });
     } catch (_) {
+      if (!mounted) return;
       setState(() {
-        _tokens = _defaultFormation();
         _loading = false;
+        _loadFailed = true;
       });
     }
   }
@@ -66,19 +85,34 @@ class _TacticalDrawingScreenState extends ConsumerState<TacticalDrawingScreen> {
       [0.25, 0.5], [0.5, 0.48], [0.75, 0.5], // midfield
       [0.2, 0.2], [0.5, 0.12], [0.8, 0.2], // attack
     ];
-    return [for (var i = 0; i < positions.length; i++) PlayerToken(id: i + 1, x: positions[i][0], y: positions[i][1])];
+    return [
+      for (var i = 0; i < positions.length; i++)
+        PlayerToken(id: i + 1, x: positions[i][0], y: positions[i][1]),
+    ];
   }
 
   Future<void> _save() async {
     setState(() => _saving = true);
     try {
-      await ref.read(trainingsRepositoryProvider).saveDrawing(widget.trainingId, widget.situationId, {
-        'players': _tokens.map((t) => t.toJson()).toList(),
-        'arrows': <dynamic>[],
-      });
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.diagramSaved)));
+      await ref.read(trainingsRepositoryProvider).saveDrawing(
+        widget.trainingId,
+        widget.situationId,
+        {
+          'players': _tokens.map((t) => t.toJson()).toList(),
+          'arrows': <dynamic>[],
+        },
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.diagramSaved)));
+      }
     } on ApiException catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -92,7 +126,11 @@ class _TacticalDrawingScreenState extends ConsumerState<TacticalDrawingScreen> {
         actions: [
           IconButton(
             icon: _saving
-                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
                 : const Icon(Icons.save_outlined),
             onPressed: _saving ? null : _save,
           ),
@@ -100,6 +138,21 @@ class _TacticalDrawingScreenState extends ConsumerState<TacticalDrawingScreen> {
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
+          : _loadFailed
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(context.l10n.errorNetwork),
+                  const SizedBox(height: AppSpacing.md),
+                  OutlinedButton.icon(
+                    onPressed: _load,
+                    icon: const Icon(Icons.refresh),
+                    label: Text(context.l10n.refresh),
+                  ),
+                ],
+              ),
+            )
           : Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: LayoutBuilder(
@@ -108,7 +161,9 @@ class _TacticalDrawingScreenState extends ConsumerState<TacticalDrawingScreen> {
                   // of platform window size — phones, tablets, and desktop
                   // windows all get a proportionally correct pitch.
                   final width = constraints.maxWidth;
-                  final height = (width * 1.5).clamp(0, constraints.maxHeight).toDouble();
+                  final height = (width * 1.5)
+                      .clamp(0, constraints.maxHeight)
+                      .toDouble();
 
                   return Center(
                     child: SizedBox(
@@ -116,7 +171,10 @@ class _TacticalDrawingScreenState extends ConsumerState<TacticalDrawingScreen> {
                       height: height,
                       child: Stack(
                         children: [
-                          CustomPaint(size: Size(width, height), painter: _PitchPainter()),
+                          CustomPaint(
+                            size: Size(width, height),
+                            painter: _PitchPainter(),
+                          ),
                           for (final token in _tokens)
                             Positioned(
                               left: token.x * width - 16,
@@ -126,8 +184,14 @@ class _TacticalDrawingScreenState extends ConsumerState<TacticalDrawingScreen> {
                                 pitchWidth: width,
                                 pitchHeight: height,
                                 onMoved: (dx, dy) => setState(() {
-                                  token.x = (token.x + dx / width).clamp(0.0, 1.0);
-                                  token.y = (token.y + dy / height).clamp(0.0, 1.0);
+                                  token.x = (token.x + dx / width).clamp(
+                                    0.0,
+                                    1.0,
+                                  );
+                                  token.y = (token.y + dy / height).clamp(
+                                    0.0,
+                                    1.0,
+                                  );
                                 }),
                               ),
                             ),
@@ -143,7 +207,12 @@ class _TacticalDrawingScreenState extends ConsumerState<TacticalDrawingScreen> {
 }
 
 class _DraggableToken extends StatelessWidget {
-  const _DraggableToken({required this.token, required this.pitchWidth, required this.pitchHeight, required this.onMoved});
+  const _DraggableToken({
+    required this.token,
+    required this.pitchWidth,
+    required this.pitchHeight,
+    required this.onMoved,
+  });
 
   final PlayerToken token;
   final double pitchWidth;
@@ -157,9 +226,19 @@ class _DraggableToken extends StatelessWidget {
       child: Container(
         width: 32,
         height: 32,
-        decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle),
+        decoration: const BoxDecoration(
+          color: AppColors.green,
+          shape: BoxShape.circle,
+        ),
         alignment: Alignment.center,
-        child: Text('${token.id}', style: const TextStyle(color: AppColors.greenTextOnFill, fontWeight: FontWeight.w700, fontSize: 12)),
+        child: Text(
+          '${token.id}',
+          style: const TextStyle(
+            color: AppColors.greenTextOnFill,
+            fontWeight: FontWeight.w700,
+            fontSize: 12,
+          ),
+        ),
       ),
     );
   }
@@ -176,13 +255,37 @@ class _PitchPainter extends CustomPainter {
 
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), fill);
     canvas.drawRect(Rect.fromLTWH(4, 4, size.width - 8, size.height - 8), line);
-    canvas.drawLine(Offset(4, size.height / 2), Offset(size.width - 4, size.height / 2), line);
-    canvas.drawCircle(Offset(size.width / 2, size.height / 2), size.width * 0.14, line);
+    canvas.drawLine(
+      Offset(4, size.height / 2),
+      Offset(size.width - 4, size.height / 2),
+      line,
+    );
+    canvas.drawCircle(
+      Offset(size.width / 2, size.height / 2),
+      size.width * 0.14,
+      line,
+    );
 
     // Goal boxes (top and bottom)
     final boxWidth = size.width * 0.5;
-    canvas.drawRect(Rect.fromLTWH((size.width - boxWidth) / 2, 4, boxWidth, size.height * 0.14), line);
-    canvas.drawRect(Rect.fromLTWH((size.width - boxWidth) / 2, size.height - 4 - size.height * 0.14, boxWidth, size.height * 0.14), line);
+    canvas.drawRect(
+      Rect.fromLTWH(
+        (size.width - boxWidth) / 2,
+        4,
+        boxWidth,
+        size.height * 0.14,
+      ),
+      line,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(
+        (size.width - boxWidth) / 2,
+        size.height - 4 - size.height * 0.14,
+        boxWidth,
+        size.height * 0.14,
+      ),
+      line,
+    );
   }
 
   @override

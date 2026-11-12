@@ -1,0 +1,58 @@
+@startuml
+title FootTech — Séquence — Épopée 11 : Bilan de saison
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Coach" as ACT
+boundary "Application Flutter" as APP
+control "API Express" as API
+control "SeasonReportService" as SVC
+database "PostgreSQL / PDFKit" as DB
+
+group US-47 — Consulter le bilan de saison
+  ACT -> APP: Consulter le bilan de saison
+  APP -> API: GET /dashboard/season-bilan
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-47)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Bilan agrégé affiché
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Bilan agrégé affiché
+end
+
+group US-48 — Exporter le bilan en PDF
+  ACT -> APP: Exporter le bilan en PDF
+  APP -> API: Commande UI vers PDFKit
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-48)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: PDF téléchargé
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: PDF téléchargé
+end
+
+group US-49 — Filtrer le bilan par joueur ou poste
+  ACT -> APP: Filtrer le bilan par joueur ou poste
+  APP -> API: GET /dashboard/season-bilan?player&position
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-49)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Bilan filtré
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Bilan filtré
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

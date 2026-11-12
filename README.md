@@ -1,3 +1,4 @@
+
 # FootTech — Plateforme de gestion de club de football
 
 FootTech est une plateforme complète de gestion de club de football (PFE), organisée en
@@ -56,17 +57,24 @@ Prérequis : Docker + `docker compose`.
 1. Copier l'environnement et le remplir :
    ```bash
    cp .env.example .env
-   # éditer .env (DB_PASSWORD, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, etc.)
+   # générer des valeurs aléatoires pour DB_PASSWORD, JWT_ACCESS_SECRET,
+   # JWT_REFRESH_SECRET, AI_SERVICE_TOKEN et DJANGO_SECRET_KEY
    ```
 2. Lancer toute la plateforme :
    ```bash
    docker compose up --build
    ```
 3. Accès :
-   - API Express : http://localhost:4000 (docs Swagger : `/docs` hors prod)
+   - API Express : http://localhost:4000
    - Django admin : http://localhost:8000/admin-site/
-   - AI insights : http://localhost:8300/health
-   - Lineup : http://localhost:8100/health
+   - Santé Express : http://localhost:4000/health
+   - Santé Django/PostgreSQL : http://localhost:8000/health/
+
+PostgreSQL, Redis et les deux services IA ne publient aucun port hôte dans la
+configuration Docker : ils sont accessibles uniquement sur le réseau privé Compose.
+Les API publiques sont liées à `127.0.0.1` par défaut. Pour tester depuis un téléphone
+du réseau local, définir explicitement `API_BIND_ADDRESS=0.0.0.0` et limiter l'accès
+avec le pare-feu de la machine.
 
 ## Démarrage local (sans Docker)
 
@@ -82,8 +90,9 @@ npm run dev                 # ou: npm run build && npm start
 ```bash
 cd front/foottechproject
 flutter pub get
-cp .env.example .env        # API_BASE_URL, SOCKET_URL, APP_NAME
-flutter run
+flutter run --dart-define=API_BASE_URL=http://localhost:4000
+# Android Emulator : API_BASE_URL=http://10.0.2.2:4000
+# Téléphone physique : API_BASE_URL=http://ADRESSE_IP_DU_PC:4000
 ```
 
 ### Back office (Django)
@@ -107,11 +116,19 @@ pousse les images Docker (registry GitHub ou GitLab).
 
 | Niveau | Emplacement | Contenu |
 |---|---|---|
-| API E2E (smoke) | `tests/cypress`, `tests/playwright`, `tests/selenium`, `tests/postman` | health check, auth (401/200), RBAC IA (Playwright), runs Newman en CI |
+| API E2E | `tests/cypress`, `tests/playwright`, `tests/selenium`, `tests/postman` | santé, auth/RBAC et parcours métier complet (équipes et isolation → joueurs → séance → planning → match → IA → PDF → rotation JWT) en CI |
 | Charge | `tests/jmeter` | Paramétrable `-Jthreads` (10 / 50 / 100 / 500 users) |
 | Spécification OpenAPI | `tests/openapi/foottech_api.yaml` | Contrat de l'API |
-| Unitaires backend | `back/FoottechBackend-main` (`npm test` = build + **Vitest**, 26 tests) | client IA, INT-01..07, PDF, schémas |
-| Unitaires IA | `ai-insights-service`, `lineup-recommendation-service` (`pytest`) | 26 + 10 tests : logique métier, clustering, contrat lineup |
+| Unitaires backend | `back/FoottechBackend-main` (`npm test` = build + **Vitest**, 59 tests) | auth/JWT/OTP, isolation d'équipe et des saisons, validation Twilio/Firebase, clients IA, PDF, schémas et migrations |
+| Unitaires IA | `ai-insights-service`, `lineup-recommendation-service` (`pytest`) | 27 + 11 tests : logique métier, clustering, contrat lineup, authentification interservice |
+| Administration | `foottech_admin_backend` (`manage.py test`) et `foottech_admin_desktop` (`mvn test`) | permissions Django et compilation JavaFX |
+
+Pour auditer les Dockerfiles et manifests Kubernetes avec la politique de
+registre du projet :
+
+```bash
+trivy config --config-data security .
+```
 
 ## Notes d'intégration
 
@@ -122,16 +139,30 @@ pousse les images Docker (registry GitHub ou GitLab).
   (`moderation_suspension`), la diffusion d'annonces insère dans `platform.notifications`.
 - **Push notifications** : le backend enregistre les tokens FCM (`POST /api/v1/notifications/push-token`)
   et les utilise à la création de chaque notification. Firebase doit être configuré via
-  `FIREBASE_*` dans `.env` (sinon les push sont logués en mode dev).
+  `FIREBASE_*` dans `.env`; sans configuration valide, l'envoi est ignoré sans journaliser
+  le contenu privé de la notification.
 - **SMS OTP** : les codes sont envoyés via Twilio si `TWILIO_*` est renseigné, sinon logués
   (mode dev).
 - **Rapport de match PDF** : généré côté serveur via `POST /api/v1/matches/:id/report/generate`
-  (bibliothèque `pdfkit`), stocké sous `/uploads/reports/` et servi statiquement.
+  (bibliothèque `pdfkit`). Le fichier n'est plus public : son téléchargement passe par
+  `GET /api/v1/matches/:id/report/file` avec authentification et contrôle d'équipe.
 - **IA de composition** : `POST /api/v1/matches/:id/ai-recommendations` (rôles Coach/Adjoint).
   L'API Express agrège les features (présence 10 dernières séances, perf 5 derniers matchs,
   ACWR proxy 7j/28j, jours depuis le dernier match), les envoie au
   `lineup-recommendation-service` (`LINEUP_SERVICE_URL`, **timeout 5 s** garanti) puis
   stocke les scores normalisés (0-1). Erreurs contrôlées : 404 match, 400 payload invalide,
   502 réponse invalidée, 503 service injoignable, 504 dépassement du délai.
+- **IA d'analyse** : l'API Express expose les tendances réelles d'un joueur
+  (`GET /api/v1/ai-insights/players/:id/trend`), le clustering d'équipe
+  (`GET /api/v1/ai-insights/clusters`) et l'analyse de ton (`POST /api/v1/ai-insights/tone`).
+  Les microservices FastAPI exigent `X-Service-Token`; le secret n'est jamais envoyé à Flutter.
+- **Sécurité** : les accès REST et Socket.IO revérifient le statut du compte et les
+  suspensions administrateur. Les listes, propositions d'exercices, événements de match
+  et rapports sont isolés par équipe. Les jetons JWT sont liés à un émetteur/une audience,
+  les OTP sont stockés sous forme de HMAC et les téléchargements sont validés par signature.
+- **Multi-équipe** : un coach peut créer plusieurs équipes depuis Flutter et choisir l'équipe
+  active. `POST /api/v1/auth/select-team` vérifie l'appartenance en base, émet une nouvelle
+  paire JWT et conserve ce contexte lors du refresh. Les payloads métier n'acceptent pas de
+  `teamId` arbitraire : l'équipe est toujours dérivée de la session authentifiée.
 - **Schémas Mermaid** : `diagrammes/mermaid/` (architecture, flux IA lineup, dataflow, déploiement/CI/CD).
 # pfe_complete

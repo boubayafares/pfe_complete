@@ -9,16 +9,15 @@ import 'api_exception.dart';
 /// Dio's default (IO) HttpClientAdapter is swapped for a browser adapter
 /// automatically on Web by the dio package itself, no code changes needed.
 class ApiClient {
-  ApiClient({required TokenStorage tokenStorage, this.onSessionExpired})
-      : _tokenStorage = tokenStorage,
-        _dio = Dio(
-          BaseOptions(
-            baseUrl: ApiConstants.baseUrl,
-            connectTimeout: const Duration(seconds: 15),
-            receiveTimeout: const Duration(seconds: 20),
-            headers: {'Content-Type': 'application/json'},
-          ),
-        ) {
+  ApiClient({required this._tokenStorage, this.onSessionExpired})
+    : _dio = Dio(
+        BaseOptions(
+          baseUrl: ApiConstants.baseUrl,
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 20),
+          headers: {'Content-Type': 'application/json'},
+        ),
+      ) {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -28,12 +27,21 @@ class ApiClient {
         },
         onError: (error, handler) async {
           final isUnauthorized = error.response?.statusCode == 401;
-          final isRefreshCall = error.requestOptions.path.contains('/auth/refresh');
+          final isRefreshCall = error.requestOptions.path.contains(
+            '/auth/refresh',
+          );
+          final hasAlreadyRetried =
+              error.requestOptions.extra['foottechAuthRetried'] == true;
 
-          if (isUnauthorized && !isRefreshCall) {
+          if (isUnauthorized && !isRefreshCall && !hasAlreadyRetried) {
             final refreshed = await _tryRefresh();
             if (refreshed) {
               try {
+                final freshAccessToken = await _tokenStorage.accessToken;
+                error.requestOptions.headers = Map<String, dynamic>.from(
+                  error.requestOptions.headers,
+                )..['Authorization'] = 'Bearer $freshAccessToken';
+                error.requestOptions.extra['foottechAuthRetried'] = true;
                 final retryResponse = await _dio.fetch(error.requestOptions);
                 return handler.resolve(retryResponse);
               } catch (_) {
@@ -67,24 +75,37 @@ class ApiClient {
   Future<bool>? _inFlightRefresh;
 
   Future<bool> _tryRefresh() {
-    return _inFlightRefresh ??= _doRefresh().whenComplete(() => _inFlightRefresh = null);
+    return _inFlightRefresh ??= _doRefresh().whenComplete(
+      () => _inFlightRefresh = null,
+    );
   }
 
   Future<bool> _doRefresh() async {
     final refreshToken = await _tokenStorage.refreshToken;
     if (refreshToken == null) return false;
     try {
-      final response = await _dio.post('${ApiConstants.auth}/refresh', data: {'refreshToken': refreshToken});
+      final response = await _dio.post(
+        '${ApiConstants.auth}/refresh',
+        data: {'refreshToken': refreshToken},
+      );
       final data = response.data['data'] as Map<String, dynamic>;
-      await _tokenStorage.saveTokens(accessToken: data['accessToken'] as String, refreshToken: data['refreshToken'] as String);
+      await _tokenStorage.saveTokens(
+        accessToken: data['accessToken'] as String,
+        refreshToken: data['refreshToken'] as String,
+      );
       return true;
     } catch (_) {
       return false;
     }
   }
 
-  Future<Map<String, dynamic>> get(String path, {Map<String, dynamic>? queryParameters}) async {
-    final response = await _request(() => _dio.get(path, queryParameters: queryParameters));
+  Future<Map<String, dynamic>> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    final response = await _request(
+      () => _dio.get(path, queryParameters: queryParameters),
+    );
     return response.data as Map<String, dynamic>;
   }
 
@@ -107,24 +128,38 @@ class ApiClient {
   /// (from image_picker's XFile.readAsBytes()) since there is no real
   /// filesystem path to read from; on other platforms pass [filePath].
   Future<Map<String, dynamic>> uploadFile(
-      String path, {
-        required String fieldName,
-        String? filePath,
-        List<int>? bytes,
-        String? fileName,
-      }) async {
-    assert(filePath != null || bytes != null, 'Provide either filePath or bytes');
+    String path, {
+    required String fieldName,
+    String? filePath,
+    List<int>? bytes,
+    String? fileName,
+  }) async {
+    assert(
+      filePath != null || bytes != null,
+      'Provide either filePath or bytes',
+    );
     // Derive the file name from the explicit name, or the basename of the path.
-    final name = fileName ??
-        (bytes != null ? 'upload' : (filePath ?? '').split(RegExp(r'[\\/]')).last);
+    final name =
+        fileName ??
+        (bytes != null
+            ? 'upload'
+            : (filePath ?? '').split(RegExp(r'[\\/]')).last);
     // MUST set the part content-type: the backend multer fileFilter only accepts
     // image/jpeg|png|webp. Without it Dio defaults the part to
     // application/octet-stream and the backend rejects the upload with 400.
     final mime = _mimeFromName(name);
     final contentType = DioMediaType.parse(mime);
     final multipartFile = bytes != null
-        ? MultipartFile.fromBytes(bytes, filename: name, contentType: contentType)
-        : await MultipartFile.fromFile(filePath!, filename: name, contentType: contentType);
+        ? MultipartFile.fromBytes(
+            bytes,
+            filename: name,
+            contentType: contentType,
+          )
+        : await MultipartFile.fromFile(
+            filePath!,
+            filename: name,
+            contentType: contentType,
+          );
     final formData = FormData.fromMap({fieldName: multipartFile});
     final response = await _request(() => _dio.post(path, data: formData));
     return response.data as Map<String, dynamic>;
@@ -167,6 +202,9 @@ class ApiClient {
         details: body['details'],
       );
     }
-    return ApiException(message: error.message ?? 'Unable to reach the server', statusCode: error.response?.statusCode);
+    return ApiException(
+      message: error.message ?? 'Unable to reach the server',
+      statusCode: error.response?.statusCode,
+    );
   }
 }

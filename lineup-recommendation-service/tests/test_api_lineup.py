@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 
-from app.presentation.main import app
+from app.infrastructure.config import settings
+from app.presentation.main import app, create_app
 
 client = TestClient(app)
 
@@ -55,3 +56,30 @@ def test_out_of_range_presence_rate_rejected():
     }
     response = client.post("/api/v1/lineup/recommendations", json=payload)
     assert response.status_code == 422
+
+
+def test_service_token_protects_lineup_endpoint_but_not_health():
+    original = settings.service_token
+    settings.service_token = "test-service-token"
+    try:
+        secured_client = TestClient(create_app())
+        assert secured_client.get("/health").status_code == 200
+        payload = {
+            "matchId": 1,
+            "players": [{
+                "playerId": 1,
+                "presenceRate": 0.8,
+                "recentPerformanceRating": 7.0,
+                "acuteChronicWorkloadRatio": 1.0,
+                "daysSinceLastMatch": 3,
+            }],
+        }
+        assert secured_client.post("/api/v1/lineup/recommendations", json=payload).status_code == 401
+        response = secured_client.post(
+            "/api/v1/lineup/recommendations",
+            json=payload,
+            headers={"X-Service-Token": "test-service-token"},
+        )
+        assert response.status_code == 200
+    finally:
+        settings.service_token = original

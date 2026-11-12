@@ -13,7 +13,8 @@ class ActivateAdjointScreen extends ConsumerStatefulWidget {
   const ActivateAdjointScreen({super.key});
 
   @override
-  ConsumerState<ActivateAdjointScreen> createState() => _ActivateAdjointScreenState();
+  ConsumerState<ActivateAdjointScreen> createState() =>
+      _ActivateAdjointScreenState();
 }
 
 class _ActivateAdjointScreenState extends ConsumerState<ActivateAdjointScreen> {
@@ -22,6 +23,7 @@ class _ActivateAdjointScreenState extends ConsumerState<ActivateAdjointScreen> {
   final _codeController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _submitting = false;
+  bool _sendingCode = false;
   bool _obscurePassword = true;
 
   @override
@@ -32,14 +34,45 @@ class _ActivateAdjointScreenState extends ConsumerState<ActivateAdjointScreen> {
     super.dispose();
   }
 
+  Future<void> _sendCode() async {
+    final phone = _phoneController.text.trim();
+    if (phone.length < 8) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.invalidNumber)));
+      return;
+    }
+    setState(() => _sendingCode = true);
+    try {
+      await ref
+          .read(authControllerProvider.notifier)
+          .requestAdjointOtp(phone: phone);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.codeSentToPhone(phone))),
+        );
+      }
+    } on ApiException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
+      }
+    } finally {
+      if (mounted) setState(() => _sendingCode = false);
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _submitting = true);
     try {
-      await ref.read(authControllerProvider.notifier).setAdjointPassword(
-        phone: _phoneController.text.trim(),
-        code: _codeController.text.trim(),
-        password: _passwordController.text,
+      await ref
+          .read(authControllerProvider.notifier)
+          .setAdjointPassword(
+            phone: _phoneController.text.trim(),
+            code: _codeController.text.trim(),
+            password: _passwordController.text,
           );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -48,7 +81,11 @@ class _ActivateAdjointScreenState extends ConsumerState<ActivateAdjointScreen> {
         context.go('/login');
       }
     } on ApiException catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -76,15 +113,35 @@ class _ActivateAdjointScreenState extends ConsumerState<ActivateAdjointScreen> {
                   TextFormField(
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(labelText: context.l10n.phoneNumber),
-                    validator: (v) => (v == null || v.trim().length < 8) ? context.l10n.invalidNumber : null,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.phoneNumber,
+                    ),
+                    validator: (v) => (v == null || v.trim().length < 8)
+                        ? context.l10n.invalidNumber
+                        : null,
                   ),
-                  const SizedBox(height: AppSpacing.md),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _sendingCode ? null : _sendCode,
+                      child: _sendingCode
+                          ? const SizedBox(
+                              height: 16,
+                              width: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(context.l10n.receiveNewCode),
+                    ),
+                  ),
                   TextFormField(
                     controller: _codeController,
                     keyboardType: TextInputType.number,
-                    decoration: InputDecoration(labelText: context.l10n.codeReceivedSms),
-                    validator: (v) => (v == null || v.trim().length < 4) ? context.l10n.invalidCode : null,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.codeReceivedSms,
+                    ),
+                    validator: (v) => (v == null || v.trim().length < 4)
+                        ? context.l10n.invalidCode
+                        : null,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   TextFormField(
@@ -93,24 +150,43 @@ class _ActivateAdjointScreenState extends ConsumerState<ActivateAdjointScreen> {
                     decoration: InputDecoration(
                       labelText: context.l10n.newPassword,
                       suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, size: 18),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          size: 18,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                     ),
-                    validator: (v) => (v == null || v.length < 8) ? context.l10n.min8Chars : null,
+                    validator: (v) => (v == null || v.length < 8)
+                        ? context.l10n.min8Chars
+                        : null,
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   ElevatedButton(
                     onPressed: _submitting ? null : _submit,
                     child: _submitting
-                        ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.greenTextOnFill))
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.greenTextOnFill,
+                            ),
+                          )
                         : Text(context.l10n.activateButton),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     context.l10n.codeExpired,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),

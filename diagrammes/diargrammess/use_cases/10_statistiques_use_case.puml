@@ -1,0 +1,34 @@
+@startuml
+title FootTech — Cas d'utilisation — Épopée 10 : Statistiques et performances
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+left to right direction
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+actor "Utilisateur" as USER #546E7A
+actor "Coach" as COACH #1565C0
+COACH -|> USER
+rectangle "FootTech — Statistiques et performances" {
+  usecase "US-43\nConsulter ses statistiques personnelles" as US43
+  usecase "US-44\nConsulter les statistiques de l'équipe" as US44
+  usecase "US-45\nComparer les performances des joueurs" as US45
+  usecase "US-46\nConsulter l'évolution saisonnière d'un joueur" as US46
+}
+USER --> US43
+COACH --> US44
+COACH --> US45
+COACH --> US46
+
+note bottom
+  Chaque cas d'utilisation reprend l'identifiant exact du Product Backlog.
+  Les contrôles JWT, rôle et équipe sont appliqués avant l'accès métier.
+end note
+@enduml

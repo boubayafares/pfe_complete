@@ -1,0 +1,60 @@
+@startuml
+title FootTech — Diagramme de classes — 03 classes entrainements
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1565C0
+  FontColor #263238
+  ArrowColor #455A64
+}
+class "Entraînement\ntrainings" as Training {
+  +id: UUID
+  +teamId: UUID
+  +dateTime: DateTime
+  +status: TrainingStatus
+}
+class "FicheSéance\ntraining_sheets" as Sheet {
+  +objectives: Text
+  +expectedPlayers: Integer
+}
+class "Situation\ntraining_situations" as Situation {
+  +title: String
+  +duration: Integer
+  +instructions: Text
+}
+class "DessinTactique\ntactical_drawings" as Drawing {
+  +payload: JSONB
+}
+class "PropositionExercice\nexercise_proposals" as Proposal {
+  +teamId: UUID
+  +status: PENDING / APPROVED / REJECTED
+  +reviewedBy: UUID
+}
+class TrainingService {
+  +create()
+  +upsertSheet()
+  +addSituation()
+  +saveDrawing()
+  +listForTeam()
+}
+class ExerciseProposalService {
+  +propose()
+  +review()
+  +listForTeam()
+}
+Training "1" o-- "0..1" Sheet
+Training "1" o-- "0..*" Situation
+Situation "1" o-- "0..*" Drawing
+Training "1" o-- "0..*" Proposal
+TrainingService --> Training
+ExerciseProposalService --> Proposal
+note bottom
+US-20 à US-26. Les propositions sont explicitement rattachées à l'équipe.
+end note
+@enduml

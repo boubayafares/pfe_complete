@@ -37,6 +37,12 @@
   "activateButton": "Activate my account",
   "codeExpired": "Code expired or never received? Ask your coach to re-add you to the team to receive a new code.",
   "accountActivatedLogin": "Account activated — you can now log in",
+  "aiTrendTitle": "AI performance trend",
+  "aiTrendProgressing": "Progressing",
+  "aiTrendStable": "Stable",
+  "aiTrendDeclining": "Needs attention",
+  "aiTrendUnavailable": "At least three evaluations are needed for an AI trend.",
+  "aiTrendBasedOn": "Based on {count} recent evaluations",
 
   "playerLoginTitle": "Player Login",
   "codeSentToPhone": "A code has been sent to {phone}. Enter it below.",

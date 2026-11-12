@@ -28,4 +28,5 @@ class ApiConstants {
   static const String notifications = '$apiPrefix/notifications';
   static const String dashboard = '$apiPrefix/dashboard';
   static const String calendarEvents = '$apiPrefix/calendar-events';
+  static const String aiInsights = '$apiPrefix/ai-insights';
 }

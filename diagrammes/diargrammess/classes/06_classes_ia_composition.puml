@@ -1,0 +1,63 @@
+@startuml
+title FootTech — Diagramme de classes — 06 classes ia composition
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1565C0
+  FontColor #263238
+  ArrowColor #455A64
+}
+class LineupController {
+  +generateRecommendation()
+  +getRecommendations()
+  +confirmLineup()
+}
+class LineupClient {
+  +recommend(payload)
+  +timeout: 5s
+}
+class RecommendationUseCase {
+  +execute(players, weights)
+}
+class ScoringService {
+  +presenceScore()
+  +performanceScore()
+  +fatigueScore()
+  +finalScore()
+}
+class "RecommandationIA\nai_lineup_recommendations" as Recommendation {
+  +matchId: UUID
+  +playerId: UUID
+  +score: Decimal
+  +suggestedRole: Role
+}
+class TrendUseCase {
+  +detect(points)
+}
+class ClusteringUseCase {
+  +cluster(players)
+}
+class ToneUseCase {
+  +analyze(comment)
+}
+class TranscriptionUseCase {
+  +transcribe(audio)
+}
+class DocumentExtractionUseCase {
+  +extract(image)
+}
+LineupController --> LineupClient
+LineupClient --> RecommendationUseCase
+RecommendationUseCase --> ScoringService
+RecommendationUseCase --> Recommendation
+note bottom
+US-34 à US-37 et US-55 à US-59.
+Le coach conserve la décision finale ; les services IA sont remplaçables.
+end note
+@enduml

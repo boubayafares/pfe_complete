@@ -3,7 +3,7 @@ import '../../../core/network/api_client.dart';
 import 'calendar_event_model.dart';
 
 class CalendarEventsRepository {
-  CalendarEventsRepository({required ApiClient client}) : _client = client;
+  CalendarEventsRepository({required this._client});
 
   final ApiClient _client;
 
@@ -38,11 +38,11 @@ class CalendarEventsRepository {
       data: {
         'title': title,
         'startTime': startTime.toUtc().toIso8601String(),
-        if (description != null) 'description': description,
+        'description': ?description,
         if (endTime != null) 'endTime': endTime.toUtc().toIso8601String(),
-        if (allDay != null) 'allDay': allDay,
-        if (location != null) 'location': location,
-        if (color != null) 'color': color,
+        'allDay': ?allDay,
+        'location': ?location,
+        'color': ?color,
       },
     );
     return CalendarEvent.fromJson(response['data'] as Map<String, dynamic>);
@@ -62,7 +62,9 @@ class CalendarEventsRepository {
     final body = <String, dynamic>{};
     if (title != null) body['title'] = title;
     if (description != null) body['description'] = description;
-    if (startTime != null) body['startTime'] = startTime.toUtc().toIso8601String();
+    if (startTime != null) {
+      body['startTime'] = startTime.toUtc().toIso8601String();
+    }
     if (endTime != null) body['endTime'] = endTime.toUtc().toIso8601String();
     if (allDay != null) body['allDay'] = allDay;
     if (location != null) body['location'] = location;

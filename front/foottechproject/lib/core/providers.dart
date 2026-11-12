@@ -10,7 +10,10 @@ final sessionExpiredProvider = StateProvider<int>((ref) => 0);
 
 final apiClientProvider = Provider<ApiClient>((ref) {
   final storage = ref.watch(tokenStorageProvider);
-  return ApiClient(tokenStorage: storage, onSessionExpired: () => ref.read(sessionExpiredProvider.notifier).state++);
+  return ApiClient(
+    tokenStorage: storage,
+    onSessionExpired: () => ref.read(sessionExpiredProvider.notifier).state++,
+  );
 });
 
 final socketServiceProvider = Provider<SocketService>((ref) {
@@ -20,4 +23,6 @@ final socketServiceProvider = Provider<SocketService>((ref) {
   return service;
 });
 
-final localAuthServiceProvider = Provider<LocalAuthService>((ref) => LocalAuthService());
+final localAuthServiceProvider = Provider<LocalAuthService>(
+  (ref) => LocalAuthService(),
+);

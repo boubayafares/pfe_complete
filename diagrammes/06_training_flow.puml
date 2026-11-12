@@ -47,7 +47,7 @@ SOCKET --> FLUTTER : notification temps réel
 == 2. Assignation des joueurs ==
 
 ADJOINT -> FLUTTER : sélectionne l'effectif prévu
-FLUTTER -> TRAIN_API : POST /trainings/:id/sheet (effectif)
+FLUTTER -> TRAIN_API : PUT /trainings/:id/sheet (effectif)
 TRAIN_API -> PG : create training_sheet
 TRAIN_API --> FLUTTER : 200 { sheet }
 
@@ -62,7 +62,7 @@ TRAIN_API --> FLUTTER : 200
 == 3. Marquage de la présence (PRESENT / ABSENT / LATE / INJURED) ==
 
 COACH -> FLUTTER : liste les joueurs convoqués
-FLUTTER -> ATTEND_API : POST /attendance/training/:id (batch)
+FLUTTER -> ATTEND_API : POST /attendance/trainings/:id/bulk (batch)
 ATTEND_API -> PG : upsert attendances
 ATTEND_API --> FLUTTER : 200 { attendances }
 FLUTTER --> COACH : mise à jour de la feuille de présence
@@ -73,7 +73,7 @@ FLUTTER --> COACH : mise à jour de la feuille de présence
 == 4. Ajout des situations (exercices) ==
 
 ADJOINT -> FLUTTER : ajoute une situation (titre, description, durées)
-FLUTTER -> SHEET_API : POST /trainings/:id/sheet/situations
+FLUTTER -> SHEET_API : POST /trainings/:id/situations
 SHEET_API -> PG : insert training_situation (ordre)
 SHEET_API --> FLUTTER : 201 { situation }
 
@@ -93,7 +93,7 @@ SHEET_API --> FLUTTER : 200 { status }
 == 5. Schémas tactiques (éditeur de terrain type TacticalPad) ==
 
 ADJOINT -> FLUTTER : dessine positions / flèches / formes
-FLUTTER -> SHEET_API : POST /trainings/situations/:id/drawings
+FLUTTER -> SHEET_API : POST /trainings/:id/situations/:situationId/drawing
 SHEET_API -> PG : save tactical_drawings (JSONB canvas)
 SHEET_API --> FLUTTER : 201 { drawing }
 FLUTTER --> ADJOINT : aperçu du schéma rendu
@@ -111,10 +111,10 @@ TRAIN_API --> FLUTTER : 200 { training fini }
 TRAIN_API -> SOCKET : emit training_completed
 SOCKET --> FLUTTER : confirmation équipe
 
-' Synthèse en fin de séance
-FLUTTER -> TRAIN_API : GET /trainings/:id/summary
-TRAIN_API -> PG : agrège feuille + présence + situations
-TRAIN_API --> FLUTTER : résumé complet (fiche)
+' Synthèse en fin de séance (lectures combinées par le mobile)
+FLUTTER -> TRAIN_API : GET /trainings/:id/sheet (objectifs + effectif)
+FLUTTER -> TRAIN_API : GET /trainings/:id/situations (liste ordonnée)
+FLUTTER -> ATTEND_API : GET /attendance/trainings/:id (présences)
 
 note over TRAIN_API, SHEET_API : La fiche d'entraînement regroupe objectifs, effectif,\nles situations ordonnées et leurs schémas tactiques
 

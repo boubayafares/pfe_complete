@@ -103,3 +103,17 @@ Premier téléchargement lent (données mises en cache localement par
 ```bash
 pytest
 ```
+
+## Déploiement Kubernetes
+
+Le manifeste utilise un namespace dédié, une image GHCR identifiée par le
+SHA du commit et un Secret Kubernetes pour l'authentification interservices.
+Ne stocke jamais le jeton dans Git :
+
+```bash
+kubectl apply -f k8s/namespace.yaml
+kubectl -n foottech create secret generic foottech-service-auth \
+  --from-literal=token='<jeton-long-et-aleatoire>'
+# Remplacer sha-REPLACE_WITH_COMMIT_SHA dans deployment.yaml par le tag SHA publié par la CI.
+kubectl apply -f k8s/configmap.yaml -f k8s/deployment.yaml -f k8s/service.yaml
+```

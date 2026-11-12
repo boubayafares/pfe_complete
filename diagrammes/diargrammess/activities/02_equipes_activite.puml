@@ -1,0 +1,43 @@
+@startuml
+title FootTech — Activité — Épopée 2 : Gestion des équipes
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam ActivityBackgroundColor #E8F5E9
+skinparam ActivityBorderColor #2E7D32
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityDiamondBorderColor #F57F17
+start
+:Ouvrir le module;
+:Vérifier la session, le rôle et l'équipe active;
+if (Accès autorisé ?) then (oui)
+  :Choisir la User Story;
+  switch (Fonction sélectionnée)
+  case (US-07)
+    :Créer une équipe\nPOST /teams;
+    :Équipe créée;
+  case (US-08)
+    :Lister ses équipes\nGET /teams;
+    :Équipes autorisées affichées;
+  case (US-09)
+    :Ajouter un adjoint à l'équipe\nPOST /teams/:id/staff;
+    :Adjoint affecté;
+  case (US-10)
+    :Retirer un adjoint de l'équipe\nDELETE /teams/:id/staff/:adjointId;
+    :Affectation supprimée;
+  endswitch
+  :Actualiser l'état Riverpod / interface;
+else (non)
+  :Afficher 401 ou 403;
+endif
+if (Erreur métier ou technique ?) then (oui)
+  :Normaliser l'erreur et proposer une reprise;
+else (non)
+  :Confirmer l'opération;
+endif
+stop
+@enduml

@@ -1,0 +1,58 @@
+@startuml
+title FootTech — Séquence — Épopée 4 : Gestion des saisons
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Coach / Utilisateur" as ACT
+boundary "Application Flutter" as APP
+control "API Express" as API
+control "SeasonService" as SVC
+database "PostgreSQL" as DB
+
+group US-17 — Créer une saison
+  ACT -> APP: Créer une saison
+  APP -> API: POST /seasons
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-17)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Saison rattachée à l'équipe
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Saison rattachée à l'équipe
+end
+
+group US-18 — Lister les saisons disponibles
+  ACT -> APP: Lister les saisons disponibles
+  APP -> API: GET /seasons
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-18)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Saisons de l'équipe affichées
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Saisons de l'équipe affichées
+end
+
+group US-19 — Modifier les dates d'une saison
+  ACT -> APP: Modifier les dates d'une saison
+  APP -> API: PATCH /seasons/:id
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-19)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Dates validées et enregistrées
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Dates validées et enregistrées
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

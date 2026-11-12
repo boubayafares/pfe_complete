@@ -1,4 +1,4 @@
-# FootTech Admin Console (Java / JavaFX)
+ # FootTech Admin Console (Java / JavaFX)
 
 Application de bureau (Windows / macOS / Linux) pour le rôle **Administrateur**
 de FootTech. Client JavaFX consommant l'API du

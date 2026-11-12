@@ -1,0 +1,49 @@
+@startuml
+title FootTech — Activité — Épopée 1 : Authentification
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam ActivityBackgroundColor #E8F5E9
+skinparam ActivityBorderColor #2E7D32
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityDiamondBorderColor #F57F17
+start
+:Ouvrir le module;
+:Vérifier la session, le rôle et l'équipe active;
+if (Accès autorisé ?) then (oui)
+  :Choisir la User Story;
+  switch (Fonction sélectionnée)
+  case (US-01)
+    :S'inscrire avec email et mot de passe\nPOST /auth/register-coach;
+    :Compte coach créé;
+  case (US-02)
+    :Se connecter avec email et mot de passe\nPOST /auth/login;
+    :Tokens JWT délivrés;
+  case (US-03)
+    :Renouveler automatiquement la session\nPOST /auth/refresh;
+    :Nouveaux tokens délivrés;
+  case (US-04)
+    :Activer un joueur par code OTP\nPOST /players puis /auth/player/request-otp;
+    :OTP envoyé sans être journalisé;
+  case (US-05)
+    :Se connecter par téléphone et OTP\nPOST /auth/player/verify-otp;
+    :Compte activé et session ouverte;
+  case (US-06)
+    :Se déconnecter\nPOST /auth/logout;
+    :Refresh token révoqué;
+  endswitch
+  :Actualiser l'état Riverpod / interface;
+else (non)
+  :Afficher 401 ou 403;
+endif
+if (Erreur métier ou technique ?) then (oui)
+  :Normaliser l'erreur et proposer une reprise;
+else (non)
+  :Confirmer l'opération;
+endif
+stop
+@enduml

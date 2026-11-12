@@ -7,6 +7,12 @@ final proposalsRepositoryProvider = Provider<ProposalsRepository>((ref) {
   return ProposalsRepository(client: ref.watch(apiClientProvider));
 });
 
-final pendingProposalsProvider = FutureProvider.autoDispose<List<ExerciseProposal>>((ref) {
-  return ref.watch(proposalsRepositoryProvider).list(status: 'PENDING');
-});
+final pendingProposalsProvider =
+    FutureProvider.autoDispose<List<ExerciseProposal>>((ref) {
+      return ref.watch(proposalsRepositoryProvider).list(status: 'PENDING');
+    });
+
+final exerciseLibraryProvider =
+    FutureProvider.autoDispose<List<ExerciseProposal>>((ref) {
+      return ref.watch(proposalsRepositoryProvider).library();
+    });

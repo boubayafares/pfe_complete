@@ -7,12 +7,13 @@ info:
     backend Express service.
 
     The API is versioned under `/api/v1`. All protected endpoints require a Bearer JWT.
-  version: 1.0.0
+    Successful JSON responses use the envelope `{ success: true, message?, data,
+    pagination? }`; resource schemas below describe the value carried in `data` unless
+    an endpoint documents the complete envelope explicitly.
+  version: 2.0.0
 servers:
   - url: http://localhost:4000
     description: Local backend (Express)
-  - url: http://localhost:8000
-    description: Django admin
 tags:
   - name: Health
     description: Service health checks
@@ -28,6 +29,14 @@ tags:
     description: Training session management
   - name: Notifications
     description: Notification management
+  - name: Attendance
+    description: Training attendance management
+  - name: Seasons
+    description: Season catalogue management
+  - name: Weekly Plannings
+    description: Team-scoped weekly planning management
+  - name: AI Insights
+    description: Team-scoped artificial intelligence insights
 paths:
   /health:
     get:
@@ -44,7 +53,6 @@ paths:
                 $ref: '#/components/schemas/HealthResponse'
               example:
                 status: ok
-                env: development
                 timestamp: '2024-11-01T10:00:00.000Z'
 
   /api/v1/auth/register-coach:
@@ -66,14 +74,13 @@ paths:
               email: coach@test.com
               password: Test1234!
               phone: '+33612345678'
-              clubName: FootTech FC
       responses:
         '201':
           description: Coach created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
+                $ref: '#/components/schemas/TokenRefreshResponse'
         '400':
           description: Validation error
           content:
@@ -145,17 +152,39 @@ paths:
         - Auth
       summary: Revoke the current session
       operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All refresh tokens for the authenticated user were revoked
+
+  /api/v1/auth/select-team:
+    post:
+      tags: [Auth]
+      summary: Select an accessible team and rotate the JWT pair
+      operationId: selectActiveTeam
+      security:
+        - bearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required: [teamId]
               properties:
-                refreshToken:
-                  type: string
+                teamId:
+                  type: integer
+                  format: int64
       responses:
-        '204':
-          description: Logged out successfully
+        '200':
+          description: Active team selected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '403':
+          description: The authenticated user cannot access this team
 
   /api/v1/auth/me:
     get:
@@ -226,7 +255,8 @@ paths:
             example:
               name: U15 A
               category: U15
-              logoUrl: ''
+              logo: https://example.test/logo.png
+              description: Équipe U15
       responses:
         '201':
           description: Team created
@@ -250,8 +280,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Team details
@@ -273,8 +303,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -286,7 +316,10 @@ paths:
                   type: string
                 category:
                   type: string
-                logoUrl:
+                logo:
+                  type: string
+                  format: uri
+                description:
                   type: string
       responses:
         '200':
@@ -303,8 +336,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '204':
           description: Team deleted
@@ -322,8 +355,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -343,16 +376,11 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: teamId
-          in: query
-          schema:
-            type: string
-            format: uuid
         - name: search
           in: query
           schema:
             type: string
-        - name: position
+        - name: posteP
           in: query
           schema:
             type: string
@@ -373,12 +401,16 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [success, data]
                 properties:
+                  success:
+                    type: boolean
+                    const: true
                   data:
                     type: array
                     items:
                       $ref: '#/components/schemas/Player'
-                  meta:
+                  pagination:
                     $ref: '#/components/schemas/PaginationMeta'
         '401':
           description: Not authenticated
@@ -398,10 +430,10 @@ paths:
             example:
               firstName: Lucas
               lastName: Martin
-              dateOfBirth: '2012-05-14'
-              position: Attaquant
-              teamId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
-              jerseyNumber: 9
+              dateNaissance: '2012-05-14'
+              posteP: FW
+              piedFort: DROIT
+              numeroMaillot: 9
               phone: '+33611112222'
       responses:
         '201':
@@ -424,8 +456,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Player profile
@@ -447,8 +479,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -456,19 +488,22 @@ paths:
             schema:
               type: object
               properties:
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                dateOfBirth:
+                dateNaissance:
                   type: string
                   format: date
-                position:
+                tailleCm:
+                  type: number
+                poidsKg:
+                  type: number
+                posteP:
                   type: string
-                jerseyNumber:
+                posteS:
+                  type: string
+                piedFort:
+                  type: string
+                  enum: [DROIT, GAUCHE, AMBIDEXTRE]
+                numeroMaillot:
                   type: integer
-                phone:
-                  type: string
       responses:
         '200':
           description: Player updated
@@ -486,8 +521,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Player guardians
@@ -503,8 +538,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -528,8 +563,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Player address
@@ -545,8 +580,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -570,8 +605,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: School information
@@ -587,8 +622,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -612,8 +647,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Season profiles
@@ -629,8 +664,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -654,8 +689,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Player injuries
@@ -677,8 +712,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -706,14 +741,14 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
         - name: injuryId
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -745,17 +780,234 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
         - name: injuryId
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '204':
           description: Injury deleted
+
+  /api/v1/seasons:
+    get:
+      tags: [Seasons]
+      summary: List seasons
+      description: Lists seasons owned by the selected team plus read-only legacy shared seasons.
+      operationId: listSeasons
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Season list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonListResponse'
+    post:
+      tags: [Seasons]
+      summary: Create a season (COACH)
+      description: Creates the season for the team selected in the authenticated session.
+      operationId: createSeason
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSeasonRequest'
+      responses:
+        '201':
+          description: Season created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonResponse'
+
+  /api/v1/seasons/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      tags: [Seasons]
+      summary: Get a season
+      operationId: getSeason
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Season details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonResponse'
+    patch:
+      tags: [Seasons]
+      summary: Partially update a season (COACH)
+      operationId: updateSeason
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSeasonRequest'
+      responses:
+        '200':
+          description: Season updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonResponse'
+    delete:
+      tags: [Seasons]
+      summary: Delete a season (COACH)
+      operationId: deleteSeason
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Season deleted
+
+  /api/v1/weekly-plannings:
+    get:
+      tags: [Weekly Plannings]
+      summary: List weekly plannings for the authenticated team
+      operationId: listWeeklyPlannings
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: seasonId
+          in: query
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Weekly planning list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WeeklyPlanning'
+    post:
+      tags: [Weekly Plannings]
+      summary: Create a weekly planning (COACH/ADJOINT)
+      operationId: createWeeklyPlanning
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWeeklyPlanningRequest'
+      responses:
+        '201':
+          description: Weekly planning created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyPlanning'
+
+  /api/v1/weekly-plannings/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      tags: [Weekly Plannings]
+      summary: Get a weekly planning belonging to the authenticated team
+      operationId: getWeeklyPlanning
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Weekly planning details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyPlanning'
+    patch:
+      tags: [Weekly Plannings]
+      summary: Partially update a weekly planning (COACH/ADJOINT)
+      operationId: updateWeeklyPlanning
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWeeklyPlanningRequest'
+      responses:
+        '200':
+          description: Weekly planning updated
+    delete:
+      tags: [Weekly Plannings]
+      summary: Delete a weekly planning (COACH)
+      operationId: deleteWeeklyPlanning
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Weekly planning deleted
+
+  /api/v1/weekly-plannings/{id}/slots:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      tags: [Weekly Plannings]
+      summary: List weekly planning slots
+      operationId: listWeeklyPlanningSlots
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Slot list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WeeklyPlanningSlot'
+    put:
+      tags: [Weekly Plannings]
+      summary: Create or update a weekly planning slot (COACH/ADJOINT)
+      operationId: upsertWeeklyPlanningSlot
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertWeeklyPlanningSlotRequest'
+      responses:
+        '200':
+          description: Slot saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyPlanningSlot'
 
   /api/v1/matches:
     get:
@@ -766,26 +1018,16 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: teamId
-          in: query
-          schema:
-            type: string
-            format: uuid
         - name: status
           in: query
           schema:
             type: string
-            enum: [SCHEDULED, IN_PROGRESS, FINISHED, CANCELLED]
-        - name: page
+            enum: [SCHEDULED, LIVE, FINISHED, CANCELLED, POSTPONED]
+        - name: seasonId
           in: query
           schema:
             type: integer
-            default: 1
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 20
+            format: int64
       responses:
         '200':
           description: List of matches
@@ -793,13 +1035,15 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [success, data]
                 properties:
+                  success:
+                    type: boolean
+                    const: true
                   data:
                     type: array
                     items:
                       $ref: '#/components/schemas/Match'
-                  meta:
-                    $ref: '#/components/schemas/PaginationMeta'
         '401':
           description: Not authenticated
     post:
@@ -816,12 +1060,12 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateMatchRequest'
             example:
-              date: '2024-11-10'
-              opponent: AS Romains
-              location: Stade de Genève
-              homeAway: HOME
-              teamId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
-              seasonId: 3fa85f64-5717-4562-b3fc-2c963f66afa7
+              adversaire: AS Romains
+              dateHeure: '2027-11-10T18:00:00Z'
+              lieu: Stade de Genève
+              isHome: true
+              formation: 4-3-3
+              seasonId: 2
       responses:
         '201':
           description: Match created
@@ -843,8 +1087,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Match details
@@ -866,8 +1110,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '204':
           description: Match deleted
@@ -885,19 +1129,19 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [status]
+              required: [matchStatus]
               properties:
-                status:
+                matchStatus:
                   type: string
-                  enum: [SCHEDULED, IN_PROGRESS, FINISHED, CANCELLED]
+                  enum: [SCHEDULED, LIVE, FINISHED, CANCELLED, POSTPONED]
                   example: FINISHED
       responses:
         '200':
@@ -916,8 +1160,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Match lineup
@@ -937,30 +1181,32 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [formation, players]
+              required: [entries]
               properties:
-                formation:
-                  type: string
-                  example: 4-3-3
-                players:
+                entries:
                   type: array
+                  minItems: 1
                   items:
                     type: object
+                    required: [playerId, status]
                     properties:
                       playerId:
+                        type: integer
+                        format: int64
+                      status:
                         type: string
-                        format: uuid
-                      position:
+                        enum: [STARTER, SUBSTITUTE, NOT_SELECTED]
+                      positionTerrain:
                         type: string
-                        example: ST
+                        maxLength: 10
       responses:
         '200':
           description: Lineup set
@@ -978,8 +1224,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Match events
@@ -1001,27 +1247,30 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [type, minute]
+              required: [eventType, minute]
               properties:
-                type:
+                eventType:
                   type: string
-                  enum: [GOAL, YELLOW_CARD, RED_CARD, SUBSTITUTION, ASSIST, OTHERS]
+                  enum: [GOAL, ASSIST, YELLOW_CARD, RED_CARD, SUBSTITUTION_IN, SUBSTITUTION_OUT, INJURY]
                   example: GOAL
                 minute:
                   type: integer
                   example: 23
                 playerId:
-                  type: string
-                  format: uuid
-                details:
+                  type: integer
+                  format: int64
+                relatedPlayerId:
+                  type: integer
+                  format: int64
+                comment:
                   type: string
                   example: But de la tête
       responses:
@@ -1045,8 +1294,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Player stats
@@ -1068,8 +1317,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -1093,8 +1342,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Evaluations
@@ -1116,8 +1365,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -1141,8 +1390,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Match report
@@ -1150,11 +1399,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MatchReport'
-    post:
+  /api/v1/matches/{id}/report/file:
+    get:
       tags:
         - Matches
-      summary: Save match report (COACH/ADJOINT)
-      operationId: saveMatchReport
+      summary: Download the authorized match report PDF
+      operationId: downloadMatchReport
       security:
         - bearerAuth: []
       parameters:
@@ -1162,17 +1412,37 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MatchReport'
+            type: integer
+            format: int64
       responses:
         '200':
-          description: Report saved
+          description: Generated PDF
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Report not generated or inaccessible
+
+  /api/v1/matches/{id}/report/generate:
+    post:
+      tags:
+        - Matches
+      summary: Generate the match report PDF (COACH/ADJOINT)
+      operationId: generateMatchReport
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '201':
+          description: Report generated
 
   /api/v1/matches/{id}/ai-recommendations:
     post:
@@ -1187,24 +1457,20 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                analysisType:
-                  type: string
-                  enum: [PERFORMANCE, TACTICAL, PLAYER_INSIGHT]
-                  example: PERFORMANCE
-                focus:
+                playerIds:
                   type: array
                   items:
-                    type: string
-                  example: [ATTACK, DEFENSE]
+                    type: integer
+                    format: int64
+                  description: Optional subset of players from the match team
       responses:
         '200':
           description: AI recommendations generated
@@ -1220,8 +1486,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Existing AI recommendations
@@ -1235,21 +1501,16 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: teamId
+        - name: from
           in: query
           schema:
             type: string
-            format: uuid
-        - name: page
+            format: date
+        - name: to
           in: query
           schema:
-            type: integer
-            default: 1
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 20
+            type: string
+            format: date
       responses:
         '200':
           description: List of trainings
@@ -1257,13 +1518,15 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [success, data]
                 properties:
+                  success:
+                    type: boolean
+                    const: true
                   data:
                     type: array
                     items:
                       $ref: '#/components/schemas/Training'
-                  meta:
-                    $ref: '#/components/schemas/PaginationMeta'
         '401':
           description: Not authenticated
     post:
@@ -1280,13 +1543,10 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateTrainingRequest'
             example:
-              title: Séance vitesse
               date: '2024-11-05'
               startTime: '18:00'
               endTime: '19:30'
               location: Stade Municipal
-              teamId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
-              seasonId: 3fa85f64-5717-4562-b3fc-2c963f66afa7
       responses:
         '201':
           description: Training created
@@ -1308,8 +1568,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Training details
@@ -1331,8 +1591,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -1340,8 +1600,6 @@ paths:
             schema:
               type: object
               properties:
-                title:
-                  type: string
                 date:
                   type: string
                   format: date
@@ -1353,6 +1611,9 @@ paths:
                   example: '19:30'
                 location:
                   type: string
+                status:
+                  type: string
+                  enum: [SCHEDULED, COMPLETED, CANCELLED]
       responses:
         '200':
           description: Training updated
@@ -1368,8 +1629,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '204':
           description: Training deleted
@@ -1387,8 +1648,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Training sheet
@@ -1404,8 +1665,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -1413,19 +1674,13 @@ paths:
             schema:
               type: object
               properties:
-                objectives:
-                  type: array
-                  items:
-                    type: string
-                  example: [Améliorer la vitesse, Travail technique]
-                expectedAttendance:
-                  type: integer
-                  example: 18
-                equipment:
-                  type: array
-                  items:
-                    type: string
-                  example: [Cônes, Ballons]
+                objectifs:
+                  type: string
+                  example: Améliorer la vitesse et la transition défensive
+                effectif:
+                  type: string
+                  maxLength: 100
+                  example: 18 joueurs
       responses:
         '200':
           description: Sheet saved
@@ -1443,8 +1698,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Training situations
@@ -1466,27 +1721,35 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [name]
               properties:
-                name:
+                ordre:
+                  type: integer
+                  minimum: 1
+                titre:
                   type: string
                   example: Exercice 1 - Conduite de balle
                 description:
                   type: string
-                duration:
-                  type: integer
-                  example: 15
-                objective:
+                dureeTravail:
                   type: string
-                  example: Technique
+                dureeRecuperation:
+                  type: string
+                dureeMinutes:
+                  type: integer
+                  minimum: 1
+                  example: 15
+                criteresReussite:
+                  type: array
+                  items:
+                    type: string
       responses:
         '201':
           description: Situation created
@@ -1508,14 +1771,14 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
         - name: situationId
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -1523,14 +1786,24 @@ paths:
             schema:
               type: object
               properties:
-                name:
+                ordre:
+                  type: integer
+                  minimum: 1
+                titre:
                   type: string
                 description:
                   type: string
-                duration:
-                  type: integer
-                objective:
+                dureeTravail:
                   type: string
+                dureeRecuperation:
+                  type: string
+                dureeMinutes:
+                  type: integer
+                  minimum: 1
+                criteresReussite:
+                  type: array
+                  items:
+                    type: string
       responses:
         '200':
           description: Situation updated
@@ -1546,14 +1819,14 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
         - name: situationId
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '204':
           description: Situation deleted
@@ -1571,14 +1844,14 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
         - name: situationId
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Tactical drawing
@@ -1594,45 +1867,27 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
         - name: situationId
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [elements]
+              required: [canvasData]
               properties:
-                elements:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      type:
-                        type: string
-                        example: player
-                      x:
-                        type: number
-                      y:
-                        type: number
-                      team:
-                        type: string
-                        example: A
-                width:
-                  type: integer
-                  example: 800
-                height:
-                  type: integer
-                  example: 500
+                canvasData:
+                  type: object
+                  additionalProperties: true
       responses:
-        '200':
+        '201':
           description: Drawing saved
 
   /api/v1/notifications:
@@ -1667,21 +1922,26 @@ paths:
           application/json:
             schema:
               type: object
-              required: [recipientId, title, body]
+              required: [userId, type, title, message]
               properties:
-                recipientId:
+                userId:
+                  type: integer
+                  format: int64
+                type:
                   type: string
-                  format: uuid
+                  enum: [MATCH_CONVOCATION, NEW_TRAINING, REPORT_AVAILABLE, PLANNING_CHANGE, OTHER]
                 title:
                   type: string
                   example: Nouvelle séance
-                body:
+                message:
                   type: string
                   example: Une séance d'entraînement a été ajoutée
-                type:
+                relatedEntityType:
                   type: string
-                  enum: [TRAINING, MATCH, GENERAL]
-                  example: TRAINING
+                  maxLength: 50
+                relatedEntityId:
+                  type: integer
+                  format: int64
       responses:
         '201':
           description: Notification created
@@ -1704,18 +1964,15 @@ paths:
           application/json:
             schema:
               type: object
-              required: [teamId, title, body]
+              required: [type, title, message]
               properties:
-                teamId:
-                  type: string
-                  format: uuid
-                title:
-                  type: string
-                body:
-                  type: string
                 type:
                   type: string
-                  enum: [TRAINING, MATCH, GENERAL]
+                  enum: [MATCH_CONVOCATION, NEW_TRAINING, REPORT_AVAILABLE, PLANNING_CHANGE, OTHER]
+                title:
+                  type: string
+                message:
+                  type: string
       responses:
         '201':
           description: Notification broadcast
@@ -1733,8 +1990,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Notification marked as read
@@ -1754,7 +2011,7 @@ paths:
   /api/v1/attendance/players/{playerId}/history:
     get:
       tags:
-        - Notifications
+        - Attendance
       summary: Get attendance history for a player
       operationId: getPlayerAttendanceHistory
       security:
@@ -1764,8 +2021,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Attendance history
@@ -1779,7 +2036,7 @@ paths:
   /api/v1/attendance/trainings/{id}:
     get:
       tags:
-        - Notifications
+        - Attendance
       summary: Get attendance for a training
       operationId: getTrainingAttendance
       security:
@@ -1789,14 +2046,14 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
           description: Attendance records for the training
     post:
       tags:
-        - Notifications
+        - Attendance
       summary: Mark attendance for one player (COACH/ADJOINT)
       operationId: markAttendance
       security:
@@ -1806,8 +2063,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -1817,20 +2074,20 @@ paths:
               required: [playerId, status]
               properties:
                 playerId:
-                  type: string
-                  format: uuid
+                  type: integer
+                  format: int64
                 status:
                   type: string
-                  enum: [PRESENT, ABSENT, LATE, EXCUSED]
+                  enum: [PRESENT, ABSENT, LATE, INJURED]
                   example: PRESENT
       responses:
-        '200':
+        '201':
           description: Attendance marked
 
   /api/v1/attendance/trainings/{id}/bulk:
     post:
       tags:
-        - Notifications
+        - Attendance
       summary: Bulk mark attendance for training (COACH/ADJOINT)
       operationId: bulkMarkAttendance
       security:
@@ -1840,30 +2097,102 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [records]
+              required: [entries]
               properties:
-                records:
+                entries:
                   type: array
+                  minItems: 1
                   items:
                     type: object
+                    required: [playerId, status]
                     properties:
                       playerId:
-                        type: string
-                        format: uuid
+                        type: integer
+                        format: int64
                       status:
                         type: string
-                        enum: [PRESENT, ABSENT, LATE, EXCUSED]
+                        enum: [PRESENT, ABSENT, LATE, INJURED]
+                      comment:
+                        type: string
+      responses:
+        '201':
+          description: Attendance marked in bulk
+
+  /api/v1/ai-insights/players/{id}/trend:
+    get:
+      tags:
+        - AI Insights
+      summary: Get the performance trend of an accessible player
+      operationId: getPlayerTrend
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
       responses:
         '200':
-          description: Attendance marked in bulk
+          description: Player trend generated from match evaluations
+        '403':
+          description: Player is outside the authenticated team
+
+  /api/v1/ai-insights/clusters:
+    get:
+      tags:
+        - AI Insights
+      summary: Cluster players from the authenticated team
+      description: Requires at least four players in the authenticated team.
+      operationId: getTeamPlayerClusters
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nClusters
+          in: query
+          schema:
+            type: integer
+            minimum: 2
+            maximum: 8
+            default: 3
+      responses:
+        '200':
+          description: Team player clusters
+        '400':
+          description: Fewer than four players or invalid cluster count
+
+  /api/v1/ai-insights/tone:
+    post:
+      tags:
+        - AI Insights
+      summary: Analyze the tone of a staff comment
+      operationId: analyzeCommentTone
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [comment]
+              properties:
+                comment:
+                  type: string
+                  minLength: 1
+                  maxLength: 5000
+      responses:
+        '200':
+          description: Tone analysis
 
 components:
   securitySchemes:
@@ -1902,7 +2231,7 @@ components:
 
     RegisterCoachRequest:
       type: object
-      required: [firstName, lastName, email, password]
+      required: [firstName, lastName, phone, email, password]
       properties:
         firstName:
           type: string
@@ -1921,9 +2250,6 @@ components:
         phone:
           type: string
           example: +33612345678
-        clubName:
-          type: string
-          example: FootTech FC
 
     LoginRequest:
       type: object
@@ -1940,24 +2266,62 @@ components:
 
     AuthResponse:
       type: object
+      required: [success, data]
       properties:
-        user:
-          $ref: '#/components/schemas/User'
+        success:
+          type: boolean
+          const: true
+        message:
+          type: string
+        data:
+          oneOf:
+            - type: object
+              required: [user, tokens]
+              properties:
+                user:
+                  $ref: '#/components/schemas/User'
+                tokens:
+                  $ref: '#/components/schemas/AuthTokens'
+            - type: object
+              required: [user, needsActivation]
+              properties:
+                user:
+                  $ref: '#/components/schemas/User'
+                needsActivation:
+                  type: boolean
+                  const: true
+
+    TokenRefreshResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          const: true
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/AuthTokens'
+
+    AuthTokens:
+      type: object
+      required: [accessToken, refreshToken, expiresIn]
+      properties:
         accessToken:
           type: string
           description: JWT bearer token
         refreshToken:
           type: string
         expiresIn:
-          type: integer
-          description: Token validity in seconds
+          type: string
+          description: Configured access-token duration, such as 15m
 
     User:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
+          type: integer
+          format: int64
         firstName:
           type: string
         lastName:
@@ -1970,12 +2334,12 @@ components:
         role:
           type: string
           enum: [COACH, ADJOINT, JOUEUR]
-        avatarUrl:
+        accountStatus:
           type: string
-          nullable: true
+          enum: [ACTIVE, INACTIVE, BLOCKED]
         teamId:
-          type: string
-          format: uuid
+          type: integer
+          format: int64
           nullable: true
 
     PaginationMeta:
@@ -1994,24 +2358,24 @@ components:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
+          type: integer
+          format: int64
         name:
           type: string
           example: U15 A
         category:
           type: string
           example: U15
-        logoUrl:
+        logo:
           type: string
           nullable: true
-        coachId:
+        description:
           type: string
-          format: uuid
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
+          nullable: true
+        coach_id:
+          type: integer
+          format: int64
+        created_at:
           type: string
           format: date-time
 
@@ -2025,12 +2389,15 @@ components:
         category:
           type: string
           example: U15
-        logoUrl:
+        logo:
+          type: string
+          format: uri
+        description:
           type: string
 
     AddStaffRequest:
       type: object
-      required: [firstName, lastName, email]
+      required: [firstName, lastName, phone, email]
       properties:
         firstName:
           type: string
@@ -2046,37 +2413,40 @@ components:
       type: object
       properties:
         id:
+          type: integer
+          format: int64
+        first_name:
           type: string
-          format: uuid
-        firstName:
+        last_name:
           type: string
-        lastName:
-          type: string
-        dateOfBirth:
+        date_naissance:
           type: string
           format: date
-        position:
+        poste_principal:
           type: string
-        teamId:
+        poste_secondaire:
           type: string
-          format: uuid
-        jerseyNumber:
+          nullable: true
+        pied_fort:
+          type: string
+          enum: [DROIT, GAUCHE, AMBIDEXTRE]
+        team_id:
+          type: integer
+          format: int64
+        numero_maillot:
           type: integer
         phone:
           type: string
-        photoUrl:
+        profile_image:
           type: string
           nullable: true
-        status:
+        account_status:
           type: string
-          enum: [ACTIVE, INJURED, INACTIVE]
-        createdAt:
-          type: string
-          format: date-time
+          enum: [ACTIVE, INACTIVE, BLOCKED]
 
     CreatePlayerRequest:
       type: object
-      required: [firstName, lastName, dateOfBirth, teamId]
+      required: [firstName, lastName, phone]
       properties:
         firstName:
           type: string
@@ -2084,35 +2454,41 @@ components:
         lastName:
           type: string
           example: Martin
-        dateOfBirth:
+        dateNaissance:
           type: string
           format: date
           example: '2012-05-14'
-        position:
+        posteP:
           type: string
-          example: Attaquant
-        teamId:
+          example: FW
+        posteS:
           type: string
-          format: uuid
-        jerseyNumber:
+        piedFort:
+          type: string
+          enum: [DROIT, GAUCHE, AMBIDEXTRE]
+        numeroMaillot:
           type: integer
           example: 9
         phone:
           type: string
-        photoUrl:
-          type: string
 
     Guardian:
       type: object
+      required: [relation]
       properties:
-        firstName:
-          type: string
-        lastName:
-          type: string
         relation:
           type: string
-          example: Père
-        phone:
+          enum: [PERE, MERE, TUTEUR]
+        nom:
+          type: string
+        prenom:
+          type: string
+        dateNaissance:
+          type: string
+          format: date
+        tel1:
+          type: string
+        tel2:
           type: string
         email:
           type: string
@@ -2121,249 +2497,513 @@ components:
     Address:
       type: object
       properties:
-        street:
+        adresseComplete:
           type: string
-        city:
+        distanceClubKm:
+          type: number
+          minimum: 0
+        moyenTransport:
           type: string
-        postalCode:
-          type: string
-        country:
-          type: string
-        additionalInfo:
-          type: string
+        dureeTrajetMin:
+          type: integer
+          minimum: 0
 
     SchoolInfo:
       type: object
       properties:
-        schoolName:
+        etablissement:
           type: string
-        grade:
+        distanceClubKm:
+          type: number
+          minimum: 0
+        classe:
           type: string
-        notes:
+        niveauScolaire:
           type: string
+          enum: [FAIBLE, MOYEN, BIEN, TRES_BIEN]
 
     SeasonProfile:
       type: object
+      required: [season]
       properties:
-        seasonId:
+        season:
           type: string
-          format: uuid
-        medicalCertificate:
-          type: boolean
-        insuranceNumber:
+        clubNiveau:
           type: string
-        skillLevel:
+        poidsKg:
+          type: number
+        tailleCm:
+          type: number
+        pointure:
+          type: number
+        tailleVetement:
           type: string
-        footedness:
+        poste1:
           type: string
-          enum: [LEFT, RIGHT, BOTH]
+        poste2:
+          type: string
+        pointsForts:
+          type: string
+        pointsAAmeliorer:
+          type: string
 
     Injury:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
-        injuryType:
-          type: string
-          example: Entorse cheville
-        date:
+          type: integer
+          format: int64
+        date_blessure:
           type: string
           format: date
-        status:
+        description:
           type: string
-          enum: [ACTIVE, RECOVERED]
-        severity:
-          type: string
-          enum: [MILD, MODERATE, SEVERE]
-        notes:
-          type: string
-        recoveryDate:
+        duree_indisponibilite_jours:
+          type: integer
+        date_retour:
           type: string
           format: date
           nullable: true
 
     CreateInjuryRequest:
       type: object
-      required: [injuryType, date]
+      required: [dateBlessure]
       properties:
-        injuryType:
-          type: string
-          example: Entorse cheville
-        date:
+        dateBlessure:
           type: string
           format: date
-        severity:
+        description:
           type: string
-          enum: [MILD, MODERATE, SEVERE]
-        notes:
+        dureeIndisponibiliteJours:
+          type: integer
+          minimum: 0
+
+    Season:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        team_id:
+          type: integer
+          format: int64
+          nullable: true
+          description: Owning team; null only for a read-only legacy shared season.
+        name:
           type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        is_current:
+          type: boolean
+
+    SeasonResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          const: true
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/Season'
+
+    SeasonListResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Season'
+
+    CreateSeasonRequest:
+      type: object
+      required: [name, startDate, endDate]
+      properties:
+        name:
+          type: string
+          minLength: 4
+          maxLength: 20
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+          description: Must be after startDate
+        isCurrent:
+          type: boolean
+
+    UpdateSeasonRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 4
+          maxLength: 20
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        isCurrent:
+          type: boolean
+
+    WeeklyPlanning:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        team_id:
+          type: integer
+          format: int64
+        season_id:
+          type: integer
+          format: int64
+          nullable: true
+        semaine_numero:
+          type: integer
+          nullable: true
+        date_debut:
+          type: string
+          format: date
+        date_fin:
+          type: string
+          format: date
+        nombre_seances:
+          type: integer
+          nullable: true
+        intensite:
+          type: string
+          nullable: true
+        volume:
+          type: string
+          nullable: true
+        match_prevu:
+          type: boolean
+
+    CreateWeeklyPlanningRequest:
+      type: object
+      required: [dateDebut, dateFin]
+      properties:
+        seasonId:
+          type: integer
+          format: int64
+        semaineNumero:
+          type: integer
+          minimum: 1
+        dateDebut:
+          type: string
+          format: date
+        dateFin:
+          type: string
+          format: date
+          description: Must be on or after dateDebut
+        nombreSeances:
+          type: integer
+          minimum: 0
+        intensite:
+          type: string
+          maxLength: 50
+        volume:
+          type: string
+          maxLength: 50
+        matchPrevu:
+          type: boolean
+
+    UpdateWeeklyPlanningRequest:
+      type: object
+      properties:
+        seasonId:
+          type: integer
+          format: int64
+        semaineNumero:
+          type: integer
+          minimum: 1
+        dateDebut:
+          type: string
+          format: date
+        dateFin:
+          type: string
+          format: date
+        nombreSeances:
+          type: integer
+          minimum: 0
+        intensite:
+          type: string
+          maxLength: 50
+        volume:
+          type: string
+          maxLength: 50
+        matchPrevu:
+          type: boolean
+
+    WeeklyPlanningSlot:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        weekly_planning_id:
+          type: integer
+          format: int64
+        jour:
+          type: string
+          format: date
+        moment:
+          type: string
+          enum: [MATIN, APRES_MIDI, SOIR]
+        training_id:
+          type: integer
+          format: int64
+          nullable: true
+        description:
+          type: string
+          nullable: true
+
+    UpsertWeeklyPlanningSlotRequest:
+      type: object
+      required: [jour, moment]
+      properties:
+        jour:
+          type: string
+          format: date
+        moment:
+          type: string
+          enum: [MATIN, APRES_MIDI, SOIR]
+        trainingId:
+          type: integer
+          format: int64
+          description: The training must belong to the same team as the weekly planning
+        description:
+          type: string
+          maxLength: 255
 
     Match:
       type: object
       properties:
         id:
+          type: integer
+          format: int64
+        team_id:
+          type: integer
+          format: int64
+        season_id:
+          type: integer
+          format: int64
+          nullable: true
+        adversaire:
           type: string
-          format: uuid
-        date:
+        date_heure:
           type: string
-          format: date
-        opponent:
+          format: date-time
+        lieu:
           type: string
-        location:
+          nullable: true
+        is_home:
+          type: boolean
+        formation:
           type: string
-        homeAway:
+          nullable: true
+        home_score:
+          type: integer
+          minimum: 0
+        away_score:
+          type: integer
+          minimum: 0
+        match_status:
           type: string
-          enum: [HOME, AWAY]
-        status:
-          type: string
-          enum: [SCHEDULED, IN_PROGRESS, FINISHED, CANCELLED]
-        teamId:
-          type: string
-          format: uuid
-        seasonId:
-          type: string
-          format: uuid
-        createdAt:
+          enum: [SCHEDULED, LIVE, FINISHED, CANCELLED, POSTPONED]
+        created_at:
           type: string
           format: date-time
 
     CreateMatchRequest:
       type: object
-      required: [date, opponent, teamId]
+      required: [adversaire, dateHeure]
       properties:
-        date:
-          type: string
-          format: date
-        opponent:
-          type: string
-        location:
-          type: string
-        homeAway:
-          type: string
-          enum: [HOME, AWAY]
-          example: HOME
-        teamId:
-          type: string
-          format: uuid
         seasonId:
+          type: integer
+          format: int64
+        adversaire:
           type: string
-          format: uuid
-
-    MatchLineup:
-      type: object
-      properties:
+          maxLength: 150
+        dateHeure:
+          type: string
+          format: date-time
+        lieu:
+          type: string
+          maxLength: 255
+        isHome:
+          type: boolean
         formation:
           type: string
-          example: 4-3-3
-        players:
-          type: array
-          items:
-            type: object
-            properties:
-              playerId:
-                type: string
-                format: uuid
-              position:
-                type: string
-              shirtNumber:
-                type: integer
+          maxLength: 20
+
+    MatchLineup:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            format: int64
+          match_id:
+            type: integer
+            format: int64
+          player_id:
+            type: integer
+            format: int64
+          status:
+            type: string
+            enum: [STARTER, SUBSTITUTE, NOT_SELECTED]
+          position_terrain:
+            type: string
+            nullable: true
+          selected_by:
+            type: integer
+            format: int64
+            nullable: true
+          first_name:
+            type: string
+          last_name:
+            type: string
+          numero_maillot:
+            type: integer
+            nullable: true
 
     MatchEvent:
       type: object
       properties:
         id:
+          type: integer
+          format: int64
+        match_id:
+          type: integer
+          format: int64
+        event_type:
           type: string
-          format: uuid
-        type:
-          type: string
-          enum: [GOAL, YELLOW_CARD, RED_CARD, SUBSTITUTION, ASSIST, OTHERS]
+          enum: [GOAL, ASSIST, YELLOW_CARD, RED_CARD, SUBSTITUTION_IN, SUBSTITUTION_OUT, INJURY]
         minute:
           type: integer
-        playerId:
-          type: string
-          format: uuid
+        player_id:
+          type: integer
+          format: int64
           nullable: true
-        details:
+        related_player_id:
+          type: integer
+          format: int64
+          nullable: true
+        comment:
           type: string
-        matchId:
+          nullable: true
+        created_by:
+          type: integer
+          format: int64
+          nullable: true
+        created_at:
           type: string
-          format: uuid
+          format: date-time
 
     PlayerStat:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
-        playerId:
-          type: string
-          format: uuid
-        matchId:
-          type: string
-          format: uuid
+          type: integer
+          format: int64
+        match_id:
+          type: integer
+          format: int64
+        player_id:
+          type: integer
+          format: int64
         goals:
           type: integer
         assists:
           type: integer
-        minutesPlayed:
+        minutes_played:
           type: integer
-        rating:
-          type: number
-          format: float
+        goals_conceded:
+          type: integer
+        yellow_cards:
+          type: integer
+        red_cards:
+          type: integer
 
     PlayerStatUpsert:
       type: object
       required: [playerId]
       properties:
         playerId:
-          type: string
-          format: uuid
+          type: integer
+          format: int64
         goals:
           type: integer
         assists:
           type: integer
         minutesPlayed:
           type: integer
-        rating:
-          type: number
-          format: float
+        goalsConceded:
+          type: integer
+          minimum: 0
+        yellowCards:
+          type: integer
+          minimum: 0
+          maximum: 2
+        redCards:
+          type: integer
+          minimum: 0
+          maximum: 1
 
     Evaluation:
       type: object
       properties:
         id:
+          type: integer
+          format: int64
+        match_id:
+          type: integer
+          format: int64
+        player_id:
+          type: integer
+          format: int64
+        note:
+          type: number
+          minimum: 0
+          maximum: 10
+          nullable: true
+        commentaire:
           type: string
-          format: uuid
-        playerId:
+          nullable: true
+        evaluated_by:
+          type: integer
+          format: int64
+        evaluated_at:
           type: string
-          format: uuid
-        matchId:
-          type: string
-          format: uuid
-        criteria:
-          type: object
-          additionalProperties:
-            type: number
-          example:
-            technique: 8
-            tactique: 7
-            physique: 9
-        globalNotes:
-          type: string
+          format: date-time
 
     EvaluationUpsert:
       type: object
       required: [playerId]
       properties:
         playerId:
-          type: string
-          format: uuid
-        criteria:
-          type: object
-          additionalProperties:
-            type: number
-        globalNotes:
+          type: integer
+          format: int64
+        note:
+          type: number
+          minimum: 0
+          maximum: 10
+        commentaire:
           type: string
 
     MatchReport:
@@ -2383,37 +3023,38 @@ components:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
-        title:
-          type: string
+          type: integer
+          format: int64
+        team_id:
+          type: integer
+          format: int64
         date:
           type: string
           format: date
-        startTime:
+        start_time:
           type: string
           example: '18:00'
-        endTime:
+        end_time:
           type: string
           example: '19:30'
         location:
           type: string
-        teamId:
+          nullable: true
+        status:
           type: string
-          format: uuid
-        seasonId:
-          type: string
-          format: uuid
-        createdAt:
+          enum: [SCHEDULED, COMPLETED, CANCELLED]
+        created_by:
+          type: integer
+          format: int64
+          nullable: true
+        created_at:
           type: string
           format: date-time
 
     CreateTrainingRequest:
       type: object
-      required: [title, date, teamId]
+      required: [date, startTime, endTime]
       properties:
-        title:
-          type: string
         date:
           type: string
           format: date
@@ -2425,50 +3066,64 @@ components:
           example: '19:30'
         location:
           type: string
-        teamId:
-          type: string
-          format: uuid
-        seasonId:
-          type: string
-          format: uuid
 
     Situation:
       type: object
       properties:
         id:
+          type: integer
+          format: int64
+        training_sheet_id:
+          type: integer
+          format: int64
+        ordre:
+          type: integer
+        titre:
           type: string
-          format: uuid
-        trainingId:
-          type: string
-          format: uuid
-        name:
-          type: string
+          nullable: true
         description:
           type: string
-        duration:
-          type: integer
-        objective:
+          nullable: true
+        duree_travail:
           type: string
+          nullable: true
+        duree_recuperation:
+          type: string
+          nullable: true
+        duree_minutes:
+          type: integer
+          nullable: true
+        criteres_reussite:
+          type: array
+          items:
+            type: string
 
     Notification:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
-        recipientId:
-          type: string
-          format: uuid
+          type: integer
+          format: int64
+        user_id:
+          type: integer
+          format: int64
         title:
           type: string
-        body:
+        message:
           type: string
         type:
           type: string
-          enum: [TRAINING, MATCH, GENERAL]
-        isRead:
+          enum: [MATCH_CONVOCATION, NEW_TRAINING, REPORT_AVAILABLE, PLANNING_CHANGE, OTHER]
+        related_entity_type:
+          type: string
+          nullable: true
+        related_entity_id:
+          type: integer
+          format: int64
+          nullable: true
+        is_read:
           type: boolean
-        createdAt:
+        created_at:
           type: string
           format: date-time
 
@@ -2476,19 +3131,22 @@ components:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
-        playerId:
-          type: string
-          format: uuid
-        trainingId:
-          type: string
-          format: uuid
+          type: integer
+          format: int64
+        training_id:
+          type: integer
+          format: int64
+        player_id:
+          type: integer
+          format: int64
         status:
           type: string
-          enum: [PRESENT, ABSENT, LATE, EXCUSED]
-        date:
+          enum: [PRESENT, ABSENT, LATE, INJURED]
+        comment:
           type: string
-          format: date
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
 security:
   - bearerAuth: []

@@ -109,6 +109,27 @@ class AppLocalizationsFr extends AppLocalizations {
       'Compte activé — vous pouvez vous connecter';
 
   @override
+  String get aiTrendTitle => 'Tendance de performance IA';
+
+  @override
+  String get aiTrendProgressing => 'En progression';
+
+  @override
+  String get aiTrendStable => 'Stable';
+
+  @override
+  String get aiTrendDeclining => 'À surveiller';
+
+  @override
+  String get aiTrendUnavailable =>
+      'Au moins trois évaluations sont nécessaires pour calculer une tendance IA.';
+
+  @override
+  String aiTrendBasedOn(Object count) {
+    return 'Basée sur $count évaluations récentes';
+  }
+
+  @override
   String get playerLoginTitle => 'Connexion Joueur';
 
   @override

@@ -1,5 +1,10 @@
 class PaginationMeta {
-  const PaginationMeta({required this.page, required this.limit, required this.total, required this.totalPages});
+  const PaginationMeta({
+    required this.page,
+    required this.limit,
+    required this.total,
+    required this.totalPages,
+  });
 
   factory PaginationMeta.fromJson(Map<String, dynamic> json) {
     return PaginationMeta(

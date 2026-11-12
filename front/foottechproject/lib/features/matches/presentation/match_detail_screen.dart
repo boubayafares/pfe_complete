@@ -21,8 +21,23 @@ class MatchDetailScreen extends ConsumerWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: matchAsync.maybeWhen(data: (m) => Text(context.l10n.homeAwayVs(m.isHome ? context.l10n.home : context.l10n.away, m.adversaire)), orElse: () => const Text('Match')),
-          bottom: TabBar(indicatorColor: AppColors.green, tabs: [Tab(text: context.l10n.lineup), Tab(text: context.l10n.live), Tab(text: context.l10n.ai)]),
+          title: matchAsync.maybeWhen(
+            data: (m) => Text(
+              context.l10n.homeAwayVs(
+                m.isHome ? context.l10n.home : context.l10n.away,
+                m.adversaire,
+              ),
+            ),
+            orElse: () => const Text('Match'),
+          ),
+          bottom: TabBar(
+            indicatorColor: AppColors.green,
+            tabs: [
+              Tab(text: context.l10n.lineup),
+              Tab(text: context.l10n.live),
+              Tab(text: context.l10n.ai),
+            ],
+          ),
         ),
         body: matchAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -55,15 +70,55 @@ class _LineupTab extends ConsumerWidget {
       data: (lineup) {
         final starters = lineup.where((e) => e.status == 'STARTER').toList();
         final subs = lineup.where((e) => e.status == 'SUBSTITUTE').toList();
+        final notSelected = lineup
+            .where((e) => e.status == 'NOT_SELECTED')
+            .toList();
         return ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
-            Text(context.l10n.starters, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textSecondary, fontSize: 12)),
-            ...starters.map((e) => _LineupTile(entry: e, canManage: canManage, matchId: matchId)),
+            Text(
+              context.l10n.starters,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+            ...starters.map(
+              (e) =>
+                  _LineupTile(entry: e, canManage: canManage, matchId: matchId),
+            ),
             const SizedBox(height: AppSpacing.md),
-            Text(context.l10n.substitutes, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textSecondary, fontSize: 12)),
-            ...subs.map((e) => _LineupTile(entry: e, canManage: canManage, matchId: matchId)),
-            if (lineup.isEmpty) Text(context.l10n.lineupNotSet, style: const TextStyle(color: AppColors.textMuted)),
+            Text(
+              context.l10n.substitutes,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+            ...subs.map(
+              (e) =>
+                  _LineupTile(entry: e, canManage: canManage, matchId: matchId),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              context.l10n.notSelected,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+            ...notSelected.map(
+              (e) =>
+                  _LineupTile(entry: e, canManage: canManage, matchId: matchId),
+            ),
+            if (lineup.isEmpty)
+              Text(
+                context.l10n.lineupNotSet,
+                style: const TextStyle(color: AppColors.textMuted),
+              ),
           ],
         );
       },
@@ -72,7 +127,11 @@ class _LineupTab extends ConsumerWidget {
 }
 
 class _LineupTile extends ConsumerWidget {
-  const _LineupTile({required this.entry, required this.canManage, required this.matchId});
+  const _LineupTile({
+    required this.entry,
+    required this.canManage,
+    required this.matchId,
+  });
   final LineupEntry entry;
   final bool canManage;
   final int matchId;
@@ -81,15 +140,71 @@ class _LineupTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(radius: 16, backgroundColor: AppColors.navyBorder, child: Text('${entry.numeroMaillot ?? '-'}', style: const TextStyle(fontSize: 11))),
+      leading: CircleAvatar(
+        radius: 16,
+        backgroundColor: AppColors.navyBorder,
+        child: Text(
+          '${entry.numeroMaillot ?? '-'}',
+          style: const TextStyle(fontSize: 11),
+        ),
+      ),
       title: Text(entry.fullName, style: const TextStyle(fontSize: 13)),
-      subtitle: entry.positionTerrain != null ? Text(entry.positionTerrain!, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)) : null,
+      subtitle: entry.positionTerrain != null
+          ? Text(
+              entry.positionTerrain!,
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+            )
+          : null,
+      trailing: canManage
+          ? DropdownButton<String>(
+              value: entry.status,
+              underline: const SizedBox.shrink(),
+              items: [
+                DropdownMenuItem(
+                  value: 'STARTER',
+                  child: Text(context.l10n.starter),
+                ),
+                DropdownMenuItem(
+                  value: 'SUBSTITUTE',
+                  child: Text(context.l10n.substitute),
+                ),
+                DropdownMenuItem(
+                  value: 'NOT_SELECTED',
+                  child: Text(context.l10n.notSelected),
+                ),
+              ],
+              onChanged: (status) async {
+                if (status == null || status == entry.status) return;
+                try {
+                  await ref
+                      .read(matchesRepositoryProvider)
+                      .setLineupEntry(
+                        matchId,
+                        playerId: entry.playerId,
+                        status: status,
+                        positionTerrain: entry.positionTerrain,
+                      );
+                  ref.invalidate(matchLineupProvider(matchId));
+                } on ApiException catch (error) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(error.message)));
+                  }
+                }
+              },
+            )
+          : null,
     );
   }
 }
 
 class _LiveTab extends ConsumerWidget {
-  const _LiveTab({required this.matchId, required this.match, required this.canManage});
+  const _LiveTab({
+    required this.matchId,
+    required this.match,
+    required this.canManage,
+  });
   final int matchId;
   final MatchInfo match;
   final bool canManage;
@@ -105,9 +220,21 @@ class _LiveTab extends ConsumerWidget {
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             children: [
-              Text(match.matchStatus, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+              Text(
+                match.matchStatus,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 11,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(match.scoreLabel, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w600)),
+              Text(
+                match.scoreLabel,
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               if (canManage) ...[
                 const SizedBox(height: AppSpacing.md),
                 Row(
@@ -116,20 +243,28 @@ class _LiveTab extends ConsumerWidget {
                     if (match.matchStatus == 'SCHEDULED')
                       ElevatedButton(
                         onPressed: () async {
-                          await ref.read(matchesRepositoryProvider).updateStatus(matchId, 'LIVE');
+                          await ref
+                              .read(matchesRepositoryProvider)
+                              .updateStatus(matchId, 'LIVE');
                           ref.invalidate(matchLiveControllerProvider(matchId));
                         },
                         child: Text(context.l10n.start),
                       ),
                     if (match.matchStatus == 'LIVE') ...[
                       ElevatedButton(
-                        onPressed: () => _showRecordEventSheet(context, ref, lineupAsync.value ?? []),
+                        onPressed: () => _showRecordEventSheet(
+                          context,
+                          ref,
+                          lineupAsync.value ?? [],
+                        ),
                         child: Text(context.l10n.addEvent),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       OutlinedButton(
                         onPressed: () async {
-                          await ref.read(matchesRepositoryProvider).updateStatus(matchId, 'FINISHED');
+                          await ref
+                              .read(matchesRepositoryProvider)
+                              .updateStatus(matchId, 'FINISHED');
                           ref.invalidate(matchLiveControllerProvider(matchId));
                         },
                         child: Text(context.l10n.finish),
@@ -147,15 +282,29 @@ class _LiveTab extends ConsumerWidget {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(child: Text('$error')),
             data: (events) => events.isEmpty
-                ? Center(child: Text(context.l10n.noEvents, style: const TextStyle(color: AppColors.textSecondary)))
+                ? Center(
+                    child: Text(
+                      context.l10n.noEvents,
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
+                  )
                 : ListView.builder(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     itemCount: events.length,
                     itemBuilder: (context, index) {
                       final event = events[index];
                       return ListTile(
-                        leading: Text("${event.minute}'", style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
-                        title: Text(_eventLabel(context, event.eventType), style: const TextStyle(fontSize: 13)),
+                        leading: Text(
+                          "${event.minute}'",
+                          style: const TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 12,
+                          ),
+                        ),
+                        title: Text(
+                          _eventLabel(context, event.eventType),
+                          style: const TextStyle(fontSize: 13),
+                        ),
                       );
                     },
                   ),
@@ -166,17 +315,21 @@ class _LiveTab extends ConsumerWidget {
   }
 
   String _eventLabel(BuildContext context, String type) => switch (type) {
-        'GOAL' => context.l10n.eventGoal,
-        'ASSIST' => context.l10n.eventAssist,
-        'YELLOW_CARD' => context.l10n.yellowCard,
-        'RED_CARD' => context.l10n.redCard,
-        'SUBSTITUTION_IN' => context.l10n.eventSubOn,
-        'SUBSTITUTION_OUT' => context.l10n.eventSubOff,
-        'INJURY' => context.l10n.eventInjury,
-        _ => type,
-      };
+    'GOAL' => context.l10n.eventGoal,
+    'ASSIST' => context.l10n.eventAssist,
+    'YELLOW_CARD' => context.l10n.yellowCard,
+    'RED_CARD' => context.l10n.redCard,
+    'SUBSTITUTION_IN' => context.l10n.eventSubOn,
+    'SUBSTITUTION_OUT' => context.l10n.eventSubOff,
+    'INJURY' => context.l10n.eventInjury,
+    _ => type,
+  };
 
-  void _showRecordEventSheet(BuildContext context, WidgetRef ref, List<LineupEntry> lineup) {
+  void _showRecordEventSheet(
+    BuildContext context,
+    WidgetRef ref,
+    List<LineupEntry> lineup,
+  ) {
     String eventType = 'GOAL';
     int? playerId = lineup.isNotEmpty ? lineup.first.playerId : null;
     final minuteController = TextEditingController();
@@ -187,36 +340,67 @@ class _LiveTab extends ConsumerWidget {
       isScrollControlled: true,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => Padding(
-          padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg),
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.lg,
+            MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               DropdownButtonFormField<String>(
-                value: eventType,
+                initialValue: eventType,
                 decoration: InputDecoration(labelText: context.l10n.type),
                 items: [
-                  DropdownMenuItem(value: 'GOAL', child: Text(context.l10n.eventGoal)),
-                  DropdownMenuItem(value: 'YELLOW_CARD', child: Text(context.l10n.yellowCard)),
-                  DropdownMenuItem(value: 'RED_CARD', child: Text(context.l10n.redCard)),
-                  DropdownMenuItem(value: 'INJURY', child: Text(context.l10n.eventInjury)),
+                  DropdownMenuItem(
+                    value: 'GOAL',
+                    child: Text(context.l10n.eventGoal),
+                  ),
+                  DropdownMenuItem(
+                    value: 'YELLOW_CARD',
+                    child: Text(context.l10n.yellowCard),
+                  ),
+                  DropdownMenuItem(
+                    value: 'RED_CARD',
+                    child: Text(context.l10n.redCard),
+                  ),
+                  DropdownMenuItem(
+                    value: 'INJURY',
+                    child: Text(context.l10n.eventInjury),
+                  ),
                 ],
-                onChanged: (value) => setState(() => eventType = value ?? 'GOAL'),
+                onChanged: (value) =>
+                    setState(() => eventType = value ?? 'GOAL'),
               ),
               const SizedBox(height: AppSpacing.sm),
               DropdownButtonFormField<int>(
-                value: playerId,
+                initialValue: playerId,
                 decoration: InputDecoration(labelText: context.l10n.player),
-                items: lineup.map((e) => DropdownMenuItem(value: e.playerId, child: Text(e.fullName))).toList(),
+                items: lineup
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e.playerId,
+                        child: Text(e.fullName),
+                      ),
+                    )
+                    .toList(),
                 onChanged: (value) => setState(() => playerId = value),
               ),
               const SizedBox(height: AppSpacing.sm),
-              TextField(controller: minuteController, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: context.l10n.minute)),
+              TextField(
+                controller: minuteController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: context.l10n.minute),
+              ),
               const SizedBox(height: AppSpacing.lg),
               ElevatedButton(
                 onPressed: () async {
                   try {
-                    await ref.read(matchesRepositoryProvider).recordEvent(
+                    await ref
+                        .read(matchesRepositoryProvider)
+                        .recordEvent(
                           matchId,
                           eventType: eventType,
                           minute: int.tryParse(minuteController.text) ?? 0,
@@ -225,7 +409,11 @@ class _LiveTab extends ConsumerWidget {
                     ref.invalidate(matchEventsProvider(matchId));
                     if (context.mounted) Navigator.of(context).pop();
                   } on ApiException catch (error) {
-                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(error.message)));
+                    }
                   }
                 },
                 child: Text(context.l10n.save),
@@ -245,7 +433,9 @@ class _AiTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recommendationsAsync = ref.watch(matchRecommendationsProvider(matchId));
+    final recommendationsAsync = ref.watch(
+      matchRecommendationsProvider(matchId),
+    );
 
     return Column(
       children: [
@@ -254,8 +444,18 @@ class _AiTab extends ConsumerWidget {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: ElevatedButton.icon(
               onPressed: () async {
-                await ref.read(matchesRepositoryProvider).generateRecommendations(matchId);
-                ref.invalidate(matchRecommendationsProvider(matchId));
+                try {
+                  await ref
+                      .read(matchesRepositoryProvider)
+                      .generateRecommendations(matchId);
+                  ref.invalidate(matchRecommendationsProvider(matchId));
+                } on ApiException catch (error) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(error.message)));
+                  }
+                }
               },
               icon: const Icon(Icons.auto_awesome, size: 18),
               label: Text(context.l10n.generateAiRecommendations),
@@ -266,7 +466,12 @@ class _AiTab extends ConsumerWidget {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(child: Text('$error')),
             data: (recommendations) => recommendations.isEmpty
-                ? Center(child: Text(context.l10n.noRecommendation, style: const TextStyle(color: AppColors.textSecondary)))
+                ? Center(
+                    child: Text(
+                      context.l10n.noRecommendation,
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
+                  )
                 : ListView.builder(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     itemCount: recommendations.length,
@@ -277,19 +482,36 @@ class _AiTab extends ConsumerWidget {
                         'SUBSTITUTE' => context.l10n.substitute,
                         _ => context.l10n.notSelected,
                       };
-                      final color = rec.recommendedStatus == 'STARTER' ? AppColors.green : AppColors.textMuted;
+                      final color = rec.recommendedStatus == 'STARTER'
+                          ? AppColors.green
+                          : AppColors.textMuted;
                       return Card(
                         margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                         child: ListTile(
-                          title: Text(context.l10n.playerId(rec.playerId), style: const TextStyle(fontSize: 13)),
+                          title: Text(
+                            context.l10n.playerId(rec.playerId),
+                            style: const TextStyle(fontSize: 13),
+                          ),
                           subtitle: Text(
                             'Score: ${((rec.finalScore ?? 0) * 100).toStringAsFixed(0)}%',
-                            style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+                            style: const TextStyle(
+                              color: AppColors.textMuted,
+                              fontSize: 11,
+                            ),
                           ),
                           trailing: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
-                            child: Text(label, style: TextStyle(color: color, fontSize: 10)),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              label,
+                              style: TextStyle(color: color, fontSize: 10),
+                            ),
                           ),
                         ),
                       );

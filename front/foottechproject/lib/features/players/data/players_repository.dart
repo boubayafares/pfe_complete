@@ -8,11 +8,13 @@ class PlayersRepository {
 
   final ApiClient _api;
 
-  Future<List<PlayerProfile>> list({int? teamId, String? search}) async {
-    final body = await _api.get(ApiConstants.players, queryParameters: {
-      if (teamId != null) 'teamId': teamId,
-      if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
-    });
+  Future<List<PlayerProfile>> list({String? search}) async {
+    final body = await _api.get(
+      ApiConstants.players,
+      queryParameters: {
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+      },
+    );
     final data = body['data'] as List<dynamic>;
     return data
         .map((e) => PlayerProfile.fromJson(e as Map<String, dynamic>))
@@ -28,20 +30,21 @@ class PlayersRepository {
     required String firstName,
     required String lastName,
     required String phone,
-    required int teamId,
     String? posteP,
     String? piedFort,
     int? numeroMaillot,
   }) async {
-    final body = await _api.post(ApiConstants.players, data: {
-      'firstName': firstName,
-      'lastName': lastName,
-      'phone': phone,
-      'teamId': teamId,
-      if (posteP != null) 'posteP': posteP,
-      if (piedFort != null) 'piedFort': piedFort,
-      if (numeroMaillot != null) 'numeroMaillot': numeroMaillot,
-    });
+    final body = await _api.post(
+      ApiConstants.players,
+      data: {
+        'firstName': firstName,
+        'lastName': lastName,
+        'phone': phone,
+        'posteP': ?posteP,
+        'piedFort': ?piedFort,
+        'numeroMaillot': ?numeroMaillot,
+      },
+    );
     return PlayerProfile.fromJson(body['data'] as Map<String, dynamic>);
   }
 

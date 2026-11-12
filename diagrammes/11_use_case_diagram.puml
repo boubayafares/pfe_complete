@@ -84,7 +84,7 @@ rectangle "Gestion des matchs" as GRP_MATCH {
 rectangle "Comptes & notifications" as GRP_AUTH {
     usecase "S'authentifier (login)" as UC20 <<Auth>>
     usecase "Activer son compte par OTP" as UC21 <<Auth>>
-    usecase "S'authentifier par biométrie" as UC22 <<Auth>>
+    usecase "Réactiver sa session (refresh token)" as UC22 <<Auth>>
     usecase "Recevoir les notifications" as UC23 <<Notification>>
     usecase "Diffuser un message (broadcast)" as UC24 <<Notification>>
 }
@@ -133,8 +133,6 @@ ADJOINT --> UC20
 ADJOINT --> UC23
 
 JOUEUR --> UC12
-JOUEUR --> UC14
-JOUEUR --> UC15
 JOUEUR --> UC16
 JOUEUR --> UC19
 JOUEUR --> UC21
@@ -149,9 +147,19 @@ UC13 ..> UC14 : <<include>> (alignement IA à la création)
 UC17 ..> UC16 : <<extend>> (événements pendant suivi live)
 UC9 ..> UC10 : <<extend>> (validation par le coach)
 UC2 ..> UC3 : <<extend>> (gestion des blessures d'un joueur)
+UC22 ..> UC20 : <<extend>> (réactivation de session)
 
-note bottom of COACH : Rôle COACH : contrôle total de l'équipe,\nvalidation des propositions et évaluations.
-note bottom of ADJOINT : Rôle ADJOINT : aide à la planification,\nprésence et saisie live des matchs.
-note bottom of JOUEUR : Rôle JOUEUR : accès en consultation\n(planning, composition, rapports, notifications).
+note bottom of COACH
+  Rôle COACH : contrôle total de l'équipe,
+  validation des propositions et évaluations.
+end note
+note bottom of ADJOINT
+  Rôle ADJOINT : aide à la planification,
+  présence et saisie live des matchs.
+end note
+note bottom of JOUEUR
+  Rôle JOUEUR : accès en consultation
+  (planning, composition, rapports, notifications).
+end note
 
 @enduml

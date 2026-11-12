@@ -22,6 +22,7 @@ class Suspension(models.Model):
     entite_type = models.CharField(max_length=20, choices=EntiteType.choices)
     entite_id = models.BigIntegerField()
     raison = models.TextField(blank=True, default="")
+    previous_account_status = models.CharField(max_length=30, null=True, blank=True)
     cree_le = models.DateTimeField(auto_now_add=True)
 
     class Meta:

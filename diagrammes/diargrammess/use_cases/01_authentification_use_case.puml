@@ -1,0 +1,43 @@
+@startuml
+title FootTech — Cas d'utilisation — Épopée 1 : Authentification
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+left to right direction
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+actor "Utilisateur" as USER #546E7A
+actor "Coach" as COACH #1565C0
+actor "Adjoint" as ADJOINT #2E7D32
+actor "Joueur" as JOUEUR #EF6C00
+COACH -|> USER
+ADJOINT -|> USER
+JOUEUR -|> USER
+rectangle "FootTech — Authentification" {
+  usecase "US-01\nS'inscrire avec email et mot de passe" as US01
+  usecase "US-02\nSe connecter avec email et mot de passe" as US02
+  usecase "US-03\nRenouveler automatiquement la session" as US03
+  usecase "US-04\nActiver un joueur par code OTP" as US04
+  usecase "US-05\nSe connecter par téléphone et OTP" as US05
+  usecase "US-06\nSe déconnecter" as US06
+}
+COACH --> US01
+COACH --> US02
+ADJOINT --> US02
+USER --> US03
+COACH --> US04
+JOUEUR --> US05
+USER --> US06
+
+note bottom
+  Chaque cas d'utilisation reprend l'identifiant exact du Product Backlog.
+  Les contrôles JWT, rôle et équipe sont appliqués avant l'accès métier.
+end note
+@enduml

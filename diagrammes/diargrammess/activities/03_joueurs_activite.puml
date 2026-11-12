@@ -1,0 +1,49 @@
+@startuml
+title FootTech — Activité — Épopée 3 : Gestion des joueurs
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam ActivityBackgroundColor #E8F5E9
+skinparam ActivityBorderColor #2E7D32
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityDiamondBorderColor #F57F17
+start
+:Ouvrir le module;
+:Vérifier la session, le rôle et l'équipe active;
+if (Accès autorisé ?) then (oui)
+  :Choisir la User Story;
+  switch (Fonction sélectionnée)
+  case (US-11)
+    :Ajouter un joueur avec activation OTP\nPOST /players;
+    :Joueur rattaché à l'équipe;
+  case (US-12)
+    :Consulter la fiche complète d'un joueur\nGET /players/:id;
+    :Fiche agrégée affichée;
+  case (US-13)
+    :Modifier les informations d'un joueur\nPATCH /players/:id;
+    :Profil mis à jour;
+  case (US-14)
+    :Ajouter les informations scolaires\nPUT /players/:id/school-info;
+    :Scolarité enregistrée;
+  case (US-15)
+    :Enregistrer une blessure\nPOST /players/:id/injuries;
+    :Blessure historisée;
+  case (US-16)
+    :Consulter le profil saisonnier\nGET /players/:id/season-profile;
+    :Évolution affichée;
+  endswitch
+  :Actualiser l'état Riverpod / interface;
+else (non)
+  :Afficher 401 ou 403;
+endif
+if (Erreur métier ou technique ?) then (oui)
+  :Normaliser l'erreur et proposer une reprise;
+else (non)
+  :Confirmer l'opération;
+endif
+stop
+@enduml

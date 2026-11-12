@@ -29,12 +29,16 @@ class SeasonDetailsScreen extends ConsumerWidget {
 
   Future<void> _setCurrent(BuildContext context, WidgetRef ref) async {
     try {
-      await ref.read(seasonsRepositoryProvider).update(seasonId, isCurrent: true);
+      await ref
+          .read(seasonsRepositoryProvider)
+          .update(seasonId, isCurrent: true);
       ref.invalidate(seasonProvider(seasonId));
       ref.invalidate(seasonsListProvider);
     } on ApiException catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
       }
     }
   }
@@ -47,10 +51,16 @@ class SeasonDetailsScreen extends ConsumerWidget {
         title: Text(l10n.deleteTitle),
         content: Text(l10n.deleteConfirm(l10n.navSeasons)),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(l10n.cancel)),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancel),
+          ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.delete, style: const TextStyle(color: AppColors.coralDanger)),
+            child: Text(
+              l10n.delete,
+              style: const TextStyle(color: AppColors.coralDanger),
+            ),
           ),
         ],
       ),
@@ -62,7 +72,9 @@ class SeasonDetailsScreen extends ConsumerWidget {
       if (context.mounted) context.pop();
     } on ApiException catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
       }
     }
   }
@@ -93,11 +105,23 @@ class SeasonDetailsScreen extends ConsumerWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(season.isCurrent ? Icons.calendar_month : Icons.calendar_today_outlined,
-                                color: season.isCurrent ? AppColors.green : AppColors.textMuted),
+                            Icon(
+                              season.isCurrent
+                                  ? Icons.calendar_month
+                                  : Icons.calendar_today_outlined,
+                              color: season.isCurrent
+                                  ? AppColors.green
+                                  : AppColors.textMuted,
+                            ),
                             const SizedBox(width: AppSpacing.sm),
                             Expanded(
-                              child: Text(season.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                              child: Text(
+                                season.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -107,19 +131,26 @@ class SeasonDetailsScreen extends ConsumerWidget {
                             dateFormat.format(season.startDate),
                             dateFormat.format(season.endDate),
                           ),
-                          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 13,
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         if (season.isCurrent)
                           Text(
                             context.l10n.current,
-                            style: const TextStyle(color: AppColors.greenSoftText, fontWeight: FontWeight.w600, fontSize: 12),
+                            style: const TextStyle(
+                              color: AppColors.greenSoftText,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
                           ),
                       ],
                     ),
                   ),
                 ),
-                if (canManage) ...[
+                if (canManage && season.teamId != null) ...[
                   const SizedBox(height: AppSpacing.sm),
                   if (!season.isCurrent)
                     OutlinedButton.icon(
@@ -136,7 +167,9 @@ class SeasonDetailsScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.sm),
                   OutlinedButton.icon(
                     onPressed: () => _delete(context, ref),
-                    style: OutlinedButton.styleFrom(foregroundColor: AppColors.coralDanger),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.coralDanger,
+                    ),
                     icon: const Icon(Icons.delete_outline, size: 18),
                     label: Text(context.l10n.deleteSeason),
                   ),

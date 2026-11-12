@@ -1,0 +1,64 @@
+@startuml
+title FootTech — Activité — Épopée 14 : Administration de la plateforme
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam ActivityBackgroundColor #E8F5E9
+skinparam ActivityBorderColor #2E7D32
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityDiamondBorderColor #F57F17
+start
+:Ouvrir le module;
+:Vérifier la session, le rôle et l'équipe active;
+if (Accès autorisé ?) then (oui)
+  :Choisir la User Story;
+  switch (Fonction sélectionnée)
+  case (US-60)
+    :Se connecter au back-office\nPOST /api/admin/auth/login/;
+    :Session administrateur ouverte;
+  case (US-61)
+    :Consulter les KPI\nGET /api/admin/dashboard/;
+    :KPI affichés;
+  case (US-62)
+    :Lister et filtrer les équipes\nGET /api/admin/teams/;
+    :Équipes paginées;
+  case (US-63)
+    :Suspendre une équipe\nPOST /api/admin/teams/:id/suspend/;
+    :Équipe suspendue et auditée;
+  case (US-64)
+    :Réactiver une équipe\nPOST /api/admin/teams/:id/activate/;
+    :Équipe réactivée et auditée;
+  case (US-65)
+    :Lister les utilisateurs\nGET /api/admin/users/;
+    :Utilisateurs paginés;
+  case (US-66)
+    :Suspendre un utilisateur\nPOST /api/admin/users/:id/suspend/;
+    :Utilisateur suspendu;
+  case (US-67)
+    :Réactiver un utilisateur\nPOST /api/admin/users/:id/activate/;
+    :Utilisateur réactivé;
+  case (US-68)
+    :Diffuser une notification globale\nPOST /api/admin/broadcast/;
+    :Diffusion auditée;
+  case (US-69)
+    :Consulter les journaux d'audit\nGET /api/admin/audit-logs/;
+    :Actions sensibles affichées;
+  case (US-70)
+    :Gérer les comptes administrateurs\nCRUD /api/admin/administrators/;
+    :Compte et rôle administrateur gérés;
+  endswitch
+  :Actualiser l'état Riverpod / interface;
+else (non)
+  :Afficher 401 ou 403;
+endif
+if (Erreur métier ou technique ?) then (oui)
+  :Normaliser l'erreur et proposer une reprise;
+else (non)
+  :Confirmer l'opération;
+endif
+stop
+@enduml

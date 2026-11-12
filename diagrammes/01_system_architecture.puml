@@ -26,35 +26,35 @@ skinparam component {
 }
 
 ' --- BACKEND EXPRESS (BLEU) -------------------------------------------------
-skinparam component <<Express>> {
+skinparam <<Express>> {
     BackgroundColor #1E88E5
     BorderColor #0D47A1
     FontColor #FFFFFF
 }
 
 ' --- BACKEND DJANGO (BLEU CLAIR) --------------------------------------------
-skinparam component <<Django>> {
+skinparam <<Django>> {
     BackgroundColor #42A5F5
     BorderColor #1565C0
     FontColor #FFFFFF
 }
 
 ' --- SERVICES IA (ORANGE) ----------------------------------------------------
-skinparam component <<AI>> {
+skinparam <<AI>> {
     BackgroundColor #F57C00
     BorderColor #E65100
     FontColor #FFFFFF
 }
 
 ' --- SERVICES EXTERNES (ROUGE) ----------------------------------------------
-skinparam component <<External>> {
+skinparam <<External>> {
     BackgroundColor #E53935
     BorderColor #B71C1C
     FontColor #FFFFFF
 }
 
 ' --- DATABASE (GRIS / ARDOISE) ----------------------------------------------
-skinparam component <<DB>> {
+skinparam <<DB>> {
     BackgroundColor #607D8B
     BorderColor #37474F
     FontColor #FFFFFF
@@ -113,7 +113,7 @@ FLUTTER ..> EXPRESS : "REST (Dio)\nJWT Bearer"
 FLUTTER ..> SOCKET : "Socket.io\n(matches live, notifications)"
 
 ' Express <-> PostgreSQL
-EXPRESS ..> PG : "TypeORM / pg\n(requêtes SQL)"
+EXPRESS ..> PG : "pg (node-postgres)\n(requêtes SQL)"
 DJANGO ..> PG : "Django ORM\n(plateforme administrée)"
 
 ' Express <-> Redis

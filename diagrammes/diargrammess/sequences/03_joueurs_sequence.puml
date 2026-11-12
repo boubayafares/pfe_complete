@@ -1,0 +1,94 @@
+@startuml
+title FootTech — Séquence — Épopée 3 : Gestion des joueurs
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Coach" as ACT
+boundary "Application Flutter" as APP
+control "API Express" as API
+control "PlayerService" as SVC
+database "PostgreSQL" as DB
+
+group US-11 — Ajouter un joueur avec activation OTP
+  ACT -> APP: Ajouter un joueur avec activation OTP
+  APP -> API: POST /players
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-11)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Joueur rattaché à l'équipe
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Joueur rattaché à l'équipe
+end
+
+group US-12 — Consulter la fiche complète d'un joueur
+  ACT -> APP: Consulter la fiche complète d'un joueur
+  APP -> API: GET /players/:id
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-12)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Fiche agrégée affichée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Fiche agrégée affichée
+end
+
+group US-13 — Modifier les informations d'un joueur
+  ACT -> APP: Modifier les informations d'un joueur
+  APP -> API: PATCH /players/:id
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-13)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Profil mis à jour
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Profil mis à jour
+end
+
+group US-14 — Ajouter les informations scolaires
+  ACT -> APP: Ajouter les informations scolaires
+  APP -> API: PUT /players/:id/school-info
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-14)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Scolarité enregistrée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Scolarité enregistrée
+end
+
+group US-15 — Enregistrer une blessure
+  ACT -> APP: Enregistrer une blessure
+  APP -> API: POST /players/:id/injuries
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-15)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Blessure historisée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Blessure historisée
+end
+
+group US-16 — Consulter le profil saisonnier
+  ACT -> APP: Consulter le profil saisonnier
+  APP -> API: GET /players/:id/season-profile
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-16)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Évolution affichée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Évolution affichée
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

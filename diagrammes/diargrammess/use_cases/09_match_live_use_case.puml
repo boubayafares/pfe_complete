@@ -1,0 +1,38 @@
+@startuml
+title FootTech — Cas d'utilisation — Épopée 9 : Match en direct et après-match
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+left to right direction
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+actor "Utilisateur" as USER #546E7A
+actor "Coach" as COACH #1565C0
+actor "Adjoint" as ADJOINT #2E7D32
+COACH -|> USER
+ADJOINT -|> USER
+rectangle "FootTech — Match en direct et après-match" {
+  usecase "US-38\nEnregistrer les événements en direct" as US38
+  usecase "US-39\nConsulter la timeline en temps réel" as US39
+  usecase "US-40\nSaisir les statistiques du match" as US40
+  usecase "US-41\nÉvaluer les joueurs après le match" as US41
+  usecase "US-42\nGénérer le rapport de match" as US42
+}
+ADJOINT --> US38
+USER --> US39
+COACH --> US40
+COACH --> US41
+COACH --> US42
+
+note bottom
+  Chaque cas d'utilisation reprend l'identifiant exact du Product Backlog.
+  Les contrôles JWT, rôle et équipe sont appliqués avant l'accès métier.
+end note
+@enduml

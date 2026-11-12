@@ -44,12 +44,15 @@ class _BiometricLockGateState extends ConsumerState<BiometricLockGate> {
       return;
     }
 
-    _subscription = ref.listenManual<AsyncValue<dynamic>>(authControllerProvider, (previous, next) {
-      if (_coldStartChecked || next.isLoading) return;
-      _coldStartChecked = true;
-      if (next.value != null) _lockAndAuthenticate();
-      _subscription?.close();
-    });
+    _subscription = ref.listenManual<AsyncValue<dynamic>>(
+      authControllerProvider,
+      (previous, next) {
+        if (_coldStartChecked || next.isLoading) return;
+        _coldStartChecked = true;
+        if (next.value != null) _lockAndAuthenticate();
+        _subscription?.close();
+      },
+    );
   }
 
   Future<void> _lockAndAuthenticate() async {
@@ -72,11 +75,21 @@ class _BiometricLockGateState extends ConsumerState<BiometricLockGate> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.fingerprint, size: 56, color: AppColors.green),
+                    const Icon(
+                      Icons.fingerprint,
+                      size: 56,
+                      color: AppColors.green,
+                    ),
                     const SizedBox(height: AppSpacing.md),
-                    Text(context.l10n.biometricLocked, style: const TextStyle(color: AppColors.textPrimary)),
+                    Text(
+                      context.l10n.biometricLocked,
+                      style: const TextStyle(color: AppColors.textPrimary),
+                    ),
                     const SizedBox(height: AppSpacing.lg),
-                    ElevatedButton(onPressed: _lockAndAuthenticate, child: Text(context.l10n.unlock)),
+                    ElevatedButton(
+                      onPressed: _lockAndAuthenticate,
+                      child: Text(context.l10n.unlock),
+                    ),
                   ],
                 ),
               ),

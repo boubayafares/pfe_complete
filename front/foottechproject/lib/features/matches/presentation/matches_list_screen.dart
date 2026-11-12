@@ -21,7 +21,9 @@ class MatchesListScreen extends ConsumerWidget {
       floatingActionButton: user?.canManageTeam == true
           ? FloatingActionButton(
               onPressed: () async {
-                final created = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (_) => const CreateMatchScreen()));
+                final created = await Navigator.of(context).push<bool>(
+                  MaterialPageRoute(builder: (_) => const CreateMatchScreen()),
+                );
                 if (created == true) ref.invalidate(teamMatchesProvider);
               },
               child: const Icon(Icons.add),
@@ -31,7 +33,12 @@ class MatchesListScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('$error')),
         data: (matches) => matches.isEmpty
-            ? Center(child: Text(context.l10n.noMatches, style: const TextStyle(color: AppColors.textSecondary)))
+            ? Center(
+                child: Text(
+                  context.l10n.noMatches,
+                  style: const TextStyle(color: AppColors.textSecondary),
+                ),
+              )
             : ListView.builder(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 itemCount: matches.length,
@@ -41,11 +48,40 @@ class MatchesListScreen extends ConsumerWidget {
                     margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                     child: ListTile(
                       onTap: () => context.push('/matches/${match.id}'),
-                      title: Text(context.l10n.homeAwayVs(match.isHome ? context.l10n.home : context.l10n.away, match.adversaire), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                      subtitle: Text(DateFormat('EEEE d MMM - HH:mm', 'en_US').format(match.dateHeure), style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                      title: Text(
+                        context.l10n.homeAwayVs(
+                          match.isHome ? context.l10n.home : context.l10n.away,
+                          match.adversaire,
+                        ),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                      subtitle: Text(
+                        DateFormat(
+                          'EEEE d MMM - HH:mm',
+                          'en_US',
+                        ).format(match.dateHeure),
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
+                      ),
                       trailing: match.matchStatus == 'SCHEDULED'
-                          ? const Icon(Icons.chevron_right, color: AppColors.textMuted)
-                          : Text(match.scoreLabel, style: TextStyle(color: match.isLive ? AppColors.green : AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                          ? const Icon(
+                              Icons.chevron_right,
+                              color: AppColors.textMuted,
+                            )
+                          : Text(
+                              match.scoreLabel,
+                              style: TextStyle(
+                                color: match.isLive
+                                    ? AppColors.green
+                                    : AppColors.textPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                     ),
                   );
                 },

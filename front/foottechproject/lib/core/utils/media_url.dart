@@ -8,10 +8,13 @@ class MediaUrl {
 
   static String? resolve(String? relativeOrAbsolute) {
     if (relativeOrAbsolute == null || relativeOrAbsolute.isEmpty) return null;
-    if (relativeOrAbsolute.startsWith('http://') || relativeOrAbsolute.startsWith('https://')) {
+    if (relativeOrAbsolute.startsWith('http://') ||
+        relativeOrAbsolute.startsWith('https://')) {
       return relativeOrAbsolute;
     }
-    final path = relativeOrAbsolute.startsWith('/') ? relativeOrAbsolute : '/$relativeOrAbsolute';
+    final path = relativeOrAbsolute.startsWith('/')
+        ? relativeOrAbsolute
+        : '/$relativeOrAbsolute';
     return '${ApiConstants.baseUrl}$path';
   }
 }

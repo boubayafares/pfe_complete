@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: lineup-recommendation-service
+  namespace: foottech
 spec:
   selector:
     app: lineup-recommendation-service

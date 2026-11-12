@@ -1,0 +1,34 @@
+@startuml
+title FootTech — Diagramme d'états / actions — 02 etats actions organisation
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam state {
+  BackgroundColor #FFF8E1
+  BorderColor #F57F17
+  FontColor #4E342E
+}
+state Equipe {
+  [*] --> CREATED : US-07
+  CREATED --> STAFFED : US-09 / ajouter adjoint
+  STAFFED --> CREATED : US-10 / retirer adjoint
+  CREATED --> ACTIVE : première saison
+}
+state Joueur {
+  [*] --> PENDING_ACTIVATION : US-11
+  PENDING_ACTIVATION --> ACTIVE : OTP validé
+  ACTIVE --> UPDATED : US-13, US-14, US-15
+  UPDATED --> ACTIVE
+}
+state Saison {
+  [*] --> PLANNED : US-17
+  PLANNED --> CURRENT : isCurrent=true
+  CURRENT --> UPDATED : US-19
+  UPDATED --> CURRENT
+  CURRENT --> CLOSED : date de fin atteinte
+}
+@enduml

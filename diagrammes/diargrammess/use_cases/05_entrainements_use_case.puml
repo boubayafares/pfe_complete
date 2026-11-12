@@ -1,0 +1,42 @@
+@startuml
+title FootTech — Cas d'utilisation — Épopée 5 : Gestion des entraînements
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+left to right direction
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+actor "Utilisateur" as USER #546E7A
+actor "Coach" as COACH #1565C0
+actor "Adjoint" as ADJOINT #2E7D32
+COACH -|> USER
+ADJOINT -|> USER
+rectangle "FootTech — Gestion des entraînements" {
+  usecase "US-20\nCréer un entraînement" as US20
+  usecase "US-21\nRemplir la fiche de séance" as US21
+  usecase "US-22\nAjouter des situations d'exercices" as US22
+  usecase "US-23\nDessiner un schéma tactique" as US23
+  usecase "US-24\nProposer un exercice au coach" as US24
+  usecase "US-25\nValider ou rejeter une proposition" as US25
+  usecase "US-26\nLister les entraînements de l'équipe" as US26
+}
+COACH --> US20
+COACH --> US21
+COACH --> US22
+COACH --> US23
+ADJOINT --> US24
+COACH --> US25
+USER --> US26
+
+note bottom
+  Chaque cas d'utilisation reprend l'identifiant exact du Product Backlog.
+  Les contrôles JWT, rôle et équipe sont appliqués avant l'accès métier.
+end note
+@enduml

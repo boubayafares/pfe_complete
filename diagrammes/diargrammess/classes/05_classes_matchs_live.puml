@@ -1,0 +1,66 @@
+@startuml
+title FootTech — Diagramme de classes — 05 classes matchs live
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1565C0
+  FontColor #263238
+  ArrowColor #455A64
+}
+class "Match\nmatches" as Match {
+  +id: UUID
+  +teamId: UUID
+  +opponent: String
+  +status: SCHEDULED / LIVE / FINISHED
+}
+class "Composition\nmatch_lineups" as Lineup {
+  +playerId: UUID
+  +role: STARTER / SUBSTITUTE
+}
+class "Événement\nmatch_events" as Event {
+  +minute: Integer
+  +type: GOAL / CARD / SUBSTITUTION / INJURY
+}
+class "StatistiqueJoueur\nmatch_player_stats" as Stat {
+  +minutes: Integer
+  +goals: Integer
+  +assists: Integer
+}
+class "Évaluation\nmatch_evaluations" as Evaluation {
+  +rating: Decimal
+  +comment: Text
+}
+class "RapportMatch\nmatch_reports" as Report {
+  +filePath: String
+  +generatedAt: DateTime
+}
+class MatchService {
+  +create()
+  +setLineup()
+  +changeStatus()
+  +recordStats()
+  +evaluate()
+  +generateReport()
+}
+class LiveGateway {
+  +joinMatchRoom()
+  +publishEvent()
+  +publishScore()
+}
+Match "1" o-- "0..*" Lineup
+Match "1" o-- "0..*" Event
+Match "1" o-- "0..*" Stat
+Match "1" o-- "0..*" Evaluation
+Match "1" o-- "0..1" Report
+MatchService --> Match
+LiveGateway --> Event
+note bottom
+US-31 à US-33 et US-38 à US-42. Socket.IO diffuse dans la room match:{id}.
+end note
+@enduml

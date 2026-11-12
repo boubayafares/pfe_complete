@@ -1,0 +1,40 @@
+@startuml
+title FootTech — Activité — Épopée 11 : Bilan de saison
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam ActivityBackgroundColor #E8F5E9
+skinparam ActivityBorderColor #2E7D32
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityDiamondBorderColor #F57F17
+start
+:Ouvrir le module;
+:Vérifier la session, le rôle et l'équipe active;
+if (Accès autorisé ?) then (oui)
+  :Choisir la User Story;
+  switch (Fonction sélectionnée)
+  case (US-47)
+    :Consulter le bilan de saison\nGET /dashboard/season-bilan;
+    :Bilan agrégé affiché;
+  case (US-48)
+    :Exporter le bilan en PDF\nCommande UI vers PDFKit;
+    :PDF téléchargé;
+  case (US-49)
+    :Filtrer le bilan par joueur ou poste\nGET /dashboard/season-bilan?player&position;
+    :Bilan filtré;
+  endswitch
+  :Actualiser l'état Riverpod / interface;
+else (non)
+  :Afficher 401 ou 403;
+endif
+if (Erreur métier ou technique ?) then (oui)
+  :Normaliser l'erreur et proposer une reprise;
+else (non)
+  :Confirmer l'opération;
+endif
+stop
+@enduml

@@ -1,0 +1,82 @@
+@startuml
+title FootTech — Séquence — Épopée 9 : Match en direct et après-match
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+hide footbox
+autonumber
+actor "Adjoint / Utilisateur / Coach" as ACT
+boundary "Application Flutter" as APP
+control "API Express / Socket.IO" as API
+control "LiveMatchService" as SVC
+database "PostgreSQL / PDFKit" as DB
+
+group US-38 — Enregistrer les événements en direct
+  ACT -> APP: Enregistrer les événements en direct
+  APP -> API: POST /matches/:id/events
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-38)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Événement diffusé en temps réel
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Événement diffusé en temps réel
+end
+
+group US-39 — Consulter la timeline en temps réel
+  ACT -> APP: Consulter la timeline en temps réel
+  APP -> API: Socket.IO room match/:id
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-39)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Timeline synchronisée
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Timeline synchronisée
+end
+
+group US-40 — Saisir les statistiques du match
+  ACT -> APP: Saisir les statistiques du match
+  APP -> API: PUT /matches/:id/stats
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-40)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Statistiques enregistrées
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Statistiques enregistrées
+end
+
+group US-41 — Évaluer les joueurs après le match
+  ACT -> APP: Évaluer les joueurs après le match
+  APP -> API: PUT /matches/:id/evaluations
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-41)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Notes et commentaires enregistrés
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Notes et commentaires enregistrés
+end
+
+group US-42 — Générer le rapport de match
+  ACT -> APP: Générer le rapport de match
+  APP -> API: POST /matches/:id/report/generate
+  API -> API: Vérifier JWT, rôle et équipe active
+  API -> SVC: Exécuter le cas d'utilisation
+  SVC -> DB: Lire / valider / persister (US-42)
+  DB --> SVC: Données ou confirmation
+  SVC --> API: Rapport PDF archivé
+  API --> APP: Réponse DTO / statut HTTP
+  APP --> ACT: Rapport PDF archivé
+end
+
+note over API,SVC
+  En cas d'échec : réponse normalisée 400/401/403/404/409/422/503
+  sans divulgation de secret ni de détail PostgreSQL.
+end note
+@enduml

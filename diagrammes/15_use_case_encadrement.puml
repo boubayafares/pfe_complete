@@ -1,0 +1,127 @@
+@startuml
+!pragma layout smetana
+title FootTech - Diagramme de Cas d'Utilisation cote encadrement (Coach + Adjoint)
+caption Cas d'usage directs du staff technique : equipe, entrainements, matchs, notifications
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+actor "Coach" as COACH #1E88E5
+actor "Adjoint" as ADJOINT #43A047
+
+skinparam usecase {
+    BackgroundColor #F5F5F5
+    BorderColor #616161
+    FontColor #212121
+}
+skinparam usecase<<Team>> {
+    BackgroundColor #E8F5FF
+    BorderColor #0D47A1
+}
+skinparam usecase<<Training>> {
+    BackgroundColor #F3E5F5
+    BorderColor #4A148C
+}
+skinparam usecase<<Match>> {
+    BackgroundColor #E1F5FE
+    BorderColor #01579B
+}
+skinparam usecase<<Player>> {
+    BackgroundColor #E8F5E9
+    BorderColor #1B5E20
+}
+skinparam usecase<<Planning>> {
+    BackgroundColor #E0F7FA
+    BorderColor #006064
+}
+skinparam usecase<<Auth>> {
+    BackgroundColor #FFEBEE
+    BorderColor #B71C1C
+}
+skinparam usecase<<Notification>> {
+    BackgroundColor #FFF3E0
+    BorderColor #BF360C
+}
+
+rectangle "Equipe et joueurs" {
+    usecase "Creer / gerer les equipes" as UC1 <<Team>>
+    usecase "Gerer les joueurs (fiches completes)" as UC2 <<Player>>
+    usecase "Gerer les blessures" as UC3 <<Player>>
+    usecase "Creer les saisons" as UC4 <<Team>>
+}
+
+rectangle "Entrainements" {
+    usecase "Creer des entrainements" as UC5 <<Training>>
+    usecase "Marquer les presences (bulk)" as UC6 <<Training>>
+    usecase "Ajouter les situations (fiche)" as UC7 <<Training>>
+    usecase "Dessiner les schemas tactiques" as UC8 <<Training>>
+    usecase "Proposer des exercices" as UC9 <<Training>>
+    usecase "Valider les propositions" as UC10 <<Training>>
+    usecase "Gerer le planning hebdomadaire" as UC11 <<Planning>>
+}
+
+rectangle "Matchs" {
+    usecase "Creer un match" as UC12 <<Match>>
+    usecase "Calculer l'alignement IA" as UC13 <<Match>>
+    usecase "Valider la composition" as UC14 <<Match>>
+    usecase "Suivre le match en direct" as UC15 <<Match>>
+    usecase "Saisir les evenements (buts/cartons)" as UC16 <<Match>>
+    usecase "Evaluer les joueurs (post-match)" as UC17 <<Match>>
+    usecase "Consulter le rapport de match" as UC18 <<Match>>
+    usecase "Consulter les tendances IA" as UC19 <<Match>>
+}
+
+rectangle "Comptes et notifications" {
+    usecase "S'authentifier (login)" as UC20 <<Auth>>
+    usecase "Reactiver la session (refresh)" as UC21 <<Auth>>
+    usecase "Diffuser un message (broadcast)" as UC22 <<Notification>>
+}
+
+COACH -- UC1
+COACH -- UC2
+COACH -- UC3
+COACH -- UC4
+COACH -- UC5
+COACH -- UC6
+COACH -- UC7
+COACH -- UC8
+COACH -- UC10
+COACH -- UC11
+COACH -- UC12
+COACH -- UC13
+COACH -- UC14
+COACH -- UC17
+COACH -- UC20
+COACH -- UC21
+COACH -- UC22
+COACH -- UC19
+
+ADJOINT -- UC1
+ADJOINT -- UC5
+ADJOINT -- UC6
+ADJOINT -- UC7
+ADJOINT -- UC8
+ADJOINT -- UC9
+ADJOINT -- UC11
+ADJOINT -- UC12
+ADJOINT -- UC15
+ADJOINT -- UC16
+ADJOINT -- UC17
+ADJOINT -- UC20
+
+UC12 ..> UC13 : <<include>> (alignement IA a la creation)
+UC16 ..> UC15 : <<extend>> (evenements pendant suivi live)
+UC9 ..> UC10 : <<extend>> (validation par le coach)
+
+note bottom of COACH
+  Rôle COACH : controle total de l'equipe,
+  validation des propositions et evaluations.
+end note
+note bottom of ADJOINT
+  Rôle ADJOINT : aide a la planification,
+  presence du jour J et saisie live des matchs.
+end note
+
+@enduml

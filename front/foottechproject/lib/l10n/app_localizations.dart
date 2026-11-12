@@ -292,6 +292,42 @@ abstract class AppLocalizations {
   /// **'Account activated — you can now log in'**
   String get accountActivatedLogin;
 
+  /// No description provided for @aiTrendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI performance trend'**
+  String get aiTrendTitle;
+
+  /// No description provided for @aiTrendProgressing.
+  ///
+  /// In en, this message translates to:
+  /// **'Progressing'**
+  String get aiTrendProgressing;
+
+  /// No description provided for @aiTrendStable.
+  ///
+  /// In en, this message translates to:
+  /// **'Stable'**
+  String get aiTrendStable;
+
+  /// No description provided for @aiTrendDeclining.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get aiTrendDeclining;
+
+  /// No description provided for @aiTrendUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'At least three evaluations are needed for an AI trend.'**
+  String get aiTrendUnavailable;
+
+  /// No description provided for @aiTrendBasedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on {count} recent evaluations'**
+  String aiTrendBasedOn(Object count);
+
   /// No description provided for @playerLoginTitle.
   ///
   /// In en, this message translates to:

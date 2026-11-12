@@ -1,0 +1,43 @@
+@startuml
+title FootTech — Activité — Épopée 8 : IA de composition
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam ActivityBackgroundColor #E8F5E9
+skinparam ActivityBorderColor #2E7D32
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityDiamondBorderColor #F57F17
+start
+:Ouvrir le module;
+:Vérifier la session, le rôle et l'équipe active;
+if (Accès autorisé ?) then (oui)
+  :Choisir la User Story;
+  switch (Fonction sélectionnée)
+  case (US-34)
+    :Obtenir une recommandation IA\nPOST /matches/:id/ai-recommendations;
+    :Scores et rôles proposés;
+  case (US-35)
+    :Consulter les scores IA du match\nGET /matches/:id/ai-recommendations;
+    :Scores expliqués affichés;
+  case (US-36)
+    :Valider ou modifier la composition IA\nPUT /matches/:id/lineup;
+    :Décision humaine conservée;
+  case (US-37)
+    :Recalculer la recommandation\nPOST /matches/:id/ai-recommendations;
+    :Nouvelle version persistée;
+  endswitch
+  :Actualiser l'état Riverpod / interface;
+else (non)
+  :Afficher 401 ou 403;
+endif
+if (Erreur métier ou technique ?) then (oui)
+  :Normaliser l'erreur et proposer une reprise;
+else (non)
+  :Confirmer l'opération;
+endif
+stop
+@enduml

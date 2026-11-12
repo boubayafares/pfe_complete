@@ -108,6 +108,27 @@ class AppLocalizationsAr extends AppLocalizations {
       'تم تفعيل الحساب — يمكنك الآن تسجيل الدخول';
 
   @override
+  String get aiTrendTitle => 'اتجاه الأداء بالذكاء الاصطناعي';
+
+  @override
+  String get aiTrendProgressing => 'في تحسن';
+
+  @override
+  String get aiTrendStable => 'مستقر';
+
+  @override
+  String get aiTrendDeclining => 'يحتاج إلى متابعة';
+
+  @override
+  String get aiTrendUnavailable =>
+      'يلزم توفر ثلاثة تقييمات على الأقل لحساب الاتجاه.';
+
+  @override
+  String aiTrendBasedOn(Object count) {
+    return 'استنادًا إلى $count تقييمات حديثة';
+  }
+
+  @override
   String get playerLoginTitle => 'دخول اللاعب';
 
   @override

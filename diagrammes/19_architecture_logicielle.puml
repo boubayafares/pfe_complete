@@ -1,0 +1,112 @@
+@startuml
+!pragma layout smetana
+title FootTech - Architecture logicielle (vues par couches)
+caption Decomposition en couches : presentation, application/API, domaine & services, donnees
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing true
+skinparam ArrowColor #333333
+
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #90A4AE
+    FontColor #263238
+}
+skinparam package<<Presentation>> {
+    BackgroundColor #E8F5E9
+    BorderColor #2E7D32
+    FontColor #1B5E20
+}
+skinparam package<<Application>> {
+    BackgroundColor #E3F2FD
+    BorderColor #1565C0
+    FontColor #0D47A1
+}
+skinparam package<<Domain>> {
+    BackgroundColor #F3E5F5
+    BorderColor #6A1B9A
+    FontColor #4A148C
+}
+skinparam package<<Data>> {
+    BackgroundColor #FFF3E0
+    BorderColor #E65100
+    FontColor #BF360C
+}
+
+skinparam component {
+    BackgroundColor #FAFAFA
+    BorderColor #757575
+    FontColor #212121
+}
+
+' ============================================================================
+' COUCHE PRESENTATION
+' ============================================================================
+package "Presentation" as P <<Presentation>> {
+    component "Flutter (Mobile / Tablette)" as FLU <<Mobile>> {
+        component "13 features : auth, dashboard, teams,\nplayers, matches, trainings, attendance,\nnotifications, calendar, profile, seasons,\nweekly-plannings, exercise-proposals"
+    }
+    component "JavaFX Desktop (Back-office admin)" as DES
+    component "Django admin (site web interne)" as ADMSITE
+}
+
+' ============================================================================
+' COUCHE APPLICATION / API
+' ============================================================================
+package "Application & API" as A <<Application>> {
+    component "Express API :4000 (REST + Socket.IO)" as API {
+        component "Modules : auth, teams, players, trainings,\nattendance, matches, notifications,\ncalendar, stats / dashboard"
+        component "Middleware JWT (access/refresh)\net RBAC (COACH / ADJOINT / JOUEUR)"
+    }
+    component "Django + DRF :8000 (Admin)" as DJA {
+        component "Apps : administrateurs, core (miroir), moderation"
+    }
+}
+
+' ============================================================================
+' COUCHE DOMAINE / SERVICES
+' ============================================================================
+package "Domaine & Services" as D <<Domain>> {
+    component "Regles metier (validations Express :\nschema zod, calcul des stats)" as RULES
+    component "Lineup Recommendation Service :8100\nFastAPI, calcul d'alignement (sans etat)" as LINEUP
+    component "AI Insights Service :8300\nFastAPI : tendances, clustering,\nton, transcription, OCR" as INSIGHTS
+}
+
+' ============================================================================
+' COUCHE DONNEES / INFRASTRUCTURE
+' ============================================================================
+package "Donnees & Infrastructure" as DATA <<Data>> {
+    database "PostgreSQL 16\nschema platform" as PG
+    queue "Redis 7\ninitialise (initRedis),\ncache non utilisee" as RD
+    component "Firebase Cloud Messaging\n(push notifications)" as FCM
+    component "Twilio\n(OTP SMS)" as TW
+    component "Stockage local Flutter\nSharedPreferences + secure storage" as LOCAL
+}
+
+' ============================================================================
+' DEPENDANCES
+' ============================================================================
+FLU ..> API : HTTPS / JSON
+FLU ..> INSIGHTS : HTTPS direct (tendances / clustering / ton)
+DES --> DJA : HTTPS REST + JWT
+ADMSITE --> DJA : requetes internes
+API ..> RULES
+API ..> LINEUP : HTTP POST /api/v1/lineup/recommendations
+RULES ..> PG
+LINEUP ..> PG : lecture stats (optionnel)\n(principalement donnees dans la requete)
+API ..> PG
+API ..> RD : init (aucun usage reel)
+API ..> FCM : diffusion
+API ..> TW : envoi OTP par SMS
+DJA ..> PG : lecture (managed=False) + tables admin
+FLU ..> LOCAL
+DJA ..> FCM : broadcast admin
+
+note bottom
+  Lecture du schema : Presentation -> Application (REST+JWT),
+  Application -> Services IA (HTTP) et -> Donnees (PostgreSQL).
+  Le frontend Flutter appelle AI Insights en direct (hors Express).
+end note
+
+@enduml

@@ -1,0 +1,59 @@
+@startuml
+title FootTech — Diagramme de classes — 08 classes notifications calendrier
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1565C0
+  FontColor #263238
+  ArrowColor #455A64
+}
+class "Notification\nnotifications" as Notification {
+  +id: UUID
+  +userId: UUID
+  +type: NotificationType
+  +message: Text
+  +isRead: Boolean
+}
+class "TokenPush\npush_tokens" as PushToken {
+  +userId: UUID
+  -token: String
+  +platform: String
+}
+class "ÉvénementCalendrier\ncalendar_events" as CalendarEvent {
+  +teamId: UUID
+  +title: String
+  +startAt: DateTime
+  +endAt: DateTime
+}
+class NotificationService {
+  +sendToUser()
+  +broadcastToTeam()
+  +markRead()
+}
+class FirebaseGateway {
+  +sendMulticast()
+}
+class SocketGateway {
+  +emitToUserRoom()
+}
+class CalendarService {
+  +listForTeam()
+  +create()
+  +update()
+  +delete()
+}
+Notification "0..*" --> "1" PushToken
+NotificationService --> Notification
+NotificationService --> FirebaseGateway
+NotificationService --> SocketGateway
+CalendarService --> CalendarEvent
+note bottom
+US-50 à US-54. Les tokens push sont secrets et ne sont jamais journalisés.
+end note
+@enduml

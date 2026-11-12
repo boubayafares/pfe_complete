@@ -1,0 +1,32 @@
+@startuml
+title FootTech — Cas d'utilisation — Épopée 8 : IA de composition
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam ArrowColor #455A64
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+
+left to right direction
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #0D47A1
+}
+actor "Coach" as COACH #1565C0
+rectangle "FootTech — IA de composition" {
+  usecase "US-34\nObtenir une recommandation IA" as US34
+  usecase "US-35\nConsulter les scores IA du match" as US35
+  usecase "US-36\nValider ou modifier la composition IA" as US36
+  usecase "US-37\nRecalculer la recommandation" as US37
+}
+COACH --> US34
+COACH --> US35
+COACH --> US36
+COACH --> US37
+
+note bottom
+  Chaque cas d'utilisation reprend l'identifiant exact du Product Backlog.
+  Les contrôles JWT, rôle et équipe sont appliqués avant l'accès métier.
+end note
+@enduml
